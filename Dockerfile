@@ -7,6 +7,8 @@ WORKDIR /app
 # プロジェクトファイルをコピー
 COPY . .
 
+RUN chmod +x mvnw
+
 # jarファイルをビルド
 RUN ./mvnw clean package -DskipTests
 
