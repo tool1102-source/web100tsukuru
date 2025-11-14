@@ -13,4 +13,4 @@ RUN chmod +x mvnw
 RUN ./mvnw clean package -DskipTests
 
 # アプリを起動
-CMD ["java", "-jar", "target/*.jar"]
+CMD ["java", "-jar", "target/web100tsukuru-0.0.1-SNAPSHOT.jar"]
