@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>フィクション投稿 | Webサイト100個チャレンジ</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* 簡単なフォームスタイリング */
+        .container { max-width: 800px; margin: 40px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #3f51b5; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .error { color: red; font-size: 0.9em; margin-top: 5px; }
+        .submit-btn { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; float: right; }
+        .placeholder-btn { padding: 5px 10px; background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>フィクション（お題）のブログを投稿</h1>
+        <p>画像を入れたい場所に <strong>[IMG]</strong> と記述してください（1枚以上必須）。</p>
+
+        <form th:action="@{/fiction}" th:object="${fictionForm}" method="post">
+            
+            <div class="form-group">
+                <label for="title">タイトル</label>
+                <input type="text" id="title" th:field="*{title}" placeholder="例: 電車で一輪車をこいでみた話" required>
+                <span th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="error"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="authorName">投稿者名</label>
+                <input type="text" id="authorName" th:field="*{authorName}" required>
+                <span th:if="${#fields.hasErrors('authorName')}" th:errors="*{authorName}" class="error"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="body">本文</label>
+                <button type="button" class="placeholder-btn" onclick="insertPlaceholder()">[IMG] プレースホルダー挿入</button>
+                <textarea id="body" th:field="*{body}" rows="15" placeholder="ブログ本文と、画像を入れたい場所に [IMG] と入れてください。" required></textarea>
+                <span th:if="${#fields.hasErrors('body')}" th:errors="*{body}" class="error"></span>
+            </div>
+            
+            <button type="submit" class="submit-btn">このフィクションを投稿</button>
+        </form>
+    </div>
+
+    <script>
+        function insertPlaceholder() {
+            const textarea = document.getElementById('body');
+            const placeholder = '[IMG]';
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            
+            // カーソル位置にプレースホルダーを挿入
+            textarea.value = textarea.value.substring(0, start) + placeholder + textarea.value.substring(end);
+            
+            // 挿入後にカーソル位置を移動
+            textarea.focus();
+            textarea.selectionStart = start + placeholder.length;
+            textarea.selectionEnd = start + placeholder.length;
+        }
+    </script>
+</body>
+</html>
