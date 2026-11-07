@@ -19,4 +19,10 @@ public class IndexController {
         model.addAttribute("catalog", catalog);
         return "index";
     }
+
+    /** サイト全体のプライバシーポリシー（Google でログイン・AdSense に要る） */
+    @GetMapping("/privacy")
+    public String privacy() {
+        return "privacy";
+    }
 }

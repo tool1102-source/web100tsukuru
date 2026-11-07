@@ -39,6 +39,8 @@ public class SitemapController {
             url(xml, "/fiction/" + f.getId(), f.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE));
         }
         url(xml, "/vote", null);
+        url(xml, "/vote/terms", null);
+        url(xml, "/privacy", null);
         for (Poll p : pollService.page(1, MAX_POSTS)) {
             LocalDateTime updated = p.getReportedAt() != null ? p.getReportedAt() : p.getCreatedAt();
             url(xml, "/vote/" + p.getId(), updated.format(DateTimeFormatter.ISO_LOCAL_DATE));

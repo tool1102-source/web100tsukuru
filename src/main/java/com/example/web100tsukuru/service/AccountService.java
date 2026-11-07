@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,9 @@ public class AccountService {
     public static final Pattern LOGIN_ID = Pattern.compile("^[a-z0-9_]{3,20}$");
     public static final int PASSWORD_MIN = 8;
     public static final int DISPLAY_NAME_MAX = 20;
+    // Google で登録した人のパスワードの欄。BCrypt の形ではないので、どんなパスワードとも合わない
+    private static final String GOOGLE_ONLY_PASSWORD = "!google-login-only";
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final AppUserRepository users;
     private final TicketLedgerRepository ledger;
@@ -84,6 +88,33 @@ public class AccountService {
         return user;
     }
 
+    /** Google で登録する。表示名だけ決めてもらい、Google の名前は使わない（本名が出ないように） */
+    @Transactional
+    public AppUser signupWithGoogle(String googleSub, String displayName) throws SignupException {
+        String name = displayName == null ? "" : displayName.strip();
+        if (name.isEmpty() || name.codePointCount(0, name.length()) > DISPLAY_NAME_MAX) {
+            throw new SignupException("表示名は1〜" + DISPLAY_NAME_MAX + "文字にしてください。");
+        }
+        if (users.findByGoogleSub(googleSub).isPresent()) {
+            throw new SignupException("この Google アカウントは、もう登録されています。ログインしてください。");
+        }
+        String loginId;
+        do {
+            loginId = "g_" + randomLetters(10);
+        } while (users.existsByLoginId(loginId));
+        AppUser user = new AppUser(loginId, name, GOOGLE_ONLY_PASSWORD);
+        user.setGoogleSub(googleSub);
+        user.addTickets(signupTickets, 0);
+        user.setLastBonusDate(today());
+        users.save(user);
+        ledger.save(new TicketLedger(user.getId(), signupTickets, 0, Reason.SIGNUP, null));
+        return user;
+    }
+
+    public Optional<AppUser> findByGoogleSub(String googleSub) {
+        return users.findByGoogleSub(googleSub);
+    }
+
     /** ID とパスワードが合っていれば、その人 */
     public Optional<AppUser> authenticate(String loginId, String password) {
         Optional<AppUser> user = users.findByLoginId(loginId == null ? "" : loginId.strip());
@@ -120,6 +151,15 @@ public class AccountService {
     /** マイページに出す、最近の券の出入り */
     public List<TicketLedger> recentLedger(Long userId) {
         return ledger.findTop50ByUserIdOrderByCreatedAtDescIdDesc(userId);
+    }
+
+    private static String randomLetters(int length) {
+        String letters = "abcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            s.append(letters.charAt(RANDOM.nextInt(letters.length())));
+        }
+        return s.toString();
     }
 
     private static LocalDate today() {

@@ -15,6 +15,8 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
     boolean existsByLoginId(String loginId);
 
+    Optional<AppUser> findByGoogleSub(String googleSub);
+
     // 券を増減するときは、同時に別の処理が同じ人の券を触らないように行を押さえる
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select u from AppUser u where u.id = :id")

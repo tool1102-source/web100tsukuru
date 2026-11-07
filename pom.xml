@@ -72,6 +72,13 @@
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 
+		<!-- 「Google でログイン」の証明書（ID トークン）が本物かを、Google の公開鍵で確かめる -->
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>10.10</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.cloudinary</groupId>
 			<artifactId>cloudinary-http44</artifactId>

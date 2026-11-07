@@ -18,6 +18,12 @@
 
         <div class="form-card">
             <div th:replace="~{vote/parts :: messages}"></div>
+            <p class="hint terms-note">
+                登録すると、<a th:href="@{/vote/terms}" target="_blank" rel="noopener">利用規約</a>と
+                <a th:href="@{/privacy}" target="_blank" rel="noopener">プライバシーポリシー</a>に同意したことになります。
+            </p>
+            <div th:replace="~{vote/parts :: google(${next})}"></div>
+            <p class="or-divider" th:if="${@googleIdTokens.enabled}"><span>または ID とパスワードで登録</span></p>
             <form th:action="@{/vote/signup}" method="post" class="form" novalidate>
                 <input type="hidden" name="next" th:value="${next}">
                 <div class="form-group">

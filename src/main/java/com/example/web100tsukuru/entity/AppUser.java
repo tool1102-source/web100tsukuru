@@ -12,7 +12,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * 「ちいさな投票所」の利用者。ログインは ID とパスワード（パスワードは BCrypt にして保存）。
+ * 「ちいさな投票所」の利用者。ログインは ID とパスワード（パスワードは BCrypt にして保存）か、Google。
+ * Google で登録した人にも、ログイン ID とパスワードの欄は埋めておく（表の作りを変えずに済むように）。
+ * そのときのパスワードの欄は BCrypt の形ではないので、パスワードではログインできない。
  * 投票券の残りは無料と有料に分けて持ち、増減はすべて TicketLedger にも残す。
  * （「user」は PostgreSQL の予約語なので、表の名前は app_user）
  */
@@ -33,6 +35,10 @@ public class AppUser {
 
     @Column(nullable = false, length = 100)
     private String passwordHash;
+
+    // 「Google でログイン」した人の Google アカウントの番号（sub）。ID とパスワードで登録した人は空
+    @Column(unique = true, length = 64)
+    private String googleSub;
 
     @Column(nullable = false)
     private long freeTickets;
@@ -74,6 +80,14 @@ public class AppUser {
 
     public String getPasswordHash() {
         return passwordHash;
+    }
+
+    public String getGoogleSub() {
+        return googleSub;
+    }
+
+    public void setGoogleSub(String googleSub) {
+        this.googleSub = googleSub;
     }
 
     public long getFreeTickets() {

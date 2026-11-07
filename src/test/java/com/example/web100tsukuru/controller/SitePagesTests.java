@@ -154,6 +154,29 @@ class SitePagesTests {
     }
 
     @Test
+    void プライバシーポリシーと投票所の利用規約がどのページからも行ける() throws Exception {
+        mvc.perform(get("/privacy"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Google AdSense")))
+                .andExpect(content().string(containsString("Google の名前・メールアドレス・写真は保存しません")));
+        mvc.perform(get("/vote/terms"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("お金やほかの物と交換できません")));
+        mvc.perform(get("/fiction"))
+                .andExpect(content().string(containsString("href=\"/privacy\"")))
+                .andExpect(content().string(containsString("href=\"/vote/terms\"")));
+    }
+
+    @Test
+    void ログインと登録の画面にGoogleでログインのボタンが出る() throws Exception {
+        for (String page : new String[]{"/vote/login", "/vote/signup"}) {
+            mvc.perform(get(page))
+                    .andExpect(content().string(containsString("data-client_id=\"24928343678-rbgpibc53cefv1fkesoajk3resf5g2r1.apps.googleusercontent.com\"")))
+                    .andExpect(content().string(containsString("https://accounts.google.com/gsi/client")));
+        }
+    }
+
+    @Test
     void 合言葉が未設定なら管理画面は無い() throws Exception {
         mvc.perform(get("/admin")).andExpect(status().isNotFound());
         mvc.perform(post("/admin/login").param("password", "")).andExpect(status().isNotFound());

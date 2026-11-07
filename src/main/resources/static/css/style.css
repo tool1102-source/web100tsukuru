@@ -331,6 +331,22 @@ main { flex: 1; }
 .ledger-delta { font-family: var(--display); }
 .ledger-delta.is-plus { color: var(--accent); }
 
+/* 「Google でログイン」と「または」の区切り */
+.google-login { display: grid; justify-items: center; gap: 8px; margin: 6px 0 4px; }
+.google-login .hint { text-align: center; }
+.or-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0; color: var(--muted); font-size: .85rem; }
+.or-divider::before, .or-divider::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+.terms-note { margin-bottom: 16px; }
+
+/* ---------- プライバシーポリシー・利用規約 ---------- */
+.doc { display: grid; gap: 14px; padding-bottom: 64px; }
+.doc .article-head { margin-bottom: 8px; }
+.doc .article-head h1 { font-family: var(--sans); }
+.doc h2 { margin-top: 18px; font-size: 1.2rem; }
+.doc h3 { margin-top: 4px; font-size: 1rem; color: var(--ink-2); }
+.doc ul { margin: 0; padding-left: 1.4em; display: grid; gap: 6px; }
+.doc p, .doc li { color: var(--ink-2); overflow-wrap: anywhere; }
+
 /* ---------- エラーページ ---------- */
 .error-page { padding: 80px 0 96px; display: grid; gap: 14px; justify-items: start; }
 .error-code { font-family: var(--display); font-weight: 700; font-size: clamp(5rem, 18vw, 9rem); line-height: .9; letter-spacing: -.06em; color: var(--accent); }

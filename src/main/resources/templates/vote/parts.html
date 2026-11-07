@@ -37,6 +37,30 @@
     <p class="alert" role="alert" th:if="${error != null}" th:text="${error}">エラー</p>
 </div>
 
+<!--
+  「Google でログイン」のボタン（Google Identity Services）。押すと Google の画面が開き、
+  届いた証明書を /vote/login/google に送る。next はログインのあとに戻る先。
+-->
+<div class="google-login" th:fragment="google(next)" th:if="${@googleIdTokens.enabled}">
+    <div id="g_id_onload" th:attr="data-client_id=${@googleIdTokens.clientId}"
+         data-callback="onGoogleCredential" data-auto_prompt="false" data-ux_mode="popup" data-context="signin"></div>
+    <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="continue_with"
+         data-shape="pill" data-logo_alignment="left" data-locale="ja" data-width="300"></div>
+    <form id="google-login-form" th:action="@{/vote/login/google}" method="post">
+        <input type="hidden" name="credential">
+        <input type="hidden" name="next" th:value="${next}">
+    </form>
+    <script>
+        function onGoogleCredential(response) {
+            const form = document.getElementById('google-login-form');
+            form.credential.value = response.credential;
+            form.submit();
+        }
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <p class="hint">Google から受け取るのは、アカウントを見分ける番号だけです。名前やメールアドレスは使いません。</p>
+</div>
+
 <li class="poll-card" th:fragment="card(s)">
     <a th:href="@{/vote/{id}(id=${s.poll().id})}">
         <img th:if="${s.hasImage()}" class="poll-card-img" th:src="@{/vote/{id}/images/0.jpg(id=${s.poll().id})}"

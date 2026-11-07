@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('プライバシーポリシー | webサイト100個作る人のwebサイト', 'webサイト100個作る人のwebサイト（web100tsukuru.com）のプライバシーポリシーです。', false)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('')}"></header>
+
+<main>
+    <div class="wrap">
+        <article class="article doc">
+            <header class="article-head">
+                <h1>プライバシーポリシー</h1>
+                <p class="meta">2026年11月7日 制定</p>
+            </header>
+
+            <p>webサイト100個作る人のwebサイト（web100tsukuru.com。以下「このサイト」）で、どんな情報を受け取り、どう使うかを説明します。このサイトの中で動く、変換ツール・フィクションブログ・ちいさな投票所のすべてに当てはまります。</p>
+
+            <h2>受け取る情報</h2>
+            <h3>すべてのページ</h3>
+            <ul>
+                <li>アクセスの記録：接続元の IP アドレス、開いたページ、ブラウザの種類、日時。サーバーの記録として残ります。</li>
+                <li>連続して投稿・登録・ログインされるのを防ぐため、接続元の IP アドレスを一時的にサーバーのメモリに置きます（DB には保存しません）。</li>
+            </ul>
+            <h3>変換ツール（/tools/）</h3>
+            <ul>
+                <li>変換するデータは、すべてお使いのブラウザの中で処理します。サーバーには送りません。</li>
+            </ul>
+            <h3>フィクションブログ（/fiction）</h3>
+            <ul>
+                <li>投稿したタイトル・本文・投稿者名・画像を保存し、公開します。</li>
+                <li>画像は保存する前に縮めて JPEG にし直すので、写真に付いている撮影場所（位置情報）などのデータは残りません。</li>
+            </ul>
+            <h3>ちいさな投票所（/vote）</h3>
+            <ul>
+                <li>ログイン ID・表示名・パスワード。パスワードは元に戻せない形（BCrypt）にして保存します。</li>
+                <li>「Google でログイン」を使った場合は、Google アカウントを見分ける番号だけを保存します。Google の名前・メールアドレス・写真は保存しません。</li>
+                <li>投票券の残りと出入り、券を入れたお題と枚数、出したお題・報告・画像を保存します。表示名・お題・報告・画像と、選択肢ごとの券の合計は公開されます。だれが何枚入れたかは公開しません。</li>
+            </ul>
+
+            <h2>Cookie</h2>
+            <ul>
+                <li>ちいさな投票所と管理画面では、ログインしたままにするために Cookie を使います。</li>
+                <li>広告を出すために、Google などの広告配信の会社が Cookie を使うことがあります（次の項目）。</li>
+            </ul>
+
+            <h2>広告（Google AdSense）</h2>
+            <p>
+                このサイトは、第三者配信の広告サービス「Google AdSense」を使っています。Google などの広告配信の会社は、
+                このサイトやほかのサイトを見た記録をもとに、興味に合いそうな広告を出すために Cookie を使うことがあります。
+                興味に合わせた広告は、<a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google の広告設定</a>で止められます。
+                くわしくは <a href="https://policies.google.com/technologies/ads?hl=ja" target="_blank" rel="noopener">Google の広告に関するポリシー</a>をご覧ください。
+            </p>
+
+            <h2>使い道</h2>
+            <ul>
+                <li>サイトを動かし、投稿・投票・ログインなどの機能を提供するため</li>
+                <li>迷惑な投稿や不正な利用を防ぐため</li>
+                <li>サイトを直したり、よくしたりするため</li>
+            </ul>
+
+            <h2>ほかの人や会社に渡すこと</h2>
+            <p>法律にもとづいて求められた場合を除き、受け取った情報を第三者に渡しません。ただし、サイトを動かすために、次の会社のサービスを使っていて、情報はそこに保存されます。</p>
+            <ul>
+                <li>サーバー：Render</li>
+                <li>DB：Neon</li>
+                <li>広告：Google（Google AdSense）</li>
+                <li>ログイン（「Google でログイン」を使った場合）：Google</li>
+            </ul>
+
+            <h2>消してほしいとき・問い合わせ</h2>
+            <p>
+                投稿やアカウントを消してほしいとき、このポリシーについて聞きたいことがあるときは、
+                X の <a href="https://x.com/web100tsukuru" target="_blank" rel="noopener">@web100tsukuru</a> までご連絡ください。
+            </p>
+
+            <h2>変更</h2>
+            <p>このポリシーを変えるときは、このページでお知らせします。</p>
+        </article>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
