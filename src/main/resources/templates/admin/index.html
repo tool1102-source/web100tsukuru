@@ -9,7 +9,7 @@
         <section class="page-head">
             <p class="eyebrow">admin</p>
             <h1>フィクションブログの管理</h1>
-            <p class="lead">消したい投稿にチェックを入れて、下の「選んだ投稿を消す」を押してください。消した投稿は元に戻せません。</p>
+            <p class="lead">消したい投稿にチェックを入れて、下の「選んだ投稿を消す」を押してください。投稿に付いた画像も一緒に消えます。消した投稿は元に戻せません。</p>
             <form class="actions" th:action="@{/admin/logout}" method="post">
                 <button type="submit" class="button button-outline button-small">ログアウト</button>
             </form>
@@ -35,6 +35,11 @@
                                 <a th:href="@{/fiction/{id}(id=${f.id})}" target="_blank" rel="noopener">全文を見る ↗</a>
                             </span>
                             <span class="excerpt" th:text="${f.excerpt}">本文の冒頭</span>
+                            <span class="admin-thumbs" th:if="${imageNumbers[f.id] != null}">
+                                <img th:each="no : ${imageNumbers[f.id]}"
+                                     th:src="@{/fiction/{id}/images/{no}.jpg(id=${f.id},no=${no})}"
+                                     th:alt="'画像（' + ${no} + '枚目）'" width="64" height="64" loading="lazy">
+                            </span>
                         </span>
                     </label>
                 </li>

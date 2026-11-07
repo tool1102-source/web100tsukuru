@@ -18,7 +18,17 @@
                 <p class="notice">※ この記事はフィクションです。実在の人物・団体とは関係ありません。</p>
             </header>
 
-            <div class="prose" th:text="${fiction.readerBody}">本文</div>
+            <div class="article-body">
+                <th:block th:each="b : ${blocks}">
+                    <div class="prose" th:if="${b.text != null}" th:text="${b.text}">本文</div>
+                    <figure class="article-figure" th:if="${b.image != null}">
+                        <img th:src="@{/fiction/{id}/images/{no}.jpg(id=${fiction.id},no=${b.image.imageNo})}"
+                             th:width="${b.image.width}" th:height="${b.image.height}"
+                             th:alt="'投稿の画像（' + ${b.image.imageNo} + '枚目）'"
+                             th:attr="loading=${b.image.imageNo == 1 ? 'eager' : 'lazy'}" decoding="async">
+                    </figure>
+                </th:block>
+            </div>
 
             <footer class="article-foot">
                 <a class="button button-outline button-small" target="_blank" rel="noopener"

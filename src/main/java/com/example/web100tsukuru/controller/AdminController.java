@@ -66,6 +66,8 @@ public class AdminController {
         }
         model.addAttribute("fictions", fictions);
         model.addAttribute("page", page);
+        // 不適切な画像も見つけられるように、投稿ごとの画像を小さく並べる
+        model.addAttribute("imageNumbers", fictionService.imageNumbers(fictions.map(Fiction::getId).toList()));
         return "admin/index";
     }
 
@@ -105,7 +107,7 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    /** チェックを入れた投稿を消す (POST /admin/delete) */
+    /** チェックを入れた投稿を、その画像ごと消す (POST /admin/delete) */
     @PostMapping("/delete")
     public String delete(@RequestParam(name = "ids", required = false) List<Long> ids,
                          HttpServletRequest request,
