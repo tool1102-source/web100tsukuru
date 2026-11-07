@@ -8,10 +8,16 @@
     <div class="wrap">
         <p class="breadcrumb"><a th:href="@{/vote}">← ちいさな投票所</a></p>
         <div th:replace="~{vote/parts :: messages}"></div>
-        <section class="page-head">
-            <h1 th:text="${me.displayName} + ' さん'">さん</h1>
+        <section class="page-head me-head">
+            <div class="me-name">
+                <span class="avatar avatar-large" th:classappend="'avatar-' + ${me.avatarColor}" aria-hidden="true" th:text="${me.initial}">み</span>
+                <h1 th:text="${me.displayName} + ' さん'">さん</h1>
+                <form th:action="@{/vote/logout}" method="post">
+                    <button type="submit" class="button button-outline button-small">ログアウト</button>
+                </form>
+            </div>
             <div class="ticket-summary">
-                <p class="ticket-summary-total"><span aria-hidden="true">🎟</span>
+                <p class="ticket-summary-total"><svg th:replace="~{vote/parts :: ticket}"></svg>
                     <b th:text="${#numbers.formatInteger(me.totalTickets, 1, 'COMMA')}">100</b>枚</p>
                 <p class="hint">
                     無料の券 <span th:text="${#numbers.formatInteger(me.freeTickets, 1, 'COMMA')}">100</span>枚

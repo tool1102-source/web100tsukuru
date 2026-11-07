@@ -58,9 +58,26 @@ public class PollController {
 
     /** 投票所のトップ：受付中と結果が出たもの (GET /vote) */
     @GetMapping("/vote")
-    public String list(Model model) {
-        model.addAttribute("open", polls.openPolls(30));
-        model.addAttribute("closed", polls.closedPolls(30));
+    public String list(@RequestParam(defaultValue = "all") String tab, Model model) {
+        // 左の切り替え（note のホームのような形）：すべて / 受付中 / 結果が出た / 報告あり
+        String current = switch (tab) {
+            case "open", "closed", "reported" -> tab;
+            default -> "all";
+        };
+        // 受付中は60件まで読み、「すべて」では締め切りが近い12件だけ並べる（順位は60件の中から選ぶ）
+        List<PollService.PollSummary> openAll = polls.openPolls(60);
+        List<PollService.PollSummary> closed = polls.closedPolls(current.equals("all") ? 8 : 60);
+        model.addAttribute("tab", current);
+        model.addAttribute("open", current.equals("open") ? openAll : openAll.subList(0, Math.min(12, openAll.size())));
+        model.addAttribute("closed", current.equals("reported")
+                ? closed.stream().filter(s -> s.poll().isReported()).toList()
+                : closed);
+        // 「券が集まっているお題」：受付中のうち、券の多い順に5件
+        model.addAttribute("hot", openAll.stream()
+                .filter(s -> s.totalTickets() > 0)
+                .sorted((a, b) -> Long.compare(b.totalTickets(), a.totalTickets()))
+                .limit(5)
+                .toList());
         return "vote/list";
     }
 

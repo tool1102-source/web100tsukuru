@@ -1,6 +1,7 @@
 package com.example.web100tsukuru.entity;
 
 import com.example.web100tsukuru.Web100tsukuruApplication;
+import com.example.web100tsukuru.service.Avatars;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -108,6 +109,16 @@ public class AppUser {
 
     public void setLastBonusDate(LocalDate lastBonusDate) {
         this.lastBonusDate = lastBonusDate;
+    }
+
+    /** 丸いアイコンに出す、表示名の1文字目（DB には保存しない） */
+    public String getInitial() {
+        return Avatars.initial(displayName);
+    }
+
+    /** 丸いアイコンの色の番号（DB には保存しない） */
+    public int getAvatarColor() {
+        return Avatars.color(displayName);
     }
 
     /** 券を増やす・減らす（減らしすぎないかは呼ぶ側で確かめる） */

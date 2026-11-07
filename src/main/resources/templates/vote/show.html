@@ -14,10 +14,11 @@
                 <p class="poll-state" th:classappend="${poll.open} ? 'is-open' : 'is-closed'"
                    th:text="${poll.open} ? '受付中 ・ ' + ${poll.timeLeft} : '締め切りました'">受付中</p>
                 <h1 th:text="${poll.title}">お題</h1>
-                <p class="meta">
-                    <span class="author" th:text="${view.ownerName()}">出した人</span> さんのお題
-                    <span aria-hidden="true"> ・ </span>
-                    締め切り <time th:datetime="${poll.closesAt}" th:text="${#temporals.format(poll.closesAt, 'M月d日 HH:mm')}">日時</time>
+                <p class="meta poll-author">
+                    <span class="avatar avatar-small" th:classappend="'avatar-' + ${view.ownerColor()}" aria-hidden="true"
+                          th:text="${view.ownerInitial()}">み</span>
+                    <span><span class="author" th:text="${view.ownerName()}">出した人</span> さんのお題</span>
+                    <span>締め切り <time th:datetime="${poll.closesAt}" th:text="${#temporals.format(poll.closesAt, 'M月d日 HH:mm')}">日時</time></span>
                 </p>
             </header>
 

@@ -303,6 +303,31 @@ class PollTests {
                 .andExpect(content().string(containsString("<loc>https://web100tsukuru.com/vote/" + pollId + "</loc>")));
     }
 
+    @Test
+    void 券が入ると順位に出て_左の切り替えで受付中と報告ありに分かれる() throws Exception {
+        MockHttpSession owner = signup("owner11");
+        Long openId = createPoll(owner, "うどん", "そば");
+        Long closedId = createPoll(owner, "海", "山");
+        mvc.perform(get("/vote"))
+                .andExpect(content().string(not(containsString("券が集まっているお題"))));
+        vote(owner, openId, optionIds(openId).get(0), 7);
+        close(closedId);
+        mvc.perform(get("/vote"))
+                .andExpect(content().string(containsString("券が集まっているお題")))
+                .andExpect(content().string(containsString("class=\"poll-rank-no\">1</span>")));
+        mvc.perform(get("/vote").param("tab", "open"))
+                .andExpect(content().string(containsString("href=\"/vote?tab=open\" aria-current=\"page\"")))
+                .andExpect(content().string(containsString("うどん ／ そば")))
+                .andExpect(content().string(not(containsString("海 ／ 山"))));
+        mvc.perform(get("/vote").param("tab", "reported"))
+                .andExpect(content().string(containsString("まだ報告は届いていません。")))
+                .andExpect(content().string(not(containsString("海 ／ 山"))));
+        // 知らない切り替えの名前は「すべて」にする
+        mvc.perform(get("/vote").param("tab", "<script>"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("href=\"/vote\" aria-current=\"page\"")));
+    }
+
     // ==========================================================
 
     private MockHttpSession signup(String loginId) throws Exception {

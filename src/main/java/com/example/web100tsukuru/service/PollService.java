@@ -77,11 +77,32 @@ public class PollService {
         public List<OptionView> winners() {
             return options.stream().filter(OptionView::winner).toList();
         }
+
+        public String ownerInitial() {
+            return Avatars.initial(ownerName);
+        }
+
+        public int ownerColor() {
+            return Avatars.color(ownerName);
+        }
     }
 
     /** 一覧の1件 */
     public record PollSummary(Poll poll, String ownerName, List<String> optionLabels, long totalTickets,
                               List<String> winnerLabels, boolean hasImage) {
+
+        public String ownerInitial() {
+            return Avatars.initial(ownerName);
+        }
+
+        public int ownerColor() {
+            return Avatars.color(ownerName);
+        }
+
+        /** 画像のないお題のカードに出す色の番号（お題ごとに変える） */
+        public int thumbColor() {
+            return (int) Math.floorMod(poll.getId(), (long) Avatars.COLORS);
+        }
     }
 
     public enum VoteResult { OK, NOT_FOUND, CLOSED, INVALID, NOT_ENOUGH }

@@ -256,38 +256,141 @@ main { flex: 1; }
 /* スマホでは、メニューの長い名前を短くして1行に収める */
 @media (max-width: 640px) { .nav-long { display: none; } }
 
-/* ---------- ちいさな投票所 ---------- */
-.vote-bar { border-bottom: 1px solid var(--line); background: var(--card); }
-.vote-bar-inner { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; min-height: 52px; padding-top: 8px; padding-bottom: 8px; }
-.vote-brand { font-weight: 700; text-decoration: none; }
-.vote-brand::before { content: "🗳 "; }
-.vote-bar-nav { display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; font-size: .9rem; }
-.vote-bar-nav a:not(.button) { text-decoration: none; color: var(--ink-2); }
-.vote-bar-nav a:not(.button):hover { color: var(--accent); }
+/* ---------- ちいさな投票所：見出しと一覧（白地・左の切り替え・画像つきのカード） ---------- */
+.vote-bar { position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--line); background: var(--paper); }
+.vote-bar-inner { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 60px; padding-top: 8px; padding-bottom: 8px; }
+.vote-brand { display: inline-flex; align-items: center; gap: 8px; flex: none; font-weight: 800; font-size: 1.08rem; letter-spacing: .02em; text-decoration: none; }
+.vote-brand:hover { color: var(--ink); }
+.vote-brand-mark { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--ink); color: var(--paper); font-size: .9rem; font-weight: 800; }
+.vote-bar-nav { display: flex; align-items: center; gap: 10px 14px; font-size: .9rem; min-width: 0; }
+.vote-bar-nav a:not(.button):not(.avatar) { text-decoration: none; color: var(--ink-2); white-space: nowrap; }
+.vote-bar-nav a:not(.button):not(.avatar):hover { color: var(--ink); }
 .vote-bar-nav form { margin: 0; }
-.ticket-balance { padding: 3px 12px; border-radius: 999px; background: var(--accent-soft); color: var(--ink) !important; }
-.ticket-balance b { font-family: var(--display); font-size: 1.05rem; }
+.vote-bar-nav .link-button { color: var(--muted); font-size: .85rem; text-decoration: none; white-space: nowrap; }
+.vote-bar-nav .link-button:hover { color: var(--ink); }
+.vote-bar .button { white-space: nowrap; }
+.vote-post svg { width: 16px; height: 16px; flex: none; }
+.ticket-balance { display: inline-flex; align-items: center; padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink) !important; white-space: nowrap; }
+.ticket-balance b { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.ticket-balance .icon-ticket { margin-right: 5px; }
+/* スマホでは「お題を出す」を鉛筆だけの丸にし、ログアウトはマイページに任せる */
+@media (max-width: 560px) {
+    .vote-bar-nav { gap: 8px; }
+    .vote-post { width: 36px; height: 36px; padding: 0; }
+    .vote-post-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .vote-logout { display: none; }
+}
 .vote-messages { padding-top: 20px; }
 .vote-messages:empty { display: none; }
 .vote-messages .status, .vote-messages .alert { margin: 0 0 8px; }
 
-.vote-rules { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; counter-reset: rule; }
+/* トップ：左に切り替え（スマホでは上に横並び）、右にカード */
+.vote-home { display: grid; gap: 8px 48px; padding: 20px 0 56px; }
+@media (min-width: 900px) { .vote-home { grid-template-columns: 184px minmax(0, 1fr); padding-top: 28px; } }
+.vote-side { display: flex; gap: 6px; overflow-x: auto; margin: 0 -20px; padding: 0 20px 8px; scrollbar-width: none; }
+.vote-side::-webkit-scrollbar { display: none; }
+.vote-side a { flex: none; padding: 7px 14px; border-radius: 999px; background: var(--line-soft); color: var(--ink-2); font-size: .88rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.vote-side a:hover { background: var(--line); color: var(--ink); }
+.vote-side a[aria-current="page"] { background: var(--ink); color: var(--paper); }
+.vote-side-line { flex: none; width: 1px; margin: 4px 2px; background: var(--line); }
+@media (min-width: 900px) {
+    .vote-side { position: sticky; top: 84px; align-self: start; flex-direction: column; gap: 2px; overflow: visible; margin: 0; padding: 0; }
+    .vote-side a { padding: 10px 14px; border-radius: 8px; background: transparent; font-size: .95rem; }
+    .vote-side a:hover { background: var(--line-soft); }
+    .vote-side a[aria-current="page"] { background: var(--line-soft); color: var(--ink); }
+    .vote-side-line { width: auto; height: 1px; margin: 10px 14px; }
+}
+.vote-feed { min-width: 0; }
+
+/* はじめての人向けの、しくみの説明 */
+.vote-intro { display: grid; gap: 18px; margin-bottom: 12px; padding: clamp(22px, 4vw, 36px); border-radius: 12px; background: var(--line-soft); }
+.vote-intro h1 { font-size: clamp(1.45rem, 4vw, 2.1rem); font-weight: 800; line-height: 1.4; letter-spacing: -.01em; }
+.vote-rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px 24px; counter-reset: rule; }
 @media (min-width: 820px) { .vote-rules { grid-template-columns: repeat(3, 1fr); } }
-.vote-rules li { counter-increment: rule; display: grid; gap: 4px; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
-.vote-rules b::before { content: counter(rule) ". "; color: var(--accent); font-family: var(--display); }
-.vote-rules span { color: var(--muted); font-size: .9rem; }
-.vote-section { padding: 28px 0 8px; }
-.vote-section .empty { padding: 32px 0; }
-.poll-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-@media (min-width: 820px) { .poll-cards { grid-template-columns: repeat(2, 1fr); } }
-.poll-card a { display: flex; gap: 14px; height: 100%; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); text-decoration: none; transition: border-color .15s, transform .15s; }
-.poll-card a:hover { border-color: var(--ink); color: var(--ink); transform: translateY(-2px); }
-.poll-card-img { flex: none; width: 88px; height: 88px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
-.poll-card-body { display: grid; gap: 4px; align-content: start; min-width: 0; }
-.poll-card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.45; overflow-wrap: anywhere; }
-.poll-card-options { color: var(--ink-2); font-size: .9rem; overflow-wrap: anywhere; }
-.poll-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; color: var(--muted); font-size: .8rem; }
+.vote-rules li { counter-increment: rule; display: grid; gap: 2px; font-size: .92rem; line-height: 1.6; }
+.vote-rules b::before { content: counter(rule) ". "; color: var(--accent); }
+.vote-rules span { color: var(--muted); font-size: .84rem; }
+
+/* 見出し（「受付中 >」のように、押すと全部が見られる） */
+.vote-section { padding: 20px 0; }
+.vote-section .empty { padding: 28px 0; border-top: 0; text-align: left; }
+.feed-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px; font-size: 1.2rem; font-weight: 800; }
+.feed-head a { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.feed-head a:hover { color: var(--ink); opacity: .7; }
+.feed-head small { font-size: .8rem; font-weight: 400; color: var(--muted); }
+.chevron { display: inline-block; width: 8px; height: 8px; margin-left: 2px; border-top: 2px solid currentColor; border-right: 2px solid currentColor; transform: rotate(45deg); }
+
+/* カード：上に 16:9 の画像（なければ選択肢を大きく）、太いお題、アイコンと名前 */
+.poll-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px 20px; grid-template-columns: repeat(auto-fill, minmax(212px, 1fr)); }
+.poll-card a { display: flex; flex-direction: column; gap: 4px; height: 100%; text-decoration: none; transition: opacity .15s; }
+.poll-card a:hover { color: var(--ink); opacity: .72; }
+.poll-thumb { position: relative; display: block; aspect-ratio: 16 / 9; margin-bottom: 6px; border-radius: 8px; overflow: hidden; background: var(--c-bg); color: var(--c-ink); }
+.poll-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.poll-thumb-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 10px 16px; text-align: center; font-weight: 800; font-size: 1.12rem; line-height: 1.4; overflow: hidden; overflow-wrap: anywhere; }
+.poll-thumb-text > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.poll-thumb-state { position: absolute; top: 8px; left: 8px; padding: 0 8px; border-radius: 999px; background: rgba(8, 19, 26, .72); color: #ffffff; font-size: .7rem; font-weight: 700; line-height: 1.8; }
+.poll-thumb-state.is-open { background: var(--accent); color: var(--accent-ink); }
+.poll-card-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-weight: 700; font-size: 1rem; line-height: 1.55; overflow-wrap: anywhere; }
+.poll-card-options { color: var(--muted); font-size: .82rem; line-height: 1.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.poll-card-author { display: flex; align-items: center; gap: 6px; min-width: 0; margin-top: auto; padding-top: 6px; color: var(--muted); font-size: .78rem; }
+.poll-card-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); font-weight: 600; }
+.poll-card-time { flex: none; }
+.poll-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; color: var(--muted); font-size: .78rem; }
+.poll-card-tickets { font-variant-numeric: tabular-nums; }
 .time-left, .winner-label { color: var(--accent); font-weight: 700; }
+/* スマホでは、右に小さな画像を置いた1行ずつの並びにする */
+@media (max-width: 559px) {
+    .poll-cards { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .poll-card a { display: grid; grid-template-columns: minmax(0, 1fr) 112px; grid-template-areas: "title thumb" "options thumb" "author author" "meta meta"; gap: 2px 14px; align-content: start; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .poll-thumb { grid-area: thumb; align-self: start; margin: 4px 0 0; border-radius: 6px; }
+    .poll-thumb-text { padding: 4px 8px; font-size: .74rem; line-height: 1.35; }
+    .poll-thumb-state { display: none; }
+    .poll-card-title { grid-area: title; }
+    .poll-card-options { grid-area: options; }
+    .poll-card-author { grid-area: author; padding-top: 4px; }
+    .poll-card-meta { grid-area: meta; }
+}
+
+/* 「券が集まっているお題」：黒い四角に順位 */
+.poll-ranks { list-style: none; margin: 0; padding: 0; }
+.poll-rank a { display: grid; grid-template-columns: 28px minmax(0, 1fr) 104px; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none; transition: opacity .15s; }
+.poll-rank:first-child a { padding-top: 0; }
+.poll-rank a:hover { color: var(--ink); opacity: .72; }
+.poll-rank-no { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 6px; background: var(--ink); color: var(--paper); font-weight: 800; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.poll-rank:nth-child(n+4) .poll-rank-no { background: var(--line-soft); color: var(--ink-2); }
+.poll-rank-body { display: grid; gap: 2px; min-width: 0; }
+.poll-rank-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
+.poll-rank-meta { color: var(--muted); font-size: .78rem; }
+.poll-rank-thumb { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; background: var(--c-bg); color: var(--c-ink); }
+.poll-rank-thumb .icon-ticket { width: 26px; height: 26px; opacity: .7; }
+.poll-rank-thumb img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 559px) { .poll-rank a { grid-template-columns: 28px minmax(0, 1fr) 80px; gap: 12px; } }
+
+/* 丸いアイコン（名前の1文字目）と、画像のないお題の色。番号は名前やお題から決める（Avatars） */
+.avatar { display: inline-grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--c-bg, var(--line-soft)); color: var(--c-ink, var(--ink)); font-size: .92rem; font-weight: 700; line-height: 1; text-decoration: none; }
+a.avatar:hover { color: var(--c-ink); opacity: .8; }
+.avatar-small { width: 22px; height: 22px; font-size: .66rem; }
+.avatar-large { width: 64px; height: 64px; font-size: 1.6rem; }
+.avatar-0, .thumb-0 { --c-bg: #ffe1d6; --c-ink: #7a2e17; }
+.avatar-1, .thumb-1 { --c-bg: #d8eaff; --c-ink: #17466e; }
+.avatar-2, .thumb-2 { --c-bg: #d6f1e4; --c-ink: #1b5a3f; }
+.avatar-3, .thumb-3 { --c-bg: #ece0ff; --c-ink: #4a2a72; }
+.avatar-4, .thumb-4 { --c-bg: #fff0bf; --c-ink: #634700; }
+.avatar-5, .thumb-5 { --c-bg: #ffdbe8; --c-ink: #74203f; }
+@media (prefers-color-scheme: dark) {
+    .avatar-0, .thumb-0 { --c-bg: #4a261b; --c-ink: #ffd2c2; }
+    .avatar-1, .thumb-1 { --c-bg: #1b3350; --c-ink: #cfe4ff; }
+    .avatar-2, .thumb-2 { --c-bg: #173d2e; --c-ink: #c9eedc; }
+    .avatar-3, .thumb-3 { --c-bg: #33244f; --c-ink: #e3d4ff; }
+    .avatar-4, .thumb-4 { --c-bg: #42361a; --c-ink: #ffe9a8; }
+    .avatar-5, .thumb-5 { --c-bg: #4a1f31; --c-ink: #ffd0e1; }
+}
+
+/* マイページの名前と、お題のページの出した人 */
+.me-name { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 16px; }
+.me-name h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); overflow-wrap: anywhere; }
+.me-name form { margin: 0 0 0 auto; }
+.poll-author { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 
 .poll .article-head h1 { font-family: var(--sans); }
 .poll-state { display: inline-block; margin-bottom: 12px; padding: 2px 12px; border-radius: 999px; font-size: .82rem; font-weight: 700; }
@@ -441,79 +544,64 @@ main { flex: 1; }
 .site-fiction .required { border-radius: 2px; background: var(--accent); }
 .site-fiction .site-footer { border-top: 4px double var(--ink); }
 
-/* ---------- No.003 ちいさな投票所：投票所のお祭り（うす紫・紫・投票券の黄色・丸ゴシック・太いふち） ---------- */
+/* ---------- No.003 ちいさな投票所：読みもの系のサービスのような白地（白・黒・黒い丸ボタン・緑を少し・端末の書体） ---------- */
 .site-vote {
-    --paper: #f4f1ff;
+    --paper: #ffffff;
     --card: #ffffff;
-    --ink: #1d1640;
-    --ink-2: #3b3266;
-    --muted: #6c6690;
-    --line: #d9d2f5;
-    --line-soft: #ebe6ff;
-    --accent: #6d4aff;
+    --ink: #08131a;
+    --ink-2: #3a4349;
+    --muted: #6b7378;
+    --line: #e6e8e9;
+    --line-soft: #f3f4f4;
+    --accent: #12806e;
     --accent-ink: #ffffff;
-    --accent-soft: #e9e3ff;
-    --ticket: #ffd43b;
-    --edge: #1d1640;
-    --radius: 18px;
-    --sans: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", system-ui, sans-serif;
-    --display: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", system-ui, sans-serif;
-    --strip-bg: #1d1640;
-    --strip-ink: #e9e3ff;
-    font-family: var(--sans);
+    --accent-soft: #e3f4f0;
+    --radius: 12px;
+    --display: var(--sans);
+    --strip-bg: #08131a;
+    --strip-ink: #ffffff;
 }
 @media (prefers-color-scheme: dark) {
     .site-vote {
-        --paper: #130f2a;
-        --card: #1d1840;
-        --ink: #f0ebff;
-        --ink-2: #d3cbf2;
-        --muted: #a39bc9;
-        --line: #3a3270;
-        --line-soft: #29235a;
-        --accent: #9b80ff;
-        --accent-ink: #130f2a;
-        --accent-soft: rgba(155, 128, 255, .16);
-        --edge: #5b4cc4;
-        --strip-bg: #0b0819;
-        --strip-ink: #c9bfff;
+        --paper: #121212;
+        --card: #1a1a1a;
+        --ink: #f1f3f4;
+        --ink-2: #c8ced2;
+        --muted: #98a1a6;
+        --line: #2c3033;
+        --line-soft: #202325;
+        --accent: #46c8b1;
+        --accent-ink: #08131a;
+        --accent-soft: rgba(70, 200, 177, .14);
+        --strip-bg: #000000;
+        --strip-ink: #d0d5d8;
     }
 }
-.site-vote .vote-bar { background: var(--accent); border-bottom: 2px solid var(--edge); color: var(--accent-ink); }
-.site-vote .vote-bar-inner { min-height: 64px; }
-.site-vote .vote-brand { font-size: 1.2rem; font-weight: 800; color: var(--accent-ink); letter-spacing: .02em; }
-.site-vote .vote-brand:hover { color: var(--ticket); }
-.site-vote .vote-bar-nav a:not(.button), .site-vote .vote-bar-nav .link-button { color: var(--accent-ink); font-weight: 700; }
-.site-vote .vote-bar-nav a:not(.button):hover, .site-vote .vote-bar-nav .link-button:hover { color: var(--ticket); }
-.site-vote .ticket-balance { background: var(--ticket); color: #1d1640 !important; border: 2px solid var(--edge); border-radius: 10px; padding: 2px 12px; box-shadow: 2px 2px 0 var(--edge); }
-.site-vote .vote-bar .button { background: var(--ticket); color: #1d1640; border-color: var(--edge); box-shadow: 2px 2px 0 var(--edge); }
-.site-vote .button { border: 2px solid var(--edge); background: var(--accent); color: var(--accent-ink); box-shadow: 3px 3px 0 var(--edge); font-weight: 800; transition: transform .1s, box-shadow .1s, background .15s; }
-.site-vote .button:hover { background: var(--accent); color: var(--accent-ink); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--edge); }
-.site-vote .button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--edge); }
-.site-vote .button-outline, .site-vote .button-outline:hover { background: var(--card); color: var(--ink); }
-.site-vote .button-danger, .site-vote .button-danger:hover { background: var(--danger); color: #ffffff; }
-.site-vote .eyebrow { font-family: var(--display); letter-spacing: .08em; text-transform: none; }
-.site-vote .page-head h1 { font-weight: 800; letter-spacing: 0; }
-.site-vote .vote-rules li, .site-vote .poll-card a, .site-vote .poll-option, .site-vote .form-card {
-    border: 2px solid var(--edge); border-radius: var(--radius); box-shadow: 4px 4px 0 var(--edge);
-}
-.site-vote .vote-rules b::before { color: var(--accent); }
-.site-vote .poll-card a:hover { border-color: var(--edge); transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--edge); }
-.site-vote .poll-card-img { border: 2px solid var(--edge); border-radius: 12px; }
-.site-vote .poll-option.is-winner { background: var(--accent-soft); border-color: var(--accent); }
-.site-vote .poll-bar { height: 14px; border: 2px solid var(--edge); background: var(--card); }
-.site-vote .poll-bar span { background: var(--accent); border-radius: 0; }
-.site-vote .poll-state.is-open { background: var(--ticket); color: #1d1640; border: 2px solid var(--edge); }
-.site-vote .poll-result { background: var(--accent); color: var(--accent-ink); border: 2px solid var(--edge); box-shadow: 4px 4px 0 var(--edge); }
-.site-vote .time-left { color: var(--accent); }
-.site-vote .badge { background: var(--ticket); color: #1d1640; border: 1.5px solid var(--edge); }
-.site-vote .section-head { border-bottom: 2px solid var(--edge); }
-.site-vote .ticket-input, .site-vote .form input[type="text"], .site-vote .form input[type="password"], .site-vote .form textarea {
-    border: 2px solid var(--edge); border-radius: 12px; background: var(--card);
-}
-.site-vote .choice { border: 2px solid var(--edge); }
-.site-vote .choice:has(input:checked) { background: var(--accent); border-color: var(--edge); color: var(--accent-ink); }
-.site-vote .required { background: var(--accent); }
-.site-vote .status { background: var(--ticket); color: #1d1640; border: 2px solid var(--edge); }
-.site-vote .ledger { border-top: 2px solid var(--edge); }
-.site-vote .site-footer { border-top: 2px solid var(--edge); }
+.site-vote .button:hover { background: var(--ink-2); border-color: var(--ink-2); color: var(--paper); }
+.site-vote .button-outline { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+.site-vote .button-outline:hover { background: var(--line-soft); border-color: var(--line); color: var(--ink); }
+.site-vote .button-danger, .site-vote .button-danger:hover { background: var(--danger); border-color: var(--danger); color: #ffffff; }
+.site-vote .eyebrow { letter-spacing: .08em; }
+.site-vote .page-head { padding-top: 36px; }
+.site-vote .page-head h1 { font-weight: 800; letter-spacing: -.01em; }
+.site-vote .section-head { border-bottom: 1px solid var(--line); }
+.site-vote .section-head h2 { font-size: 1.2rem; font-weight: 800; }
+.site-vote .form-card { border-radius: 12px; }
+.site-vote .form input[type="text"], .site-vote .form input[type="password"], .site-vote .form textarea, .site-vote .ticket-input { border-radius: 8px; }
+.site-vote .form textarea { font-family: var(--sans); }
+.site-vote .status { background: var(--accent-soft); }
+.site-vote .ledger { border-top: 1px solid var(--line); }
+.site-vote .site-footer { background: var(--line-soft); }
+/* お題のページ：記事のように読める形 */
+.site-vote .article-head { padding-bottom: 12px; border-bottom: 0; }
+.site-vote .article-head h1 { font-family: var(--sans); font-weight: 800; line-height: 1.5; }
+.site-vote .article-figure img { border-radius: 8px; }
+.site-vote .poll-state.is-open { background: var(--accent-soft); color: var(--accent); }
+.site-vote .poll-result, .site-vote .poll-option { border-radius: 12px; }
+.site-vote .poll-option.is-winner { border: 2px solid var(--ink); }
+.site-vote .poll-bar { height: 8px; }
+.site-vote .poll-bar span { background: var(--ink); }
+.site-vote .poll-option.is-winner .poll-bar span { background: var(--accent); }
+.icon-ticket { display: inline-block; width: 1.15em; height: 1.15em; flex: none; vertical-align: -.22em; }
+/* 見出しは文節で折り返す（「変わ / る。」のような切れ方をさせない。対応していない端末ではふつうに折り返す） */
+.site-vote h1, .site-vote h2, .poll-card-title, .poll-rank-title { word-break: auto-phrase; }

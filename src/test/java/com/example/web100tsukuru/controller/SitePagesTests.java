@@ -192,7 +192,7 @@ class SitePagesTests {
         mvc.perform(get("/vote"))
                 .andExpect(content().string(containsString("class=\"site-vote\"")))
                 .andExpect(content().string(containsString("class=\"vote-bar\"")))
-                .andExpect(content().string(containsString("family=M+PLUS+Rounded+1c")))
+                .andExpect(content().string(not(containsString("fonts.googleapis.com"))))
                 .andExpect(content().string(containsString("No.003 / 100")));
         // エラー画面は、もともと開こうとしたページのサイトに合わせる（MockMvc はエラー画面を描かないので、判定だけ確かめる）
         assertThat(GlobalModelAttributes.siteOf("/fiction/99999")).isEqualTo("fiction");
