@@ -23,7 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = "app.admin-password=テスト用の合言葉")
+// 「テスト用の合言葉」の SHA-256
+@SpringBootTest(properties = "app.admin-password-hash=eb612e81bc1519b28a127b8112ca3d90dce0c1c13a99629655e38d707659ab37")
 @AutoConfigureMockMvc
 class AdminTests {
 

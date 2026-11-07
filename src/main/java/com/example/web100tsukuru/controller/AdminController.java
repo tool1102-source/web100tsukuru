@@ -22,13 +22,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.HexFormat;
 import java.util.List;
 
 /**
  * フィクションブログの管理画面（不適切な投稿を消す）。
  *
- * 合言葉は Render の環境変数 ADMIN_PASSWORD に入れる。入っていなければ管理画面ごと無効（404）。
+ * 合言葉そのものはどこにも置かず、SHA-256 にした値だけを app.admin-password-hash に置く。
+ * ソースは公開しているので、合言葉は推測できないランダムな24文字にしている（短いと総当たりで割り出される）。
+ * 値が空なら管理画面ごと無効（404）。
  * ログインの状態はセッションに持つ。セッションの Cookie は SameSite=Strict なので、
  * よそのサイトから削除のリクエストを送らせることはできない（application.properties）。
  */
@@ -40,13 +44,13 @@ public class AdminController {
     private static final String SESSION_KEY = "admin";
 
     private final FictionService fictionService;
-    private final byte[] password;
+    private final byte[] passwordHash;
     // 合言葉の総当たり対策（同じ接続元から 10分に5回まで）
     private final PostRateLimiter loginLimiter = new PostRateLimiter(5, Duration.ofMinutes(10));
 
-    public AdminController(FictionService fictionService, @Value("${app.admin-password:}") String password) {
+    public AdminController(FictionService fictionService, @Value("${app.admin-password-hash:}") String passwordHash) {
         this.fictionService = fictionService;
-        this.password = password.getBytes(StandardCharsets.UTF_8);
+        this.passwordHash = HexFormat.of().parseHex(passwordHash.strip());
     }
 
     /** 投稿の一覧。ログインしていなければ合言葉の入力画面 (GET /admin?page=2) */
@@ -77,7 +81,7 @@ public class AdminController {
             model.addAttribute("rateLimited", true);
             return "admin/login";
         }
-        if (!MessageDigest.isEqual(password.getBytes(StandardCharsets.UTF_8), this.password)) {
+        if (!MessageDigest.isEqual(sha256(password), passwordHash)) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             model.addAttribute("wrongPassword", true);
             return "admin/login";
@@ -120,8 +124,16 @@ public class AdminController {
     }
 
     private void requireEnabled() {
-        if (password.length == 0) {
+        if (passwordHash.length == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    private static byte[] sha256(String text) {
+        try {
+            return MessageDigest.getInstance("SHA-256").digest(text.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
         }
     }
 
