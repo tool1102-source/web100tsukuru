@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.example.web100tsukuru.config.DatabaseUrlEnvironmentPostProcessor
