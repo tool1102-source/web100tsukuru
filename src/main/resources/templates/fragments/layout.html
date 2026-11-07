@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<!--
+  全ページ共通の部品。
+  使い方: <head th:replace="~{fragments/layout :: head('タイトル', '説明文', false)}"></head>
+  3つ目を true にすると検索結果に出さない（投稿フォームやエラー画面用）。
+-->
+<head th:fragment="head(title, description, noindex)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title}">webサイト100個作る人のwebサイト</title>
+    <meta name="description" th:content="${description}">
+    <meta name="robots" content="noindex" th:if="${noindex}">
+    <link rel="canonical" th:if="${baseUrl != null and !noindex}" th:href="${baseUrl + currentPath}">
+
+    <meta property="og:type" th:content="${currentPath == '/' ? 'website' : 'article'}">
+    <meta property="og:site_name" content="webサイト100個作る人のwebサイト">
+    <meta property="og:title" th:content="${title}">
+    <meta property="og:description" th:content="${description}">
+    <meta property="og:url" th:if="${baseUrl != null}" th:content="${baseUrl + currentPath}">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@web100tsukuru">
+
+    <meta name="theme-color" content="#3f51b5">
+    <link rel="icon" th:href="@{/favicon.ico}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <meta name="google-site-verification" content="yj4LGgoltxROKbI2DaOK9eTDbavhFgUfPISmX5yaD44">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4550031417169253"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+
+<header class="site-header" th:fragment="header(active)">
+    <div class="site-header-inner">
+        <a class="site-title" th:href="@{/}">webサイト100個作る人のwebサイト</a>
+        <nav class="site-nav" aria-label="メニュー">
+            <a th:href="@{/}" th:attr="aria-current=${active == 'home'} ? 'page' : null">作ったサイト</a>
+            <a th:href="@{/fiction}" th:attr="aria-current=${active == 'fiction'} ? 'page' : null">フィクションブログ</a>
+        </nav>
+    </div>
+</header>
+
+<footer class="site-footer" th:fragment="footer">
+    <p class="follow">
+        フォローはこちら：
+        <a href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note</a>
+        <span aria-hidden="true">／</span>
+        <a href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X（@web100tsukuru）</a>
+    </p>
+    <p class="copyright" th:with="y=${#temporals.year(#temporals.createNow())}">
+        &copy; <span th:text="${y > 2025 ? '2025–' + y : '2025'}">2025</span> webサイト100個作る人
+    </p>
+</footer>
+
+</body>
+</html>

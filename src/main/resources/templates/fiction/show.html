@@ -1,37 +1,32 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${fiction.title} + ' | フィクションブログ'">フィクション</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<head th:replace="~{fragments/layout :: head(${fiction.title} + ' | フィクションブログ', ${fiction.excerpt}, false)}"></head>
 <body>
-    <header>
-        <h1>フィクションブログ</h1>
-        <p><a class="header-link" th:href="@{/fiction}">← 一覧へ</a></p>
-    </header>
+<header th:replace="~{fragments/layout :: header('fiction')}"></header>
 
-    <main class="page">
-        <article class="post">
-            <h2 th:text="${fiction.title}">タイトル</h2>
-            <p class="meta">
-                <span th:text="${fiction.authorName}">投稿者</span> ・
-                <span th:text="${#temporals.format(fiction.createdAt, 'yyyy/MM/dd HH:mm')}">日時</span>
-            </p>
+<main class="container narrow">
+    <p class="breadcrumb"><a th:href="@{/fiction}">← フィクションブログ一覧</a></p>
 
-            <!-- 本文を [IMG] の位置で区切り、間に画像枠を入れる（画像アップロードは今後対応） -->
-            <div class="post-body">
-                <th:block th:each="part, st : ${bodyParts}">
-                    <p class="post-text" th:text="${part}">本文</p>
-                    <div class="img-slot" th:unless="${st.last}">🖼 画像 <span th:text="${st.count}">1</span>（準備中）</div>
-                </th:block>
-            </div>
-        </article>
-    </main>
+    <article class="post">
+        <h1 class="post-title" th:text="${fiction.title}">タイトル</h1>
+        <p class="meta">
+            <span th:text="${fiction.authorName}">投稿者</span>
+            <span aria-hidden="true">・</span>
+            <time th:datetime="${fiction.createdAt}" th:text="${#temporals.format(fiction.createdAt, 'yyyy/MM/dd HH:mm')}">日時</time>
+        </p>
+        <p class="notice">※ この記事はフィクションです。実在の人物・団体とは関係ありません。</p>
 
-    <footer>
-        <p>&copy; 2025 webサイト100個作る人</p>
-    </footer>
+        <div class="post-body" th:text="${fiction.readerBody}">本文</div>
+
+        <p class="share">
+            <a class="button button-outline" target="_blank" rel="noopener"
+               th:href="@{https://x.com/intent/post(text=${fiction.title} + ' | フィクションブログ', url=${baseUrl + currentPath})}">Xでシェア</a>
+        </p>
+    </article>
+
+    <p class="next-action"><a class="button" th:href="@{/fiction/new}">✏️ あなたも投稿する</a></p>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

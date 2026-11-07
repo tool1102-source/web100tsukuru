@@ -1,72 +1,87 @@
 package com.example.web100tsukuru.controller;
 
 import com.example.web100tsukuru.dto.FictionForm;
-import com.example.web100tsukuru.service.FictionService;
-import jakarta.validation.Valid;
 import com.example.web100tsukuru.entity.Fiction;
+import com.example.web100tsukuru.service.FictionService;
+import com.example.web100tsukuru.service.PostRateLimiter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class FictionController {
 
     private final FictionService fictionService;
+    private final PostRateLimiter rateLimiter;
 
-    public FictionController(FictionService fictionService) {
+    public FictionController(FictionService fictionService, PostRateLimiter rateLimiter) {
         this.fictionService = fictionService;
+        this.rateLimiter = rateLimiter;
     }
 
-    /**
-     * 投稿一覧 (GET /fiction)
-     */
+    /** 投稿一覧 (GET /fiction?page=2) */
     @GetMapping("/fiction")
-    public String list(Model model) {
-        model.addAttribute("fictions", fictionService.findAll());
+    public String list(@RequestParam(defaultValue = "1") int page, Model model) {
+        Page<Fiction> fictions = fictionService.findPage(page);
+        if (page < 1 || (page > 1 && page > fictions.getTotalPages())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        model.addAttribute("fictions", fictions);
+        model.addAttribute("page", page);
         return "fiction/list";
     }
 
-    /**
-     * 投稿詳細 (GET /fiction/{id})
-     */
+    /** 投稿詳細 (GET /fiction/{id}) */
     @GetMapping("/fiction/{id:\\d+}")
     public String show(@PathVariable Long id, Model model) {
         Fiction fiction = fictionService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("fiction", fiction);
-        model.addAttribute("bodyParts", fictionService.splitBody(fiction.getBody()));
         return "fiction/show";
     }
 
-    /**
-     * フィクション投稿フォームの表示 (GET /fiction/new)
-     */
+    /** 投稿フォーム (GET /fiction/new) */
     @GetMapping("/fiction/new")
     public String showForm(Model model) {
         model.addAttribute("fictionForm", new FictionForm());
-        return "fiction/new"; // templates/fiction/new.htmlを表示
+        return "fiction/new";
     }
 
-    /**
-     * フィクション投稿データの受け取りと保存 (POST /fiction)
-     */
+    /** 投稿の受け取りと保存 (POST /fiction) */
     @PostMapping("/fiction")
-    public String createFiction(@Valid FictionForm form, BindingResult bindingResult) {
-        
-        // 入力チェック (Validation) に引っかかった場合
+    public String createFiction(@Valid @ModelAttribute("fictionForm") FictionForm form,
+                                BindingResult bindingResult,
+                                HttpServletRequest request,
+                                HttpServletResponse response,
+                                Model model) {
+
+        // おとり欄に入力がある＝ボット。保存せず、成功したように見せて一覧へ
+        if (form.isFilledByBot()) {
+            return "redirect:/fiction";
+        }
+
         if (bindingResult.hasErrors()) {
-            // エラーを添えてフォーム画面に戻す
+            return "fiction/new";
+        }
+
+        if (!rateLimiter.tryAcquire(request.getRemoteAddr())) {
+            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+            model.addAttribute("rateLimited", true);
             return "fiction/new";
         }
 
         Fiction saved = fictionService.saveFiction(form);
-
-        // 投稿が成功したら、その投稿の詳細ページへ
         return "redirect:/fiction/" + saved.getId();
     }
 }

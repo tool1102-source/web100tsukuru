@@ -1,5 +1,6 @@
 package com.example.web100tsukuru.entity;
 
+import com.example.web100tsukuru.Web100tsukuruApplication;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,9 +33,9 @@ public class Fiction {
     @Column(nullable = false)
     private int placeholderCount;
 
-    // 投稿日時
+    // 投稿日時（日本時間）
     @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now(Web100tsukuruApplication.ZONE);
 
     // ==========================================================
     // コンストラクタ（通常、引数なしと全引数が必要）
@@ -89,4 +90,18 @@ public class Fiction {
         return createdAt;
     }
     // setCreatedAtは不要（自動設定のため）
+
+    // ==========================================================
+    // 表示用（DBには保存しない）
+    // ==========================================================
+
+    /** 読者向けの本文（[IMG] の目印を取り除いたもの） */
+    public String getReaderBody() {
+        return FictionText.readerText(body);
+    }
+
+    /** 一覧や検索結果に出す短い抜粋 */
+    public String getExcerpt() {
+        return FictionText.excerpt(body, 80);
+    }
 }

@@ -1,35 +1,37 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>フィクション一覧 | webサイト100個作る人のwebサイト</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<head th:replace="~{fragments/layout :: head(${page > 1 ? 'フィクションブログ（' + page + 'ページ目） | webサイト100個作る人のwebサイト' : 'フィクションブログ | webサイト100個作る人のwebサイト'}, '「やってみた」風の架空の体験談を、だれでも投稿して読めるブログです。', false)}"></head>
 <body>
-    <header>
+<header th:replace="~{fragments/layout :: header('fiction')}"></header>
+
+<main class="container">
+    <section class="hero">
         <h1>フィクションブログ</h1>
-        <p><a class="header-link" th:href="@{/}">← トップへ</a> ｜ <a class="header-link" th:href="@{/fiction/new}">✏️ 投稿する</a></p>
-    </header>
+        <p class="lead">「やってみた」風の、架空の体験談を集めたブログです。だれでも投稿できます。</p>
+        <a class="button" th:href="@{/fiction/new}">✏️ 投稿する</a>
+    </section>
 
-    <main class="page">
-        <p th:if="${#lists.isEmpty(fictions)}" class="empty">まだ投稿がありません。最初の1本を書いてみましょう。</p>
+    <p th:if="${fictions.empty}" class="empty">まだ投稿がありません。最初の1本を書いてみませんか？</p>
 
-        <section class="website-list" th:unless="${#lists.isEmpty(fictions)}">
-            <article class="website-item" th:each="f : ${fictions}">
-                <h2><a th:href="@{/fiction/{id}(id=${f.id})}" th:text="${f.title}">タイトル</a></h2>
-                <p class="meta">
-                    <span th:text="${f.authorName}">投稿者</span> ・
-                    <span th:text="${#temporals.format(f.createdAt, 'yyyy/MM/dd HH:mm')}">日時</span> ・
-                    画像 <span th:text="${f.placeholderCount}">0</span> 枚
-                </p>
-                <p class="description" th:text="${#strings.abbreviate(#strings.replace(f.body, '[IMG]', ''), 80)}">本文の冒頭</p>
-            </article>
-        </section>
-    </main>
+    <ul class="card-grid" th:unless="${fictions.empty}">
+        <li class="card" th:each="f : ${fictions}">
+            <h2 class="card-title"><a th:href="@{/fiction/{id}(id=${f.id})}" th:text="${f.title}">タイトル</a></h2>
+            <p class="meta">
+                <span th:text="${f.authorName}">投稿者</span>
+                <span aria-hidden="true">・</span>
+                <time th:datetime="${f.createdAt}" th:text="${#temporals.format(f.createdAt, 'yyyy/MM/dd HH:mm')}">日時</time>
+            </p>
+            <p class="card-text" th:text="${f.excerpt}">本文の冒頭</p>
+        </li>
+    </ul>
 
-    <footer>
-        <p>&copy; 2025 webサイト100個作る人</p>
-    </footer>
+    <nav class="pager" aria-label="ページ送り" th:if="${fictions.totalPages > 1}">
+        <a th:if="${fictions.hasPrevious()}" th:href="@{/fiction(page=${page - 1})}" rel="prev">← 新しい投稿</a>
+        <span class="pager-status" th:text="${page} + ' / ' + ${fictions.totalPages}">1 / 3</span>
+        <a th:if="${fictions.hasNext()}" th:href="@{/fiction(page=${page + 1})}" rel="next">古い投稿 →</a>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>
