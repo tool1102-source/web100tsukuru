@@ -4,13 +4,18 @@
 <body>
 <header th:replace="~{fragments/layout :: header('')}"></header>
 
-<main class="container narrow">
-    <section class="post error-page">
-        <p class="error-code">404</p>
-        <h1 class="post-title">ページが見つかりません</h1>
-        <p>URL がまちがっているか、ページが削除された可能性があります。</p>
-        <p><a class="button" th:href="@{/}">トップページへ</a></p>
-    </section>
+<main>
+    <div class="wrap">
+        <section class="error-page">
+            <p class="error-code">404</p>
+            <h1>ページが見つかりません</h1>
+            <p>URL がまちがっているか、ページが削除された可能性があります。</p>
+            <div class="actions" style="margin-top: 12px">
+                <a class="button" th:href="@{/}">トップページへ</a>
+                <a class="button button-outline" th:href="@{/fiction}">フィクションブログへ</a>
+            </div>
+        </section>
+    </div>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

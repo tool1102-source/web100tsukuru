@@ -1,39 +1,91 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('webサイト100個作る人のwebサイト', 'webサイトを100個作ることに挑戦中の個人が、これまでに作ったサイトをまとめて紹介しています。', false)}"></head>
+<head th:replace="~{fragments/layout :: head('webサイト100個作る人のwebサイト', 'webサイトを100個つくる挑戦の記録。これまでに作ったサイトを、ひとつずつ紹介しています。', false)}"></head>
 <body>
 <header th:replace="~{fragments/layout :: header('home')}"></header>
 
-<main class="container">
-    <section class="hero">
-        <h1>webサイトを100個つくる挑戦</h1>
-        <p class="lead">作ったサイトをここに順番に並べています。気になるものがあれば、のぞいてみてください。</p>
-
-        <div class="progress">
-            <p class="progress-label">
-                いま <strong th:text="${catalog.count()}">2</strong> 個 ／ 目標 <span th:text="${catalog.goal()}">100</span> 個
-            </p>
-            <div class="progress-bar" role="progressbar" aria-label="進み具合" aria-valuemin="0"
-                 th:attr="aria-valuemax=${catalog.goal()},aria-valuenow=${catalog.count()}">
-                <span th:style="'width:' + ${catalog.progressPercent()} + '%'"></span>
+<main>
+    <div class="wrap">
+        <section class="hero">
+            <div>
+                <p class="eyebrow">100 websites challenge</p>
+                <h1>webサイトを、<span class="nowrap">100個つくる。</span></h1>
+                <p class="lead">思いついたものを、ひとつずつ形にしていく挑戦です。できたサイトはこのページに順番に並べていきます。</p>
+                <div class="actions">
+                    <a class="button" href="#works">作ったサイトを見る</a>
+                    <a class="button button-outline" href="https://note.com/web100tsukuru" target="_blank" rel="noopener">作る過程を note で読む</a>
+                </div>
             </div>
-        </div>
-    </section>
+            <div class="counter" aria-label="進み具合">
+                <p class="counter-num"><strong th:text="${catalog.countLabel()}">002</strong><span th:text="'/ ' + ${catalog.goal()}">/ 100</span></p>
+                <p class="counter-caption">いま <span th:text="${catalog.count()}">2</span> 個。のこり <b th:text="${catalog.remaining()}">98</b> 個</p>
+            </div>
+        </section>
 
-    <section aria-labelledby="sites-heading">
-        <h2 id="sites-heading" class="section-title">作ったwebサイト</h2>
-        <ul class="card-grid">
-            <li class="card" th:each="site : ${catalog.newestFirst()}">
-                <p class="card-number" th:text="${site.label()}">No.001</p>
-                <h3 class="card-title" th:text="${site.title()}">サイト名</h3>
-                <p class="card-text" th:text="${site.description()}">説明</p>
-                <a class="button" th:href="${site.url()}"
-                   th:attr="target=${site.external()} ? '_blank' : null, rel=${site.external()} ? 'noopener' : null">
-                    サイトを見る<span th:if="${site.external()}" aria-label="（別のタブで開きます）"> ↗</span>
-                </a>
-            </li>
-        </ul>
-    </section>
+        <section class="board" aria-labelledby="board-h">
+            <div class="board-head">
+                <h2 id="board-h">100マスの進み具合</h2>
+                <ul class="legend">
+                    <li><i class="l-done"></i>公開ずみ（押すと開きます）</li>
+                    <li><i class="l-next"></i>次に作るもの</li>
+                    <li><i></i>これから</li>
+                </ul>
+            </div>
+            <ol class="tiles">
+                <li th:each="t : ${catalog.tiles()}" class="tile"
+                    th:classappend="${t.site() != null} ? 'tile-done' : (${t.next()} ? 'tile-next' : 'tile-empty')">
+                    <a th:if="${t.site() != null}" th:href="${t.site().url()}" th:text="${t.label()}"
+                       th:attr="title=${t.site().label()} + ' ' + ${t.site().title()},target=${t.site().external()} ? '_blank' : null,rel=${t.site().external()} ? 'noopener' : null">001</a>
+                    <span th:unless="${t.site() != null}" th:text="${t.label()}"
+                          th:attr="title=${t.next()} ? '次に作るサイト' : null">003</span>
+                </li>
+            </ol>
+        </section>
+
+        <section class="section" id="works" aria-labelledby="works-h">
+            <div class="section-head">
+                <h2 id="works-h">作ったwebサイト</h2>
+                <p>新しい順 ・ <span th:text="${catalog.count()}">2</span> 件</p>
+            </div>
+            <ol class="works" reversed>
+                <li class="work" th:each="site : ${catalog.newestFirst()}">
+                    <a class="work-shot" th:href="${site.url()}" tabindex="-1" aria-hidden="true"
+                       th:attr="target=${site.external()} ? '_blank' : null,rel=${site.external()} ? 'noopener' : null">
+                        <img th:src="@{${site.image()}}" th:alt="${site.title()} + ' の画面'" width="1200" height="750" loading="lazy" decoding="async">
+                    </a>
+                    <div>
+                        <p class="work-num" th:text="${site.label()}">No.001</p>
+                        <h3><a th:href="${site.url()}" th:text="${site.title()}"
+                               th:attr="target=${site.external()} ? '_blank' : null,rel=${site.external()} ? 'noopener' : null">サイト名</a></h3>
+                        <p class="work-desc" th:text="${site.description()}">説明</p>
+                        <ul class="work-meta">
+                            <li th:text="${site.launched()} + ' 公開'">2025年11月 公開</li>
+                            <li th:each="tag : ${site.tags()}" th:text="${tag}">タグ</li>
+                        </ul>
+                        <div class="actions">
+                            <a class="button button-small" th:href="${site.url()}"
+                               th:attr="target=${site.external()} ? '_blank' : null,rel=${site.external()} ? 'noopener' : null">
+                                サイトを開く<span th:if="${site.external()}" aria-label="（別のタブで開きます）"> ↗</span>
+                            </a>
+                            <span class="work-url" th:text="${site.displayUrl()}">convertertools.jp</span>
+                        </div>
+                    </div>
+                </li>
+            </ol>
+        </section>
+
+        <section class="about" aria-labelledby="about-h">
+            <h2 id="about-h">この挑戦について</h2>
+            <div class="about-body">
+                <p>小さな道具から読みもののサイトまで、作りたいと思ったものを、とにかく公開まで持っていく。それを100回くり返すことにしました。</p>
+                <p>どう考えて、どう作ったか。うまくいかなかったことも含めて、作る過程は note と X に書いています。</p>
+                <div class="actions">
+                    <a class="button button-outline button-small" href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note を読む ↗</a>
+                    <a class="button button-outline button-small" href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X をフォロー ↗</a>
+                </div>
+            </div>
+        </section>
+    </div>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

@@ -4,13 +4,17 @@
 <body>
 <header th:replace="~{fragments/layout :: header('')}"></header>
 
-<main class="container narrow">
-    <section class="post error-page">
-        <p class="error-code" th:text="${status}">500</p>
-        <h1 class="post-title">エラーが発生しました</h1>
-        <p>しばらくたってから、もう一度お試しください。</p>
-        <p><a class="button" th:href="@{/}">トップページへ</a></p>
-    </section>
+<main>
+    <div class="wrap">
+        <section class="error-page">
+            <p class="error-code" th:text="${status}">500</p>
+            <h1>エラーが発生しました</h1>
+            <p>しばらくたってから、もう一度お試しください。</p>
+            <div class="actions" style="margin-top: 12px">
+                <a class="button" th:href="@{/}">トップページへ</a>
+            </div>
+        </section>
+    </div>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

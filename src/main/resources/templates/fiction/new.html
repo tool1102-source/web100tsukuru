@@ -1,61 +1,61 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('フィクションを投稿する | フィクションブログ', 'フィクションブログに、架空の体験談を投稿するページです。', true)}"></head>
+<head th:replace="~{fragments/layout :: head('体験談を投稿する | フィクションブログ', 'フィクションブログに、架空の体験談を投稿するページです。', true)}"></head>
 <body>
 <header th:replace="~{fragments/layout :: header('fiction')}"></header>
 
-<main class="container narrow">
-    <p class="breadcrumb"><a th:href="@{/fiction}">← フィクションブログ一覧</a></p>
+<main>
+    <div class="wrap">
+        <p class="breadcrumb"><a th:href="@{/fiction}">← フィクションブログ</a></p>
+        <section class="page-head">
+            <h1>体験談を投稿する</h1>
+            <p class="lead">「やってみた」風の、架空の体験談を書いてください。投稿はすぐに公開されます。</p>
+        </section>
 
-    <section class="post">
-        <h1 class="post-title">フィクションを投稿する</h1>
-        <p>「やってみた」風の、架空の体験談を書いてください。投稿はすぐに公開されます。</p>
+        <div class="form-card">
+            <p class="alert" role="alert" th:if="${rateLimited}">
+                短い時間に投稿が続いたため、受け付けを止めています。10分ほどたってから、もう一度お試しください。
+            </p>
 
-        <p class="alert" role="alert" th:if="${rateLimited}">
-            短い時間に投稿が続いたため、受け付けを止めています。10分ほどたってから、もう一度お試しください。
-        </p>
+            <form th:action="@{/fiction}" th:object="${fictionForm}" method="post" class="form" novalidate>
+                <div class="form-group">
+                    <label for="title">タイトル <span class="required">必須</span></label>
+                    <input type="text" id="title" th:field="*{title}" placeholder="例：電車で一輪車をこいでみた話"
+                           th:attr="maxlength=*{titleMax}" th:errorclass="is-invalid" required>
+                    <p class="hint" th:text="*{titleMax} + '文字まで'">50文字まで</p>
+                    <p class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+                </div>
 
-        <form th:action="@{/fiction}" th:object="${fictionForm}" method="post" class="form" novalidate>
-            <div class="form-group">
-                <label for="title">タイトル <span class="required">必須</span></label>
-                <input type="text" id="title" th:field="*{title}" placeholder="例：電車で一輪車をこいでみた話"
-                       th:attr="maxlength=*{titleMax}"
-                       th:errorclass="is-invalid" required>
-                <p class="hint" th:text="*{titleMax} + '文字まで'">50文字まで</p>
-                <p class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
-            </div>
+                <div class="form-group">
+                    <label for="authorName">投稿者名 <span class="required">必須</span></label>
+                    <input type="text" id="authorName" th:field="*{authorName}" placeholder="ニックネームでOK"
+                           th:attr="maxlength=*{authorMax}" th:errorclass="is-invalid" autocomplete="nickname" required>
+                    <p class="error" th:if="${#fields.hasErrors('authorName')}" th:errors="*{authorName}"></p>
+                </div>
 
-            <div class="form-group">
-                <label for="authorName">投稿者名 <span class="required">必須</span></label>
-                <input type="text" id="authorName" th:field="*{authorName}" placeholder="ニックネームでOK"
-                       th:attr="maxlength=*{authorMax}"
-                       th:errorclass="is-invalid" autocomplete="nickname" required>
-                <p class="error" th:if="${#fields.hasErrors('authorName')}" th:errors="*{authorName}"></p>
-            </div>
+                <div class="form-group">
+                    <label for="body">本文 <span class="required">必須</span></label>
+                    <p class="hint">
+                        画像を入れたい場所に <code>[IMG]</code> と書いておくと、画像のアップロード機能ができたときに、そこへ画像を入れられます（今は表示されません）。
+                    </p>
+                    <button type="button" class="button button-outline button-small" id="insert-img" style="margin-top: 8px">[IMG] を入れる</button>
+                    <textarea id="body" th:field="*{body}" rows="15" placeholder="本文を書いてください。"
+                              th:attr="maxlength=*{bodyMax}" th:errorclass="is-invalid" required></textarea>
+                    <p class="error" th:if="${#fields.hasErrors('body')}" th:errors="*{body}"></p>
+                </div>
 
-            <div class="form-group">
-                <label for="body">本文 <span class="required">必須</span></label>
-                <p class="hint">
-                    画像を入れたい場所に <code>[IMG]</code> と書いておくと、画像のアップロード機能ができたときに、そこへ画像を入れられます（今は表示されません）。
-                </p>
-                <button type="button" class="button button-small button-outline" id="insert-img">[IMG] を入れる</button>
-                <textarea id="body" th:field="*{body}" rows="15" placeholder="本文を書いてください。"
-                          th:attr="maxlength=*{bodyMax}"
-                          th:errorclass="is-invalid" required></textarea>
-                <p class="error" th:if="${#fields.hasErrors('body')}" th:errors="*{body}"></p>
-            </div>
+                <!-- スパム対策のおとり欄（人には見えない） -->
+                <div class="hp" aria-hidden="true">
+                    <label for="website">ウェブサイト（入力しないでください）</label>
+                    <input type="text" id="website" th:field="*{website}" tabindex="-1" autocomplete="off">
+                </div>
 
-            <!-- スパム対策のおとり欄（人には見えない） -->
-            <div class="hp" aria-hidden="true">
-                <label for="website">ウェブサイト（入力しないでください）</label>
-                <input type="text" id="website" th:field="*{website}" tabindex="-1" autocomplete="off">
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="button">投稿する</button>
-            </div>
-        </form>
-    </section>
+                <div class="form-actions">
+                    <button type="submit" class="button">投稿する</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

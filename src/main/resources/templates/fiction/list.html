@@ -4,32 +4,37 @@
 <body>
 <header th:replace="~{fragments/layout :: header('fiction')}"></header>
 
-<main class="container">
-    <section class="hero">
-        <h1>フィクションブログ</h1>
-        <p class="lead">「やってみた」風の、架空の体験談を集めたブログです。だれでも投稿できます。</p>
-        <a class="button" th:href="@{/fiction/new}">✏️ 投稿する</a>
-    </section>
+<main>
+    <div class="wrap">
+        <section class="page-head">
+            <p class="eyebrow">No.002 · fiction blog</p>
+            <h1>フィクションブログ</h1>
+            <p class="lead">「やってみた」風の、ありそうでない体験談を集めたブログです。読むのも書くのも、だれでもどうぞ。</p>
+            <div class="actions"><a class="button" th:href="@{/fiction/new}">体験談を投稿する</a></div>
+        </section>
 
-    <p th:if="${fictions.empty}" class="empty">まだ投稿がありません。最初の1本を書いてみませんか？</p>
+        <p th:if="${fictions.empty}" class="empty">まだ投稿がありません。最初の1本を書いてみませんか？</p>
 
-    <ul class="card-grid" th:unless="${fictions.empty}">
-        <li class="card" th:each="f : ${fictions}">
-            <h2 class="card-title"><a th:href="@{/fiction/{id}(id=${f.id})}" th:text="${f.title}">タイトル</a></h2>
-            <p class="meta">
-                <span th:text="${f.authorName}">投稿者</span>
-                <span aria-hidden="true">・</span>
-                <time th:datetime="${f.createdAt}" th:text="${#temporals.format(f.createdAt, 'yyyy/MM/dd HH:mm')}">日時</time>
-            </p>
-            <p class="card-text" th:text="${f.excerpt}">本文の冒頭</p>
-        </li>
-    </ul>
+        <ol class="posts" th:unless="${fictions.empty}">
+            <li class="post-item" th:each="f : ${fictions}">
+                <a th:href="@{/fiction/{id}(id=${f.id})}">
+                    <h2 th:text="${f.title}">タイトル</h2>
+                    <p class="meta">
+                        <span class="author" th:text="${f.authorName}">投稿者</span><br>
+                        <time th:datetime="${f.createdAt}" th:text="${#temporals.format(f.createdAt, 'yyyy.MM.dd HH:mm')}">日時</time>
+                    </p>
+                    <p class="excerpt" th:text="${f.excerpt}">本文の冒頭</p>
+                </a>
+            </li>
+        </ol>
 
-    <nav class="pager" aria-label="ページ送り" th:if="${fictions.totalPages > 1}">
-        <a th:if="${fictions.hasPrevious()}" th:href="@{/fiction(page=${page - 1})}" rel="prev">← 新しい投稿</a>
-        <span class="pager-status" th:text="${page} + ' / ' + ${fictions.totalPages}">1 / 3</span>
-        <a th:if="${fictions.hasNext()}" th:href="@{/fiction(page=${page + 1})}" rel="next">古い投稿 →</a>
-    </nav>
+        <nav class="pager" aria-label="ページ送り" th:if="${fictions.totalPages > 1}">
+            <a class="button button-outline button-small" th:if="${fictions.hasPrevious()}" th:href="@{/fiction(page=${page - 1})}" rel="prev">← 新しい投稿</a>
+            <span class="pager-status" th:text="${page} + ' / ' + ${fictions.totalPages}">1 / 3</span>
+            <a class="button button-outline button-small" th:if="${fictions.hasNext()}" th:href="@{/fiction(page=${page + 1})}" rel="next">古い投稿 →</a>
+        </nav>
+        <div class="pager" th:unless="${fictions.totalPages > 1}"></div>
+    </div>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

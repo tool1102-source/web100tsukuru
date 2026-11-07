@@ -22,8 +22,15 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@web100tsukuru">
 
-    <meta name="theme-color" content="#3f51b5">
+    <meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#131312" media="(prefers-color-scheme: dark)">
+    <meta name="color-scheme" content="light dark">
     <link rel="icon" th:href="@{/favicon.ico}">
+
+    <!-- 数字と英字の見出しだけに使う書体（日本語は端末の書体） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <meta name="google-site-verification" content="yj4LGgoltxROKbI2DaOK9eTDbavhFgUfPISmX5yaD44">
@@ -33,25 +40,36 @@
 <body>
 
 <header class="site-header" th:fragment="header(active)">
-    <div class="site-header-inner">
-        <a class="site-title" th:href="@{/}">webサイト100個作る人のwebサイト</a>
+    <div class="wrap site-header-inner">
+        <a class="logo" th:href="@{/}" aria-label="webサイト100個作る人のwebサイト トップへ">
+            <span class="logo-mark" aria-hidden="true">100</span>
+            <span class="logo-text">webサイト100個作る人</span>
+        </a>
         <nav class="site-nav" aria-label="メニュー">
             <a th:href="@{/}" th:attr="aria-current=${active == 'home'} ? 'page' : null">作ったサイト</a>
             <a th:href="@{/fiction}" th:attr="aria-current=${active == 'fiction'} ? 'page' : null">フィクションブログ</a>
+            <a class="nav-ext" href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note</a>
+            <a class="nav-ext" href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X</a>
         </nav>
     </div>
 </header>
 
 <footer class="site-footer" th:fragment="footer">
-    <p class="follow">
-        フォローはこちら：
-        <a href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note</a>
-        <span aria-hidden="true">／</span>
-        <a href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X（@web100tsukuru）</a>
-    </p>
-    <p class="copyright" th:with="y=${#temporals.year(#temporals.createNow())}">
-        &copy; <span th:text="${y > 2025 ? '2025–' + y : '2025'}">2025</span> webサイト100個作る人
-    </p>
+    <div class="wrap site-footer-inner">
+        <div>
+            <p class="footer-title">webサイト100個作る人のwebサイト</p>
+            <p class="footer-text">webサイトを100個つくる挑戦の記録です。作る過程は note と X で発信しています。</p>
+        </div>
+        <ul class="footer-links">
+            <li><a th:href="@{/}">作ったサイト</a></li>
+            <li><a th:href="@{/fiction}">フィクションブログ</a></li>
+            <li><a href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note</a></li>
+            <li><a href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X（@web100tsukuru）</a></li>
+        </ul>
+        <p class="copyright" th:with="y=${#temporals.year(#temporals.createNow())}">
+            &copy; <span th:text="${y > 2025 ? '2025–' + y : '2025'}">2025</span> webサイト100個作る人
+        </p>
+    </div>
 </footer>
 
 </body>

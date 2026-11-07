@@ -4,27 +4,29 @@
 <body>
 <header th:replace="~{fragments/layout :: header('fiction')}"></header>
 
-<main class="container narrow">
-    <p class="breadcrumb"><a th:href="@{/fiction}">← フィクションブログ一覧</a></p>
+<main>
+    <div class="wrap">
+        <article class="article">
+            <p class="breadcrumb"><a th:href="@{/fiction}">← フィクションブログ</a></p>
+            <header class="article-head">
+                <h1 th:text="${fiction.title}">タイトル</h1>
+                <p class="meta">
+                    <span class="author" th:text="${fiction.authorName}">投稿者</span>
+                    <span aria-hidden="true"> ・ </span>
+                    <time th:datetime="${fiction.createdAt}" th:text="${#temporals.format(fiction.createdAt, 'yyyy年M月d日 HH:mm')}">日時</time>
+                </p>
+                <p class="notice">※ この記事はフィクションです。実在の人物・団体とは関係ありません。</p>
+            </header>
 
-    <article class="post">
-        <h1 class="post-title" th:text="${fiction.title}">タイトル</h1>
-        <p class="meta">
-            <span th:text="${fiction.authorName}">投稿者</span>
-            <span aria-hidden="true">・</span>
-            <time th:datetime="${fiction.createdAt}" th:text="${#temporals.format(fiction.createdAt, 'yyyy/MM/dd HH:mm')}">日時</time>
-        </p>
-        <p class="notice">※ この記事はフィクションです。実在の人物・団体とは関係ありません。</p>
+            <div class="prose" th:text="${fiction.readerBody}">本文</div>
 
-        <div class="post-body" th:text="${fiction.readerBody}">本文</div>
-
-        <p class="share">
-            <a class="button button-outline" target="_blank" rel="noopener"
-               th:href="@{https://x.com/intent/post(text=${fiction.title} + ' | フィクションブログ', url=${baseUrl + currentPath})}">Xでシェア</a>
-        </p>
-    </article>
-
-    <p class="next-action"><a class="button" th:href="@{/fiction/new}">✏️ あなたも投稿する</a></p>
+            <footer class="article-foot">
+                <a class="button button-outline button-small" target="_blank" rel="noopener"
+                   th:href="@{https://x.com/intent/post(text=${fiction.title} + ' | フィクションブログ', url=${baseUrl + currentPath})}">X でシェア ↗</a>
+                <a class="button button-small" th:href="@{/fiction/new}">あなたも投稿する</a>
+            </footer>
+        </article>
+    </div>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
