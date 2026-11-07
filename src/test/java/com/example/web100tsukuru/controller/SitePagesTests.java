@@ -47,19 +47,20 @@ class SitePagesTests {
                 .andExpect(content().string(containsString("href=\"/tools/\"")))
                 .andExpect(content().string(not(containsString("convertertools.jp"))))
                 .andExpect(content().string(containsString("href=\"/fiction\"")))
-                .andExpect(content().string(containsString("<strong>002</strong><span>/ 100</span>")))
-                .andExpect(content().string(containsString("のこり <b>98</b> 個")))
+                .andExpect(content().string(containsString("<strong>003</strong><span>/ 100</span>")))
+                .andExpect(content().string(containsString("のこり <b>97</b> 個")))
                 .andExpect(content().string(containsString("<meta name=\"viewport\"")))
                 .andExpect(content().string(containsString("<link rel=\"canonical\" href=\"https://web100tsukuru.com/\">")))
                 .andExpect(content().string(containsString("og:title")))
                 .andExpect(content().string(containsString("adsbygoogle")))
                 .andReturn().getResponse().getContentAsString();
 
-        // 100マス：作った2つはリンク、次の 003 に印、残りは空
-        assertThat(html.split("class=\"tile\\s*tile-done\"", -1).length - 1).isEqualTo(2);
+        // 100マス：作った3つはリンク、次の 004 に印、残りは空
+        assertThat(html.split("class=\"tile\\s*tile-done\"", -1).length - 1).isEqualTo(3);
         assertThat(html.split("class=\"tile\\s*tile-next\"", -1).length - 1).isEqualTo(1);
-        assertThat(html.split("class=\"tile\\s*tile-empty\"", -1).length - 1).isEqualTo(97);
-        assertThat(html).containsPattern("tile-next\">\\s*<span title=\"次に作るサイト\">003</span>");
+        assertThat(html.split("class=\"tile\\s*tile-empty\"", -1).length - 1).isEqualTo(96);
+        assertThat(html).containsPattern("tile-next\">\\s*<span title=\"次に作るサイト\">004</span>");
+        assertThat(html).contains("href=\"/vote\"");
     }
 
     @Test

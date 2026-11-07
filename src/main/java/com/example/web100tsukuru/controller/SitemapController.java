@@ -1,12 +1,15 @@
 package com.example.web100tsukuru.controller;
 
 import com.example.web100tsukuru.entity.Fiction;
+import com.example.web100tsukuru.entity.Poll;
 import com.example.web100tsukuru.service.FictionService;
+import com.example.web100tsukuru.service.PollService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /** 検索エンジン向けのサイトマップ（Google Search Console に登録する） */
@@ -16,10 +19,12 @@ public class SitemapController {
     private static final int MAX_POSTS = 5000;
 
     private final FictionService fictionService;
+    private final PollService pollService;
     private final String baseUrl;
 
-    public SitemapController(FictionService fictionService, @Value("${app.base-url}") String baseUrl) {
+    public SitemapController(FictionService fictionService, PollService pollService, @Value("${app.base-url}") String baseUrl) {
         this.fictionService = fictionService;
+        this.pollService = pollService;
         this.baseUrl = baseUrl.replaceAll("/+$", "");
     }
 
@@ -32,6 +37,11 @@ public class SitemapController {
         url(xml, "/fiction", null);
         for (Fiction f : fictionService.findLatest(MAX_POSTS)) {
             url(xml, "/fiction/" + f.getId(), f.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        }
+        url(xml, "/vote", null);
+        for (Poll p : pollService.page(1, MAX_POSTS)) {
+            LocalDateTime updated = p.getReportedAt() != null ? p.getReportedAt() : p.getCreatedAt();
+            url(xml, "/vote/" + p.getId(), updated.format(DateTimeFormatter.ISO_LOCAL_DATE));
         }
         return xml.append("</urlset>\n").toString();
     }

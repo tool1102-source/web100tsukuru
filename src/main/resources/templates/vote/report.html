@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('報告する | ちいさな投票所', 'お題の結果のとおりにやったことを報告するページです。', true)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('vote')}"></header>
+<div th:replace="~{vote/parts :: bar}"></div>
+
+<main>
+    <div class="wrap">
+        <p class="breadcrumb"><a th:href="@{/vote/{id}(id=${poll.id})}">← お題にもどる</a></p>
+        <section class="page-head">
+            <h1>やったことを報告する</h1>
+            <p class="lead">
+                「<span th:text="${poll.title}">お題</span>」は
+                <th:block th:if="${view.winners().isEmpty()}">投票がありませんでした。どうしたかを書いてください。</th:block>
+                <th:block th:unless="${view.winners().isEmpty()}">
+                    「<b th:text="${#strings.listJoin(view.winners().![label()], '・')}">A</b>」に決まりました。そのとおりにやってみて、どうだったかを書いてください。
+                </th:block>
+            </p>
+        </section>
+
+        <div class="form-card">
+            <div th:replace="~{vote/parts :: messages}"></div>
+            <form th:action="@{/vote/{id}/report(id=${poll.id})}" method="post" enctype="multipart/form-data" class="form" novalidate>
+                <div class="form-group">
+                    <label for="text">報告 <span class="required">必須</span></label>
+                    <textarea id="text" name="text" rows="8" th:text="${text}" required
+                              placeholder="例：カレーにしました。辛口にしたら汗が止まりませんでした。"
+                              maxlength="1000"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="images">写真 <span class="optional">任意</span></label>
+                    <p class="hint">3枚まで。大きい写真は自動で縮め、位置情報などは消してから載せます。</p>
+                    <input type="file" id="images" name="images" accept="image/*" multiple data-shrink data-max="3" data-previews="image-previews">
+                    <ol class="image-previews" id="image-previews" aria-label="選んだ写真"></ol>
+                </div>
+                <p class="hint">報告は1回だけで、あとから書き直せません。</p>
+                <div class="form-actions">
+                    <button type="submit" class="button">報告する</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/image-shrink.js}" defer></script>
+</body>
+</html>

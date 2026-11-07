@@ -48,7 +48,8 @@
         </a>
         <nav class="site-nav" aria-label="メニュー">
             <a th:href="@{/}" th:attr="aria-current=${active == 'home'} ? 'page' : null">作ったサイト</a>
-            <a th:href="@{/fiction}" th:attr="aria-current=${active == 'fiction'} ? 'page' : null">フィクションブログ</a>
+            <a th:href="@{/fiction}" th:attr="aria-current=${active == 'fiction'} ? 'page' : null"><span class="nav-long">フィクション</span>ブログ</a>
+            <a th:href="@{/vote}" th:attr="aria-current=${active == 'vote'} ? 'page' : null"><span class="nav-long">ちいさな</span>投票所</a>
             <a class="nav-ext" href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note</a>
             <a class="nav-ext" href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X</a>
         </nav>
@@ -64,6 +65,7 @@
         <ul class="footer-links">
             <li><a th:href="@{/}">作ったサイト</a></li>
             <li><a th:href="@{/fiction}">フィクションブログ</a></li>
+            <li><a th:href="@{/vote}">ちいさな投票所</a></li>
             <li><a href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note</a></li>
             <li><a href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X（@web100tsukuru）</a></li>
         </ul>

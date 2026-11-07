@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('お題を出す | ちいさな投票所', 'ちいさな投票所に、自分の小さな選択をお題として出すページです。', true)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('vote')}"></header>
+<div th:replace="~{vote/parts :: bar}"></div>
+
+<main>
+    <div class="wrap">
+        <p class="breadcrumb"><a th:href="@{/vote}">← ちいさな投票所</a></p>
+        <section class="page-head">
+            <h1>お題を出す</h1>
+            <p class="lead">あなたの小さな選択を、みんなの投票券で決めてもらいます。締め切りで1位になったとおりに、本当にやって報告してください。</p>
+        </section>
+
+        <div class="form-card">
+            <div th:replace="~{vote/parts :: messages}"></div>
+            <form th:action="@{/vote}" method="post" enctype="multipart/form-data" class="form" novalidate>
+                <div class="form-group">
+                    <label for="title">お題 <span class="required">必須</span></label>
+                    <input type="text" id="title" name="title" th:value="${pollTitle}" placeholder="例：明日の昼ごはん、どっちにする？"
+                           maxlength="60" required>
+                </div>
+
+                <fieldset class="form-group options-group">
+                    <legend>選択肢 <span class="required">2〜4個</span></legend>
+                    <input type="text" name="option" th:each="i : ${#numbers.sequence(0, 3)}"
+                           th:value="${options != null and options.size() > i} ? ${options[i]} : ''"
+                           th:placeholder="${i == 0} ? '例：カレー' : (${i == 1} ? '例：ラーメン' : '（なくてもよい）')"
+                           maxlength="30" th:attr="aria-label='選択肢' + ${i + 1}">
+                </fieldset>
+
+                <fieldset class="form-group">
+                    <legend>締め切り</legend>
+                    <div class="choice-row">
+                        <label class="choice" th:each="d : ${durations}">
+                            <input type="radio" name="duration" th:value="${d.name()}" th:checked="${d.name() == duration}">
+                            <span th:text="${d.label} + 'あと'">1日あと</span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="form-group">
+                    <label for="detail">説明 <span class="optional">任意</span></label>
+                    <textarea id="detail" name="detail" rows="4" th:text="${pollDetail}"
+                              placeholder="迷っている理由や、決まったらどうするかなど"
+                              maxlength="500"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="image">画像 <span class="optional">任意</span></label>
+                    <p class="hint">1枚まで。大きい画像は自動で縮め、写真の位置情報などは消してから載せます。</p>
+                    <input type="file" id="image" name="image" accept="image/*" data-shrink data-max="1" data-previews="image-previews">
+                    <ol class="image-previews" id="image-previews" aria-label="選んだ画像"></ol>
+                </div>
+
+                <!-- スパム対策のおとり欄（人には見えない） -->
+                <div class="hp" aria-hidden="true">
+                    <label for="website">ウェブサイト（入力しないでください）</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                </div>
+
+                <p class="hint">出したお題は、締め切りのあとで報告してください。1位のとおりにやるのがこの投票所の約束です。</p>
+                <div class="form-actions">
+                    <button type="submit" class="button">お題を出す</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/image-shrink.js}" defer></script>
+</body>
+</html>

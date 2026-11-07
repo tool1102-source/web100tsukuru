@@ -235,6 +235,102 @@ main { flex: 1; }
 .admin-bar { position: sticky; bottom: 0; display: flex; justify-content: flex-end; padding: 16px 0; background: var(--paper); border-top: 1px solid var(--line); }
 @media (max-width: 520px) { .admin-bar .button { width: 100%; } }
 
+.admin-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.admin-tabs a { text-decoration: none; font-size: .88rem; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-2); }
+.admin-tabs a[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+/* ---------- 共通の小物 ---------- */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.link-button { border: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.link-button:hover { color: var(--accent); }
+.muted { color: var(--muted); }
+.badge { display: inline-block; padding: 0 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: .74rem; font-weight: 700; }
+.form-foot { margin-top: 18px; font-size: .9rem; color: var(--muted); text-align: center; }
+.form fieldset { border: 0; margin: 0 0 22px; padding: 0; min-width: 0; }
+.form legend { font-weight: 700; margin-bottom: 6px; padding: 0; }
+.options-group { display: grid; gap: 8px; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.choice { display: inline-flex !important; align-items: center; gap: 6px; margin: 0 !important; padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; font-weight: 500 !important; cursor: pointer; background: var(--paper); }
+.choice:has(input:checked) { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.choice input { accent-color: var(--accent); margin: 0; }
+/* スマホでは、メニューの長い名前を短くして1行に収める */
+@media (max-width: 640px) { .nav-long { display: none; } }
+
+/* ---------- ちいさな投票所 ---------- */
+.vote-bar { border-bottom: 1px solid var(--line); background: var(--card); }
+.vote-bar-inner { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; min-height: 52px; padding-top: 8px; padding-bottom: 8px; }
+.vote-brand { font-weight: 700; text-decoration: none; }
+.vote-brand::before { content: "🗳 "; }
+.vote-bar-nav { display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; font-size: .9rem; }
+.vote-bar-nav a:not(.button) { text-decoration: none; color: var(--ink-2); }
+.vote-bar-nav a:not(.button):hover { color: var(--accent); }
+.vote-bar-nav form { margin: 0; }
+.ticket-balance { padding: 3px 12px; border-radius: 999px; background: var(--accent-soft); color: var(--ink) !important; }
+.ticket-balance b { font-family: var(--display); font-size: 1.05rem; }
+.vote-messages { padding-top: 20px; }
+.vote-messages:empty { display: none; }
+.vote-messages .status, .vote-messages .alert { margin: 0 0 8px; }
+
+.vote-rules { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; counter-reset: rule; }
+@media (min-width: 820px) { .vote-rules { grid-template-columns: repeat(3, 1fr); } }
+.vote-rules li { counter-increment: rule; display: grid; gap: 4px; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+.vote-rules b::before { content: counter(rule) ". "; color: var(--accent); font-family: var(--display); }
+.vote-rules span { color: var(--muted); font-size: .9rem; }
+.vote-section { padding: 28px 0 8px; }
+.vote-section .empty { padding: 32px 0; }
+.poll-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+@media (min-width: 820px) { .poll-cards { grid-template-columns: repeat(2, 1fr); } }
+.poll-card a { display: flex; gap: 14px; height: 100%; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); text-decoration: none; transition: border-color .15s, transform .15s; }
+.poll-card a:hover { border-color: var(--ink); color: var(--ink); transform: translateY(-2px); }
+.poll-card-img { flex: none; width: 88px; height: 88px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
+.poll-card-body { display: grid; gap: 4px; align-content: start; min-width: 0; }
+.poll-card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.45; overflow-wrap: anywhere; }
+.poll-card-options { color: var(--ink-2); font-size: .9rem; overflow-wrap: anywhere; }
+.poll-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; color: var(--muted); font-size: .8rem; }
+.time-left, .winner-label { color: var(--accent); font-weight: 700; }
+
+.poll .article-head h1 { font-family: var(--sans); }
+.poll-state { display: inline-block; margin-bottom: 12px; padding: 2px 12px; border-radius: 999px; font-size: .82rem; font-weight: 700; }
+.poll-state.is-open { background: var(--accent); color: var(--accent-ink); }
+.poll-state.is-closed { background: var(--line-soft); color: var(--ink-2); }
+.poll-figure { margin-top: 24px; }
+.poll-detail { padding-top: 20px; font-family: var(--sans); font-size: 1rem; line-height: 1.9; }
+.poll-result { margin-top: 28px; padding: 22px 24px; border-radius: var(--radius); background: var(--ink); color: var(--paper); text-align: center; }
+.poll-result-label { font-size: .85rem; opacity: .8; }
+.poll-result-head { margin-top: 4px; font-size: clamp(1.5rem, 5vw, 2.2rem); font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+.poll-result-note { margin-top: 8px; font-size: .9rem; opacity: .85; }
+.poll-options { margin-top: 28px; display: grid; gap: 12px; }
+.poll-option { padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+.poll-option.is-winner { border: 2px solid var(--accent); }
+.poll-option-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.poll-option-label { font-weight: 700; font-size: 1.08rem; overflow-wrap: anywhere; }
+.poll-option.is-winner .poll-option-label::before { content: "1位 "; color: var(--accent); }
+.poll-option-count { flex: none; font-size: .9rem; }
+.poll-option-count b { font-family: var(--display); font-size: 1.2rem; }
+.poll-bar { margin-top: 10px; height: 10px; border-radius: 999px; background: var(--line-soft); overflow: hidden; }
+.poll-bar span { display: block; height: 100%; border-radius: 999px; background: var(--accent); min-width: 0; transition: width .3s; }
+.poll-option-mine { margin-top: 8px; font-size: .86rem; color: var(--ink-2); }
+.poll-vote-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.ticket-input { width: 7.5em; padding: 7px 10px; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 1rem; background: var(--paper); color: var(--ink); }
+.ticket-input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--accent-soft); }
+.poll-total { text-align: right; color: var(--muted); font-size: .88rem; }
+.poll-login { display: flex; flex-wrap: wrap; gap: 10px; }
+.poll-hint { margin-top: 0; }
+.poll-report { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line); display: grid; gap: 16px; }
+.poll-report h2 { font-size: 1.4rem; }
+.poll-report .prose { font-family: var(--sans); font-size: 1rem; line-height: 1.9; }
+
+.ticket-summary { display: grid; gap: 4px; }
+.ticket-summary-total { font-size: clamp(2rem, 7vw, 3rem); font-weight: 700; line-height: 1.1; }
+.ticket-summary-total b { font-family: var(--display); }
+.ledger { list-style: none; margin: 0 0 48px; padding: 0; border-top: 1.5px solid var(--ink); }
+.ledger li { display: grid; grid-template-columns: 5.5em 1fr auto; gap: 10px; align-items: baseline; padding: 10px 4px; border-bottom: 1px solid var(--line); font-size: .9rem; }
+.ledger time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.ledger-reason { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.ledger-reason a { color: var(--muted); font-size: .84rem; }
+.ledger-delta { font-family: var(--display); }
+.ledger-delta.is-plus { color: var(--accent); }
+
 /* ---------- エラーページ ---------- */
 .error-page { padding: 80px 0 96px; display: grid; gap: 14px; justify-items: start; }
 .error-code { font-family: var(--display); font-weight: 700; font-size: clamp(5rem, 18vw, 9rem); line-height: .9; letter-spacing: -.06em; color: var(--accent); }

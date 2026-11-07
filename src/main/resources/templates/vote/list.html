@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('ちいさな投票所 | webサイト100個作る人のwebサイト', 'だれかの小さな選択を、あなたの投票券で決める投票所。券は何枚でも入れられて、1位にならなかった券は全部戻ってきます。', false)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('vote')}"></header>
+<div th:replace="~{vote/parts :: bar}"></div>
+
+<main>
+    <div class="wrap">
+        <div th:replace="~{vote/parts :: messages}"></div>
+
+        <section class="page-head">
+            <p class="eyebrow">No.003 · small votes</p>
+            <h1>ちいさな投票所</h1>
+            <p class="lead">だれかの小さな選択を、あなたの投票券で決める。1位になったとおりに、出した人が本当にやって報告します。</p>
+            <ol class="vote-rules">
+                <li><b>券は何枚でも入れられる</b><span>どうしても決めたいなら、たくさん入れてください。</span></li>
+                <li><b>1位にならなかった券は、全部戻る</b><span>負けても券は減りません。減るのは、入れた先が1位になったときだけ。</span></li>
+                <li><b>出した人は、1位のとおりにやる</b><span>締め切りのあと、写真つきの報告が届きます。</span></li>
+            </ol>
+            <div class="actions">
+                <a class="button" th:href="@{/vote/new}">お題を出す</a>
+                <a class="button button-outline" th:if="${me == null}" th:href="@{/vote/signup}"
+                   th:text="'登録して投票券を' + ${@accountService.signupTickets} + '枚もらう'">登録して投票券を100枚もらう</a>
+            </div>
+        </section>
+
+        <section class="vote-section" aria-labelledby="open-h">
+            <div class="section-head">
+                <h2 id="open-h">受付中</h2>
+                <p>締め切りが近い順</p>
+            </div>
+            <p th:if="${open.isEmpty()}" class="empty">いま受付中のお題はありません。最初のお題を出してみませんか？</p>
+            <ol class="poll-cards" th:unless="${open.isEmpty()}">
+                <th:block th:each="s : ${open}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
+            </ol>
+        </section>
+
+        <section class="vote-section" aria-labelledby="closed-h">
+            <div class="section-head">
+                <h2 id="closed-h">結果が出たお題</h2>
+                <p>新しい順</p>
+            </div>
+            <p th:if="${closed.isEmpty()}" class="empty">まだありません。</p>
+            <ol class="poll-cards" th:unless="${closed.isEmpty()}">
+                <th:block th:each="s : ${closed}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
+            </ol>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

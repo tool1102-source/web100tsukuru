@@ -9,6 +9,10 @@
         <section class="page-head">
             <p class="eyebrow">admin</p>
             <h1>フィクションブログの管理</h1>
+            <nav class="admin-tabs" aria-label="管理画面の切り替え">
+                <a th:href="@{/admin}" aria-current="page">フィクションブログ</a>
+                <a th:href="@{/admin/vote}">ちいさな投票所</a>
+            </nav>
             <p class="lead">消したい投稿にチェックを入れて、下の「選んだ投稿を消す」を押してください。投稿に付いた画像も一緒に消えます。消した投稿は元に戻せません。</p>
             <form class="actions" th:action="@{/admin/logout}" method="post">
                 <button type="submit" class="button button-outline button-small">ログアウト</button>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('ログイン | ちいさな投票所', 'ちいさな投票所にログインするページです。', true)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('vote')}"></header>
+<div th:replace="~{vote/parts :: bar}"></div>
+
+<main>
+    <div class="wrap">
+        <p class="breadcrumb"><a th:href="@{/vote}">← ちいさな投票所</a></p>
+        <section class="page-head">
+            <h1>ログイン</h1>
+            <p class="lead">1日1回のログインで、投票券が <b th:text="${@accountService.dailyBonus}">10</b> 枚増えます。</p>
+        </section>
+
+        <div class="form-card">
+            <div th:replace="~{vote/parts :: messages}"></div>
+            <form th:action="@{/vote/login}" method="post" class="form" novalidate>
+                <input type="hidden" name="next" th:value="${next}">
+                <div class="form-group">
+                    <label for="loginId">ログイン ID</label>
+                    <input type="text" id="loginId" name="loginId" th:value="${loginId}" autocomplete="username"
+                           maxlength="20" required autocapitalize="none" spellcheck="false">
+                </div>
+                <div class="form-group">
+                    <label for="password">パスワード</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" maxlength="72" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="button">ログイン</button>
+                </div>
+            </form>
+            <p class="form-foot">はじめての方は <a th:href="@{/vote/signup(next=${next})}">登録</a>（投票券を <span th:text="${@accountService.signupTickets}">100</span> 枚もらえます）</p>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

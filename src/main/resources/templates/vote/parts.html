@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<!--
+  「ちいさな投票所」の画面で共通に使う部品。
+  bar … 投票所の見出しと、券の残り・マイページ・ログアウト（ログインしていなければ登録・ログイン）
+  messages … 「入れました」などのお知らせ
+  card(s) … 一覧の1件（s は PollService.PollSummary）
+-->
+<body>
+
+<div class="vote-bar" th:fragment="bar">
+    <div class="wrap vote-bar-inner">
+        <a class="vote-brand" th:href="@{/vote}">ちいさな投票所</a>
+        <nav class="vote-bar-nav" aria-label="投票所のメニュー">
+            <th:block th:if="${me != null}">
+                <a class="ticket-balance" th:href="@{/vote/me}" title="投票券の残り（マイページへ）">
+                    <span aria-hidden="true">🎟</span> <b th:text="${#numbers.formatInteger(me.totalTickets, 1, 'COMMA')}">100</b>枚
+                </a>
+                <a th:href="@{/vote/new}">お題を出す</a>
+                <form th:action="@{/vote/logout}" method="post">
+                    <button type="submit" class="link-button">ログアウト</button>
+                </form>
+            </th:block>
+            <th:block th:if="${me == null}"
+                      th:with="back=${currentPath == '/vote/signup' or currentPath == '/vote/login'} ? '/vote' : ${currentPath}">
+                <a th:href="@{/vote/login(next=${back})}">ログイン</a>
+                <a class="button button-small" th:href="@{/vote/signup(next=${back})}">登録して券をもらう</a>
+            </th:block>
+        </nav>
+    </div>
+</div>
+
+<div th:fragment="messages" class="vote-messages">
+    <p class="status" role="status" th:if="${bonusGranted != null}"
+       th:text="'ログインボーナスで投票券を' + ${bonusGranted} + '枚もらいました。'">ログインボーナス</p>
+    <p class="status" role="status" th:if="${notice != null}" th:text="${notice}">お知らせ</p>
+    <p class="alert" role="alert" th:if="${error != null}" th:text="${error}">エラー</p>
+</div>
+
+<li class="poll-card" th:fragment="card(s)">
+    <a th:href="@{/vote/{id}(id=${s.poll().id})}">
+        <img th:if="${s.hasImage()}" class="poll-card-img" th:src="@{/vote/{id}/images/0.jpg(id=${s.poll().id})}"
+             alt="" width="88" height="88" loading="lazy" decoding="async">
+        <span class="poll-card-body">
+            <span class="poll-card-title" th:text="${s.poll().title}">お題</span>
+            <span class="poll-card-options" th:text="${#strings.listJoin(s.optionLabels(), ' ／ ')}">A ／ B</span>
+            <span class="poll-card-meta">
+                <span th:text="${s.ownerName()}">名前</span>
+                <span aria-hidden="true">・</span>
+                <span th:text="${#numbers.formatInteger(s.totalTickets(), 1, 'COMMA')} + '枚'">0枚</span>
+                <span aria-hidden="true">・</span>
+                <span th:if="${s.poll().open}" class="time-left" th:text="${s.poll().timeLeft}">あと1日</span>
+                <th:block th:unless="${s.poll().open}">
+                    <span th:if="${s.winnerLabels().isEmpty()}">投票なし</span>
+                    <span th:unless="${s.winnerLabels().isEmpty()}" class="winner-label"
+                          th:text="'1位：' + ${#strings.listJoin(s.winnerLabels(), '・')}">1位：A</span>
+                </th:block>
+                <span class="badge" th:if="${s.poll().reported}">報告あり</span>
+            </span>
+        </span>
+    </a>
+</li>
+
+</body>
+</html>

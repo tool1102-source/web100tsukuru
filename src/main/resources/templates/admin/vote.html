@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('管理画面（投票所） | webサイト100個作る人のwebサイト', '管理画面です。', true)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('admin')}"></header>
+
+<main>
+    <div class="wrap">
+        <section class="page-head">
+            <p class="eyebrow">admin</p>
+            <h1>ちいさな投票所の管理</h1>
+            <nav class="admin-tabs" aria-label="管理画面の切り替え">
+                <a th:href="@{/admin}">フィクションブログ</a>
+                <a th:href="@{/admin/vote}" aria-current="page">ちいさな投票所</a>
+            </nav>
+            <p class="lead">消したいお題にチェックを入れて、下の「選んだお題を消す」を押してください。入っていた投票券は、入れた人に全部返します。消したお題は元に戻せません。</p>
+        </section>
+
+        <p class="status" role="status" th:if="${deletedCount != null}" th:text="${deletedCount} + '件のお題を消しました。'">1件のお題を消しました。</p>
+
+        <p th:if="${summaries.isEmpty()}" class="empty">お題はありません。</p>
+
+        <form id="delete-form" th:unless="${summaries.isEmpty()}" th:action="@{/admin/vote/delete}" method="post">
+            <p class="admin-count" th:text="'お題は全部で ' + ${polls.totalElements} + ' 件'">お題は全部で 3 件</p>
+            <ol class="admin-list">
+                <li class="admin-item" th:each="s : ${summaries}">
+                    <label>
+                        <input type="checkbox" name="ids" th:value="${s.poll().id}">
+                        <span>
+                            <span class="admin-title" th:text="${s.poll().title}">お題</span>
+                            <span class="meta">
+                                <span class="author" th:text="${s.ownerName()}">出した人</span>
+                                <span aria-hidden="true"> ・ </span>
+                                <span th:text="${#numbers.formatInteger(s.totalTickets(), 1, 'COMMA')} + '枚'">0枚</span>
+                                <span aria-hidden="true"> ・ </span>
+                                <span th:text="${s.poll().open} ? '受付中' : (${s.poll().reported} ? '報告あり' : '報告待ち')">受付中</span>
+                                <span aria-hidden="true"> ・ </span>
+                                <a th:href="@{/vote/{id}(id=${s.poll().id})}" target="_blank" rel="noopener">開く ↗</a>
+                            </span>
+                            <span class="excerpt" th:text="${#strings.listJoin(s.optionLabels(), ' ／ ')}">A ／ B</span>
+                            <span class="admin-thumbs" th:if="${s.hasImage()}">
+                                <img th:src="@{/vote/{id}/images/0.jpg(id=${s.poll().id})}" alt="お題の画像" width="64" height="64" loading="lazy">
+                            </span>
+                        </span>
+                    </label>
+                </li>
+            </ol>
+            <div class="admin-bar">
+                <button type="submit" class="button button-danger">選んだお題を消す</button>
+            </div>
+        </form>
+
+        <nav class="pager" aria-label="ページ送り" th:if="${polls.totalPages > 1}">
+            <a class="button button-outline button-small" th:if="${polls.hasPrevious()}" th:href="@{/admin/vote(page=${page - 1})}" rel="prev">← 新しいお題</a>
+            <span class="pager-status" th:text="${page} + ' / ' + ${polls.totalPages}">1 / 3</span>
+            <a class="button button-outline button-small" th:if="${polls.hasNext()}" th:href="@{/admin/vote(page=${page + 1})}" rel="next">古いお題 →</a>
+        </nav>
+        <div class="pager" th:unless="${polls.totalPages > 1}"></div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script>
+    // 押し間違いで消さないように、件数を出して確かめる
+    const deleteForm = document.getElementById('delete-form');
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', function (event) {
+            const count = deleteForm.querySelectorAll('input[name="ids"]:checked').length;
+            if (count === 0) {
+                event.preventDefault();
+                alert('消したいお題にチェックを入れてください。');
+            } else if (!confirm(count + '件のお題を消します。入っていた券は全部返します。元に戻せません。よろしいですか？')) {
+                event.preventDefault();
+            }
+        });
+    }
+</script>
+</body>
+</html>

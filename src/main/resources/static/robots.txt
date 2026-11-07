@@ -1,5 +1,9 @@
 User-agent: *
 Disallow: /fiction/new
+Disallow: /vote/new
+Disallow: /vote/signup
+Disallow: /vote/login
+Disallow: /vote/me
 
 Sitemap: https://web100tsukuru.com/sitemap.xml
 Sitemap: https://web100tsukuru.com/tools/sitemap.xml

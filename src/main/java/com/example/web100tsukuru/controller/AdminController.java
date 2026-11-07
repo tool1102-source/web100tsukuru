@@ -1,7 +1,9 @@
 package com.example.web100tsukuru.controller;
 
 import com.example.web100tsukuru.entity.Fiction;
+import com.example.web100tsukuru.entity.Poll;
 import com.example.web100tsukuru.service.FictionService;
+import com.example.web100tsukuru.service.PollService;
 import com.example.web100tsukuru.service.PostRateLimiter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,12 +46,15 @@ public class AdminController {
     private static final String SESSION_KEY = "admin";
 
     private final FictionService fictionService;
+    private final PollService pollService;
     private final byte[] passwordHash;
     // 合言葉の総当たり対策（同じ接続元から 10分に5回まで）
     private final PostRateLimiter loginLimiter = new PostRateLimiter(5, Duration.ofMinutes(10));
 
-    public AdminController(FictionService fictionService, @Value("${app.admin-password-hash:}") String passwordHash) {
+    public AdminController(FictionService fictionService, PollService pollService,
+                           @Value("${app.admin-password-hash:}") String passwordHash) {
         this.fictionService = fictionService;
+        this.pollService = pollService;
         this.passwordHash = HexFormat.of().parseHex(passwordHash.strip());
     }
 
@@ -123,6 +128,40 @@ public class AdminController {
         }
         redirect.addFlashAttribute("deletedCount", deleted.size());
         return "redirect:/admin";
+    }
+
+    /** 「ちいさな投票所」のお題の一覧 (GET /admin/vote?page=2) */
+    @GetMapping("/vote")
+    public String polls(@RequestParam(defaultValue = "1") int page, HttpServletRequest request, Model model) {
+        requireEnabled();
+        if (!isLoggedIn(request)) {
+            return "redirect:/admin";
+        }
+        Page<Poll> found = pollService.page(page, 30);
+        if (page < 1 || (page > 1 && page > found.getTotalPages())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        model.addAttribute("polls", found);
+        model.addAttribute("summaries", pollService.summaries(found.getContent()));
+        model.addAttribute("page", page);
+        return "admin/vote";
+    }
+
+    /** チェックを入れたお題を消す。入っていた投票券は、全部入れた人に返す (POST /admin/vote/delete) */
+    @PostMapping("/vote/delete")
+    public String deletePolls(@RequestParam(name = "ids", required = false) List<Long> ids,
+                              HttpServletRequest request,
+                              RedirectAttributes redirect) {
+        requireEnabled();
+        if (!isLoggedIn(request)) {
+            return "redirect:/admin";
+        }
+        List<Poll> deleted = pollService.deleteAll(ids == null ? List.of() : ids);
+        for (Poll p : deleted) {
+            log.info("管理画面でお題を消しました: id={} タイトル={}", p.getId(), p.getTitle().replaceAll("[\\r\\n]+", " "));
+        }
+        redirect.addFlashAttribute("deletedCount", deleted.size());
+        return "redirect:/admin/vote";
     }
 
     private void requireEnabled() {

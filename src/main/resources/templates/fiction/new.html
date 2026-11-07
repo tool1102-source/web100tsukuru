@@ -49,7 +49,7 @@
                     <p class="hint">
                         5枚まで。本文の <code>[IMG]</code> の場所に、選んだ順に入ります（<code>[IMG]</code> が足りない分は最後に並びます）。大きい画像は自動で縮め、写真の位置情報などは消してから載せます。
                     </p>
-                    <input type="file" id="images" name="images" accept="image/*" multiple>
+                    <input type="file" id="images" name="images" accept="image/*" multiple data-shrink data-max="5" data-previews="image-previews">
                     <ol class="image-previews" id="image-previews" aria-label="選んだ画像"></ol>
                     <p class="error" th:if="${imageError}" th:text="${imageError}">画像は5枚までです。</p>
                     <p class="error" th:if="${imagesDropped == true and imageError == null and (rateLimited == true or #fields.hasErrors('*'))}">
@@ -83,83 +83,7 @@
         textarea.focus();
         textarea.selectionStart = textarea.selectionEnd = start + placeholder.length;
     });
-
-    // 画像を選んだら、送る前にブラウザの中で長い辺 1600px までに縮めて JPEG にする
-    // （スマホの大きな写真でもすぐ送れるように。サーバーでも同じように縮め直す）
-    (function () {
-        const input = document.getElementById('images');
-        const previews = document.getElementById('image-previews');
-        const submit = document.querySelector('.form-actions button[type="submit"]');
-        const MAX_IMAGES = 5;
-        const LONG_SIDE = 1600;
-        if (!window.DataTransfer || !HTMLCanvasElement.prototype.toBlob) {
-            return;
-        }
-
-        function shrink(file) {
-            return new Promise(function (resolve) {
-                const url = URL.createObjectURL(file);
-                const img = new Image();
-                img.onload = function () {
-                    const scale = Math.min(1, LONG_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
-                    const canvas = document.createElement('canvas');
-                    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
-                    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
-                    const ctx = canvas.getContext('2d');
-                    ctx.fillStyle = '#fff';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.imageSmoothingQuality = 'high';
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    URL.revokeObjectURL(url);
-                    canvas.toBlob(function (blob) {
-                        const name = file.name.replace(/\.[^.]*$/, '') + '.jpg';
-                        resolve(blob ? new File([blob], name, { type: 'image/jpeg' }) : file);
-                    }, 'image/jpeg', 0.85);
-                };
-                // ブラウザで開けない画像は、そのまま送ってサーバーの判断に任せる
-                img.onerror = function () {
-                    URL.revokeObjectURL(url);
-                    resolve(file);
-                };
-                img.src = url;
-            });
-        }
-
-        input.addEventListener('change', async function () {
-            const files = Array.from(input.files);
-            previews.replaceChildren();
-            if (files.length > MAX_IMAGES) {
-                alert('画像は' + MAX_IMAGES + '枚までです。選び直してください。');
-                input.value = '';
-                return;
-            }
-            if (files.length === 0) {
-                return;
-            }
-            const label = submit.textContent;
-            submit.disabled = true;
-            submit.textContent = '画像を準備しています…';
-            const shrunk = [];
-            for (const file of files) {
-                shrunk.push(await shrink(file));
-            }
-            const transfer = new DataTransfer();
-            shrunk.forEach(function (file) { transfer.items.add(file); });
-            input.files = transfer.files;
-            shrunk.forEach(function (file, i) {
-                const item = document.createElement('li');
-                const thumb = document.createElement('img');
-                thumb.src = URL.createObjectURL(file);
-                thumb.alt = '';
-                const caption = document.createElement('span');
-                caption.textContent = (i + 1) + '枚目';
-                item.append(thumb, caption);
-                previews.append(item);
-            });
-            submit.disabled = false;
-            submit.textContent = label;
-        });
-    })();
 </script>
+<script th:src="@{/js/image-shrink.js}" defer></script>
 </body>
 </html>

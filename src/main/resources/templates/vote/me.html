@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('マイページ | ちいさな投票所', 'ちいさな投票所のマイページです。', true)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('vote')}"></header>
+<div th:replace="~{vote/parts :: bar}"></div>
+
+<main>
+    <div class="wrap">
+        <p class="breadcrumb"><a th:href="@{/vote}">← ちいさな投票所</a></p>
+        <div th:replace="~{vote/parts :: messages}"></div>
+        <section class="page-head">
+            <h1 th:text="${me.displayName} + ' さん'">さん</h1>
+            <div class="ticket-summary">
+                <p class="ticket-summary-total"><span aria-hidden="true">🎟</span>
+                    <b th:text="${#numbers.formatInteger(me.totalTickets, 1, 'COMMA')}">100</b>枚</p>
+                <p class="hint">
+                    無料の券 <span th:text="${#numbers.formatInteger(me.freeTickets, 1, 'COMMA')}">100</span>枚
+                    <th:block th:if="${me.paidTickets > 0}"> ・ 有料の券 <span th:text="${#numbers.formatInteger(me.paidTickets, 1, 'COMMA')}">0</span>枚</th:block>
+                    ・ 毎日のログインで <span th:text="${dailyBonus}">10</span>枚ずつ増えます
+                </p>
+            </div>
+        </section>
+
+        <section class="vote-section" aria-labelledby="voted-h">
+            <div class="section-head"><h2 id="voted-h">券を入れたお題</h2></div>
+            <p th:if="${voted.isEmpty()}" class="empty">まだありません。<a th:href="@{/vote}">受付中のお題</a>に券を入れてみましょう。</p>
+            <ol class="poll-cards" th:unless="${voted.isEmpty()}">
+                <th:block th:each="s : ${voted}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
+            </ol>
+        </section>
+
+        <section class="vote-section" aria-labelledby="owned-h">
+            <div class="section-head"><h2 id="owned-h">出したお題</h2></div>
+            <p th:if="${owned.isEmpty()}" class="empty">まだありません。<a th:href="@{/vote/new}">お題を出す</a></p>
+            <ol class="poll-cards" th:unless="${owned.isEmpty()}">
+                <th:block th:each="s : ${owned}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
+            </ol>
+        </section>
+
+        <section class="vote-section" aria-labelledby="ledger-h">
+            <div class="section-head"><h2 id="ledger-h">券の出入り</h2><p>最近の50件</p></div>
+            <ol class="ledger">
+                <li th:each="l : ${ledger}">
+                    <time th:text="${#temporals.format(l.createdAt, 'M/d HH:mm')}">日時</time>
+                    <span class="ledger-reason">
+                        <span th:text="${l.reasonType.label}">理由</span>
+                        <a th:if="${l.pollId != null}" th:href="@{/vote/{id}(id=${l.pollId})}">お題を見る</a>
+                    </span>
+                    <b class="ledger-delta" th:classappend="${l.totalDelta < 0} ? 'is-minus' : 'is-plus'"
+                       th:text="(${l.totalDelta > 0} ? '+' : '') + ${#numbers.formatInteger(l.totalDelta, 1, 'COMMA')} + '枚'">+10枚</b>
+                </li>
+            </ol>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
