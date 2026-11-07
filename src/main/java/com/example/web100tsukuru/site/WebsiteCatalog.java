@@ -23,7 +23,7 @@ public class WebsiteCatalog {
     private static final List<Website> WEBSITES = List.of(
             new Website(1, "ConverterTools",
                     "JSON・CSV・Excel・日付・PDF・文字列の変換が、ブラウザだけで済むツール集。データはサーバーに送りません。",
-                    "https://web100-tools.onrender.com/", "2025年11月",
+                    "/tools/", "2025年11月",
                     List.of("変換ツール", "ブラウザで完結"), "/img/sites/001.jpg"),
             new Website(2, "フィクションブログ",
                     "「やってみた」風の架空の体験談を、だれでも投稿して読めるブログ。",

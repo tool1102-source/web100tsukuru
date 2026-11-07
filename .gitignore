@@ -32,6 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
+### 変換ツール（Dockerfile が別リポジトリから入れる。手元で試すときに置いたもの） ###
+src/main/resources/static/tools/
+
 ### ローカル用の秘密情報 ###
 .env
 application-local.properties

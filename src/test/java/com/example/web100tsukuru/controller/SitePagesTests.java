@@ -44,7 +44,7 @@ class SitePagesTests {
         String html = mvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("ConverterTools")))
-                .andExpect(content().string(containsString("href=\"https://web100-tools.onrender.com/\"")))
+                .andExpect(content().string(containsString("href=\"/tools/\"")))
                 .andExpect(content().string(not(containsString("convertertools.jp"))))
                 .andExpect(content().string(containsString("href=\"/fiction\"")))
                 .andExpect(content().string(containsString("<strong>002</strong><span>/ 100</span>")))
@@ -135,7 +135,8 @@ class SitePagesTests {
     void robotsとadsのファイルが出る() throws Exception {
         mvc.perform(get("/robots.txt"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Sitemap: https://web100tsukuru.com/sitemap.xml")));
+                .andExpect(content().string(containsString("Sitemap: https://web100tsukuru.com/sitemap.xml")))
+                .andExpect(content().string(containsString("Sitemap: https://web100tsukuru.com/tools/sitemap.xml")));
         mvc.perform(get("/ads.txt"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("pub-4550031417169253")));

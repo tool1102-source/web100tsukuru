@@ -2,3 +2,4 @@ User-agent: *
 Disallow: /fiction/new
 
 Sitemap: https://web100tsukuru.com/sitemap.xml
+Sitemap: https://web100tsukuru.com/tools/sitemap.xml

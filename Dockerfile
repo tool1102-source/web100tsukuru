@@ -1,3 +1,12 @@
+# ---------- No.001 変換ツール（別リポジトリ）を /tools 用に書き出す ----------
+# 変換ツールのソースは tool1102-source/spring-date-converter にある。
+# GitHub から最新の中身を取ってきて、web100tsukuru.com/tools/ に置ける形に書き出す。
+# （中身が変わっていれば、ここから下は作り直される）
+FROM node:22-alpine AS tools
+WORKDIR /src
+ADD https://github.com/tool1102-source/spring-date-converter/archive/refs/heads/main.tar.gz tools.tar.gz
+RUN tar xzf tools.tar.gz --strip-components=1 && BASE_PATH=/tools node scripts/build.mjs
+
 # ---------- ビルド用 ----------
 FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
@@ -7,8 +16,9 @@ COPY mvnw pom.xml ./
 COPY .mvn .mvn
 RUN chmod +x mvnw && ./mvnw -B -q dependency:go-offline
 
-# ソースをコピーして jar を作る
+# ソースと変換ツールをコピーして jar を作る
 COPY src src
+COPY --from=tools /src/dist src/main/resources/static/tools
 RUN ./mvnw -B -q package -DskipTests
 
 # ---------- 実行用（JDK ではなく軽い JRE だけ） ----------
