@@ -52,6 +52,7 @@ class SitePagesTests {
                 .andExpect(content().string(containsString("<meta name=\"viewport\"")))
                 .andExpect(content().string(containsString("<link rel=\"canonical\" href=\"https://web100tsukuru.com/\">")))
                 .andExpect(content().string(containsString("og:title")))
+                .andExpect(content().string(containsString("adsbygoogle")))
                 .andReturn().getResponse().getContentAsString();
 
         // 100マス：作った2つはリンク、次の 003 に印、残りは空
@@ -147,6 +148,14 @@ class SitePagesTests {
         mvc.perform(get("/fiction/new"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("<meta name=\"robots\" content=\"noindex\">")))
-                .andExpect(content().string(containsString("name=\"website\"")));
+                .andExpect(content().string(containsString("name=\"website\"")))
+                .andExpect(content().string(not(containsString("adsbygoogle"))));
+    }
+
+    @Test
+    void 合言葉が未設定なら管理画面は無い() throws Exception {
+        mvc.perform(get("/admin")).andExpect(status().isNotFound());
+        mvc.perform(post("/admin/login").param("password", "")).andExpect(status().isNotFound());
+        mvc.perform(post("/admin/delete").param("ids", "1")).andExpect(status().isNotFound());
     }
 }

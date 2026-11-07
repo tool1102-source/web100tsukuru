@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('管理画面 | webサイト100個作る人のwebサイト', '管理画面です。', true)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('admin')}"></header>
+
+<main>
+    <div class="wrap">
+        <section class="page-head">
+            <p class="eyebrow">admin</p>
+            <h1>フィクションブログの管理</h1>
+            <p class="lead">消したい投稿にチェックを入れて、下の「選んだ投稿を消す」を押してください。消した投稿は元に戻せません。</p>
+            <form class="actions" th:action="@{/admin/logout}" method="post">
+                <button type="submit" class="button button-outline button-small">ログアウト</button>
+            </form>
+        </section>
+
+        <p class="status" role="status" th:if="${deletedCount != null}" th:text="${deletedCount} + '件の投稿を消しました。'">1件の投稿を消しました。</p>
+
+        <p th:if="${fictions.empty}" class="empty">投稿はありません。</p>
+
+        <form id="delete-form" th:unless="${fictions.empty}" th:action="@{/admin/delete}" method="post">
+            <p class="admin-count" th:text="'投稿は全部で ' + ${fictions.totalElements} + ' 件'">投稿は全部で 3 件</p>
+            <ol class="admin-list">
+                <li class="admin-item" th:each="f : ${fictions}">
+                    <label>
+                        <input type="checkbox" name="ids" th:value="${f.id}">
+                        <span>
+                            <span class="admin-title" th:text="${f.title}">タイトル</span>
+                            <span class="meta">
+                                <span class="author" th:text="${f.authorName}">投稿者</span>
+                                <span aria-hidden="true"> ・ </span>
+                                <time th:datetime="${f.createdAt}" th:text="${#temporals.format(f.createdAt, 'yyyy.MM.dd HH:mm')}">日時</time>
+                                <span aria-hidden="true"> ・ </span>
+                                <a th:href="@{/fiction/{id}(id=${f.id})}" target="_blank" rel="noopener">全文を見る ↗</a>
+                            </span>
+                            <span class="excerpt" th:text="${f.excerpt}">本文の冒頭</span>
+                        </span>
+                    </label>
+                </li>
+            </ol>
+            <div class="admin-bar">
+                <button type="submit" class="button button-danger">選んだ投稿を消す</button>
+            </div>
+        </form>
+
+        <nav class="pager" aria-label="ページ送り" th:if="${fictions.totalPages > 1}">
+            <a class="button button-outline button-small" th:if="${fictions.hasPrevious()}" th:href="@{/admin(page=${page - 1})}" rel="prev">← 新しい投稿</a>
+            <span class="pager-status" th:text="${page} + ' / ' + ${fictions.totalPages}">1 / 3</span>
+            <a class="button button-outline button-small" th:if="${fictions.hasNext()}" th:href="@{/admin(page=${page + 1})}" rel="next">古い投稿 →</a>
+        </nav>
+        <div class="pager" th:unless="${fictions.totalPages > 1}"></div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script>
+    // 押し間違いで消さないように、件数を出して確かめる
+    const deleteForm = document.getElementById('delete-form');
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', function (event) {
+            const count = deleteForm.querySelectorAll('input[name="ids"]:checked').length;
+            if (count === 0) {
+                event.preventDefault();
+                alert('消したい投稿にチェックを入れてください。');
+            } else if (!confirm(count + '件の投稿を消します。元に戻せません。よろしいですか？')) {
+                event.preventDefault();
+            }
+        });
+    }
+</script>
+</body>
+</html>

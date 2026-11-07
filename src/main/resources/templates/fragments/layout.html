@@ -34,8 +34,9 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <meta name="google-site-verification" content="yj4LGgoltxROKbI2DaOK9eTDbavhFgUfPISmX5yaD44">
+    <!-- 広告は読み物のページだけ。フォーム・エラー・管理画面には載せない（AdSense の規約） -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4550031417169253"
-            crossorigin="anonymous"></script>
+            crossorigin="anonymous" th:unless="${noindex}"></script>
 </head>
 <body>
 

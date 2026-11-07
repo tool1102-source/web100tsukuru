@@ -194,7 +194,7 @@ main { flex: 1; }
 .form-group { margin-bottom: 22px; }
 .form label { display: block; font-weight: 700; margin-bottom: 6px; }
 .required { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 4px; background: var(--accent); color: var(--accent-ink); font-size: .7rem; font-weight: 700; vertical-align: middle; }
-.form input[type="text"], .form textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 1rem; color: var(--ink); background: var(--paper); }
+.form input[type="text"], .form input[type="password"], .form textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 1rem; color: var(--ink); background: var(--paper); }
 .form textarea { margin-top: 8px; resize: vertical; min-height: 14em; font-family: var(--serif); line-height: 1.9; }
 .form input:focus, .form textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--accent-soft); }
 .form .is-invalid { border-color: var(--danger); }
@@ -205,6 +205,24 @@ main { flex: 1; }
 .form-actions { display: flex; justify-content: flex-end; }
 @media (max-width: 520px) { .form-actions .button { width: 100%; } }
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+/* ---------- 管理画面 ---------- */
+.button-danger { background: var(--danger); border-color: var(--danger); color: var(--paper); }
+.button-danger:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.status { margin-bottom: 16px; padding: 12px 16px; border-radius: 10px; background: var(--line-soft); }
+.admin-count { margin-bottom: 10px; color: var(--muted); font-size: .9rem; }
+.admin-list { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+.admin-item { border-bottom: 1px solid var(--line); }
+.admin-item label { display: grid; grid-template-columns: auto 1fr; gap: 14px; padding: 18px 8px; cursor: pointer; }
+.admin-item label:has(input:checked) { background: var(--accent-soft); }
+.admin-item input { width: 20px; height: 20px; margin: 4px 0 0; accent-color: var(--accent); }
+.admin-title { display: block; font-family: var(--serif); font-size: 1.1rem; font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
+.admin-item .meta { display: block; margin-top: 4px; }
+.admin-item .excerpt { display: block; margin-top: 4px; color: var(--muted); font-size: .9rem; overflow-wrap: anywhere; }
+.admin-item .meta a { color: var(--ink-2); }
+/* 消すボタンは、長い一覧でも画面の下に残す */
+.admin-bar { position: sticky; bottom: 0; display: flex; justify-content: flex-end; padding: 16px 0; background: var(--paper); border-top: 1px solid var(--line); }
+@media (max-width: 520px) { .admin-bar .button { width: 100%; } }
 
 /* ---------- エラーページ ---------- */
 .error-page { padding: 80px 0 96px; display: grid; gap: 14px; justify-items: start; }

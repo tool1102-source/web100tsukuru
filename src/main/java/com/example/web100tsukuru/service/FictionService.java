@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -47,5 +48,13 @@ public class FictionService {
     /** 投稿1件 */
     public Optional<Fiction> findById(Long id) {
         return fictionRepository.findById(id);
+    }
+
+    /** 投稿をまとめて消す（管理画面用）。実際に消した投稿を返す（ない番号は無視） */
+    @Transactional
+    public List<Fiction> deleteAll(List<Long> ids) {
+        List<Fiction> found = fictionRepository.findAllById(ids);
+        fictionRepository.deleteAll(found);
+        return found;
     }
 }

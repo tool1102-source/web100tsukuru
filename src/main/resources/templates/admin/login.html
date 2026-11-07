@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('管理画面 | webサイト100個作る人のwebサイト', '管理画面です。', true)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('admin')}"></header>
+
+<main>
+    <div class="wrap">
+        <section class="page-head">
+            <h1>管理画面</h1>
+            <p class="lead">合言葉を入れてください。</p>
+        </section>
+
+        <div class="form-card">
+            <p class="alert" role="alert" th:if="${rateLimited}">
+                短い時間に何度も試したため、受け付けを止めています。10分ほどたってから、もう一度お試しください。
+            </p>
+            <p class="alert" role="alert" th:if="${wrongPassword}">合言葉が違います。</p>
+
+            <form th:action="@{/admin/login}" method="post" class="form">
+                <div class="form-group">
+                    <label for="password">合言葉</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required autofocus>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="button">入る</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
