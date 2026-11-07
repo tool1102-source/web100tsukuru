@@ -43,9 +43,9 @@ class SitePagesTests {
     void トップページに作ったサイトと進み具合が出る() throws Exception {
         String html = mvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("ConverterTools.jp")))
-                .andExpect(content().string(containsString("href=\"https://convertertools.jp/\"")))
-                .andExpect(content().string(not(containsString("onrender.com"))))
+                .andExpect(content().string(containsString("ConverterTools")))
+                .andExpect(content().string(containsString("href=\"https://web100-tools.onrender.com/\"")))
+                .andExpect(content().string(not(containsString("convertertools.jp"))))
                 .andExpect(content().string(containsString("href=\"/fiction\"")))
                 .andExpect(content().string(containsString("<strong>002</strong><span>/ 100</span>")))
                 .andExpect(content().string(containsString("のこり <b>98</b> 個")))
