@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>フィクション一覧 | webサイト100個作る人のwebサイト</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <header>
+        <h1>フィクションブログ</h1>
+        <p><a class="header-link" th:href="@{/}">← トップへ</a> ｜ <a class="header-link" th:href="@{/fiction/new}">✏️ 投稿する</a></p>
+    </header>
+
+    <main class="page">
+        <p th:if="${#lists.isEmpty(fictions)}" class="empty">まだ投稿がありません。最初の1本を書いてみましょう。</p>
+
+        <section class="website-list" th:unless="${#lists.isEmpty(fictions)}">
+            <article class="website-item" th:each="f : ${fictions}">
+                <h2><a th:href="@{/fiction/{id}(id=${f.id})}" th:text="${f.title}">タイトル</a></h2>
+                <p class="meta">
+                    <span th:text="${f.authorName}">投稿者</span> ・
+                    <span th:text="${#temporals.format(f.createdAt, 'yyyy/MM/dd HH:mm')}">日時</span> ・
+                    画像 <span th:text="${f.placeholderCount}">0</span> 枚
+                </p>
+                <p class="description" th:text="${#strings.abbreviate(#strings.replace(f.body, '[IMG]', ''), 80)}">本文の冒頭</p>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 webサイト100個作る人</p>
+    </footer>
+</body>
+</html>

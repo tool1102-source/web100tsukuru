@@ -5,6 +5,8 @@ import com.example.web100tsukuru.entity.Fiction;
 import com.example.web100tsukuru.repository.FictionRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +23,7 @@ public class FictionService {
         this.fictionRepository = fictionRepository;
     }
 
-    public void saveFiction(FictionForm form) {
+    public Fiction saveFiction(FictionForm form) {
         
         // 1. プレースホルダーの数をカウント
         int count = countPlaceholders(form.getBody());
@@ -34,7 +36,24 @@ public class FictionService {
         fiction.setPlaceholderCount(count); // カウントした数を設定
         
         // 3. データベースに保存
-        fictionRepository.save(fiction);
+        return fictionRepository.save(fiction);
+    }
+
+    /** 投稿一覧（新しい順） */
+    public List<Fiction> findAll() {
+        return fictionRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    /** 投稿1件 */
+    public Optional<Fiction> findById(Long id) {
+        return fictionRepository.findById(id);
+    }
+
+    /**
+     * 本文を [IMG] で区切った断片に分ける（詳細ページで画像枠を差し込むため）。
+     */
+    public List<String> splitBody(String body) {
+        return List.of(PLACEHOLDER_PATTERN.split(body, -1));
     }
 
     /**

@@ -3,11 +3,15 @@ package com.example.web100tsukuru.controller;
 import com.example.web100tsukuru.dto.FictionForm;
 import com.example.web100tsukuru.service.FictionService;
 import jakarta.validation.Valid;
+import com.example.web100tsukuru.entity.Fiction;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class FictionController {
@@ -16,6 +20,27 @@ public class FictionController {
 
     public FictionController(FictionService fictionService) {
         this.fictionService = fictionService;
+    }
+
+    /**
+     * 投稿一覧 (GET /fiction)
+     */
+    @GetMapping("/fiction")
+    public String list(Model model) {
+        model.addAttribute("fictions", fictionService.findAll());
+        return "fiction/list";
+    }
+
+    /**
+     * 投稿詳細 (GET /fiction/{id})
+     */
+    @GetMapping("/fiction/{id:\\d+}")
+    public String show(@PathVariable Long id, Model model) {
+        Fiction fiction = fictionService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        model.addAttribute("fiction", fiction);
+        model.addAttribute("bodyParts", fictionService.splitBody(fiction.getBody()));
+        return "fiction/show";
     }
 
     /**
@@ -39,9 +64,9 @@ public class FictionController {
             return "fiction/new";
         }
 
-        fictionService.saveFiction(form);
+        Fiction saved = fictionService.saveFiction(form);
 
-        // 投稿が成功したらトップページにリダイレクト
-        return "redirect:/";
+        // 投稿が成功したら、その投稿の詳細ページへ
+        return "redirect:/fiction/" + saved.getId();
     }
 }
