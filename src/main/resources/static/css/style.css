@@ -362,3 +362,158 @@ main { flex: 1; }
 .footer-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; align-content: start; }
 .copyright { color: var(--muted); font-size: .8rem; }
 @media (min-width: 820px) { .copyright { grid-column: 1 / -1; } }
+
+/* =========================================================
+   サイトごとの見た目
+   トップ（webサイト100個作る人）はここまでの見た目のまま。
+   中のサイトは、ぱっと見でどこにいるか分かるように、色・書体・形を変える。
+   body の class（site-hub / site-fiction / site-vote）で切り替える（fragments/layout.html）
+   ========================================================= */
+
+/* ---------- 中のサイトのいちばん上の細い帯（トップへ戻る） ---------- */
+.hub-strip { background: var(--strip-bg, var(--ink)); color: var(--strip-ink, var(--paper)); font-size: .76rem; }
+.hub-strip-inner { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 30px; }
+.hub-strip a { color: inherit; text-decoration: none; opacity: .85; }
+.hub-strip a:hover { opacity: 1; color: inherit; text-decoration: underline; }
+.hub-strip span { opacity: .7; font-variant-numeric: tabular-nums; }
+
+/* ---------- No.002 フィクションブログ：文芸誌（生成りの紙・墨・藍・明朝） ---------- */
+.site-fiction {
+    --paper: #f6f1e7;
+    --card: #fbf8f1;
+    --ink: #24211c;
+    --ink-2: #47423a;
+    --muted: #7a7368;
+    --line: #dcd2c0;
+    --line-soft: #ebe3d4;
+    --accent: #2b4c7e;
+    --accent-ink: #ffffff;
+    --accent-soft: #e2e8f1;
+    --radius: 3px;
+    --serif: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", serif;
+    --display: var(--serif);
+    --strip-bg: #2b4c7e;
+    --strip-ink: #f6f1e7;
+    font-family: var(--serif);
+}
+@media (prefers-color-scheme: dark) {
+    .site-fiction {
+        --paper: #16171b;
+        --card: #1d1f25;
+        --ink: #ece6d9;
+        --ink-2: #cfc8b9;
+        --muted: #9a9384;
+        --line: #33343a;
+        --line-soft: #26272d;
+        --accent: #94b2e4;
+        --accent-ink: #10141c;
+        --accent-soft: rgba(148, 178, 228, .14);
+        --strip-bg: #1f2b40;
+        --strip-ink: #d6dff0;
+    }
+}
+.fiction-masthead { border-bottom: 4px double var(--ink); }
+.fiction-masthead-inner { display: grid; justify-items: center; gap: 6px; padding-top: 34px; padding-bottom: 18px; text-align: center; }
+.fiction-title { font-family: var(--serif); font-weight: 800; font-size: clamp(2rem, 7vw, 3.1rem); letter-spacing: .12em; line-height: 1.25; text-decoration: none; }
+.fiction-title:hover { color: var(--accent); }
+.fiction-tagline { color: var(--muted); font-size: .9rem; letter-spacing: .3em; }
+.fiction-nav { display: flex; gap: 4px 28px; margin-top: 8px; font-size: .95rem; letter-spacing: .2em; }
+.fiction-nav a { text-decoration: none; padding: 2px 2px 4px; border-bottom: 1px solid transparent; }
+.fiction-nav a[aria-current="page"], .fiction-nav a:hover { color: var(--accent); border-bottom-color: currentColor; }
+.site-fiction .button { border-radius: var(--radius); background: var(--accent); border-color: var(--accent); color: var(--accent-ink); letter-spacing: .08em; font-family: var(--serif); }
+.site-fiction .button:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.site-fiction .button-outline { background: transparent; border-color: var(--ink); color: var(--ink); }
+.site-fiction .button-outline:hover { background: var(--ink); color: var(--paper); }
+.site-fiction .eyebrow { font-family: var(--serif); letter-spacing: .3em; color: var(--accent); }
+.site-fiction .page-head { justify-items: center; text-align: center; padding-top: 40px; }
+.site-fiction .page-head h1 { font-family: var(--serif); font-weight: 800; letter-spacing: .06em; }
+.site-fiction .page-head .lead { max-width: 30em; }
+.site-fiction .posts { border-top: 3px double var(--ink); }
+.site-fiction .post-item { border-bottom: 1px dashed var(--line); }
+.site-fiction .post-item h2 { font-weight: 800; }
+.site-fiction .post-item a:hover h2 { color: var(--accent); }
+.site-fiction .article-head { text-align: center; border-bottom: 3px double var(--line); }
+.site-fiction .article-head h1 { font-weight: 800; }
+.site-fiction .prose { font-size: 1.1rem; line-height: 2.15; }
+.site-fiction .article-figure img { border-radius: var(--radius); }
+.site-fiction .form-card { border-radius: var(--radius); box-shadow: 0 1px 0 var(--line); }
+.site-fiction .form input[type="text"], .site-fiction .form textarea { border-radius: var(--radius); font-family: var(--serif); }
+.site-fiction .required { border-radius: 2px; background: var(--accent); }
+.site-fiction .site-footer { border-top: 4px double var(--ink); }
+
+/* ---------- No.003 ちいさな投票所：投票所のお祭り（うす紫・紫・投票券の黄色・丸ゴシック・太いふち） ---------- */
+.site-vote {
+    --paper: #f4f1ff;
+    --card: #ffffff;
+    --ink: #1d1640;
+    --ink-2: #3b3266;
+    --muted: #6c6690;
+    --line: #d9d2f5;
+    --line-soft: #ebe6ff;
+    --accent: #6d4aff;
+    --accent-ink: #ffffff;
+    --accent-soft: #e9e3ff;
+    --ticket: #ffd43b;
+    --edge: #1d1640;
+    --radius: 18px;
+    --sans: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", system-ui, sans-serif;
+    --display: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", system-ui, sans-serif;
+    --strip-bg: #1d1640;
+    --strip-ink: #e9e3ff;
+    font-family: var(--sans);
+}
+@media (prefers-color-scheme: dark) {
+    .site-vote {
+        --paper: #130f2a;
+        --card: #1d1840;
+        --ink: #f0ebff;
+        --ink-2: #d3cbf2;
+        --muted: #a39bc9;
+        --line: #3a3270;
+        --line-soft: #29235a;
+        --accent: #9b80ff;
+        --accent-ink: #130f2a;
+        --accent-soft: rgba(155, 128, 255, .16);
+        --edge: #5b4cc4;
+        --strip-bg: #0b0819;
+        --strip-ink: #c9bfff;
+    }
+}
+.site-vote .vote-bar { background: var(--accent); border-bottom: 2px solid var(--edge); color: var(--accent-ink); }
+.site-vote .vote-bar-inner { min-height: 64px; }
+.site-vote .vote-brand { font-size: 1.2rem; font-weight: 800; color: var(--accent-ink); letter-spacing: .02em; }
+.site-vote .vote-brand:hover { color: var(--ticket); }
+.site-vote .vote-bar-nav a:not(.button), .site-vote .vote-bar-nav .link-button { color: var(--accent-ink); font-weight: 700; }
+.site-vote .vote-bar-nav a:not(.button):hover, .site-vote .vote-bar-nav .link-button:hover { color: var(--ticket); }
+.site-vote .ticket-balance { background: var(--ticket); color: #1d1640 !important; border: 2px solid var(--edge); border-radius: 10px; padding: 2px 12px; box-shadow: 2px 2px 0 var(--edge); }
+.site-vote .vote-bar .button { background: var(--ticket); color: #1d1640; border-color: var(--edge); box-shadow: 2px 2px 0 var(--edge); }
+.site-vote .button { border: 2px solid var(--edge); background: var(--accent); color: var(--accent-ink); box-shadow: 3px 3px 0 var(--edge); font-weight: 800; transition: transform .1s, box-shadow .1s, background .15s; }
+.site-vote .button:hover { background: var(--accent); color: var(--accent-ink); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--edge); }
+.site-vote .button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--edge); }
+.site-vote .button-outline, .site-vote .button-outline:hover { background: var(--card); color: var(--ink); }
+.site-vote .button-danger, .site-vote .button-danger:hover { background: var(--danger); color: #ffffff; }
+.site-vote .eyebrow { font-family: var(--display); letter-spacing: .08em; text-transform: none; }
+.site-vote .page-head h1 { font-weight: 800; letter-spacing: 0; }
+.site-vote .vote-rules li, .site-vote .poll-card a, .site-vote .poll-option, .site-vote .form-card {
+    border: 2px solid var(--edge); border-radius: var(--radius); box-shadow: 4px 4px 0 var(--edge);
+}
+.site-vote .vote-rules b::before { color: var(--accent); }
+.site-vote .poll-card a:hover { border-color: var(--edge); transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--edge); }
+.site-vote .poll-card-img { border: 2px solid var(--edge); border-radius: 12px; }
+.site-vote .poll-option.is-winner { background: var(--accent-soft); border-color: var(--accent); }
+.site-vote .poll-bar { height: 14px; border: 2px solid var(--edge); background: var(--card); }
+.site-vote .poll-bar span { background: var(--accent); border-radius: 0; }
+.site-vote .poll-state.is-open { background: var(--ticket); color: #1d1640; border: 2px solid var(--edge); }
+.site-vote .poll-result { background: var(--accent); color: var(--accent-ink); border: 2px solid var(--edge); box-shadow: 4px 4px 0 var(--edge); }
+.site-vote .time-left { color: var(--accent); }
+.site-vote .badge { background: var(--ticket); color: #1d1640; border: 1.5px solid var(--edge); }
+.site-vote .section-head { border-bottom: 2px solid var(--edge); }
+.site-vote .ticket-input, .site-vote .form input[type="text"], .site-vote .form input[type="password"], .site-vote .form textarea {
+    border: 2px solid var(--edge); border-radius: 12px; background: var(--card);
+}
+.site-vote .choice { border: 2px solid var(--edge); }
+.site-vote .choice:has(input:checked) { background: var(--accent); border-color: var(--edge); color: var(--accent-ink); }
+.site-vote .required { background: var(--accent); }
+.site-vote .status { background: var(--ticket); color: #1d1640; border: 2px solid var(--edge); }
+.site-vote .ledger { border-top: 2px solid var(--edge); }
+.site-vote .site-footer { border-top: 2px solid var(--edge); }

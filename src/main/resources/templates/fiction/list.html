@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(${page > 1 ? 'フィクションブログ（' + page + 'ページ目） | webサイト100個作る人のwebサイト' : 'フィクションブログ | webサイト100個作る人のwebサイト'}, '「やってみた」風の架空の体験談を、だれでも投稿して読めるブログです。', false)}"></head>
-<body>
+<body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('fiction')}"></header>
 
 <main>
     <div class="wrap">
+        <!-- 題字は上の見出し（fragments/layout の fiction-masthead）にあるので、ここは案内だけ -->
         <section class="page-head">
-            <p class="eyebrow">No.002 · fiction blog</p>
-            <h1>フィクションブログ</h1>
+            <h1 class="visually-hidden">フィクションブログ</h1>
             <p class="lead">「やってみた」風の、ありそうでない体験談を集めたブログです。読むのも書くのも、だれでもどうぞ。</p>
             <div class="actions"><a class="button" th:href="@{/fiction/new}">体験談を投稿する</a></div>
         </section>

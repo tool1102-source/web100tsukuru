@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('報告する | ちいさな投票所', 'お題の結果のとおりにやったことを報告するページです。', true)}"></head>
-<body>
+<body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
-<div th:replace="~{vote/parts :: bar}"></div>
 
 <main>
     <div class="wrap">

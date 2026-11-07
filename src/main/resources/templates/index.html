@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('webサイト100個作る人のwebサイト', 'webサイトを100個つくる挑戦の記録。これまでに作ったサイトを、ひとつずつ紹介しています。', false)}"></head>
-<body>
+<body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('home')}"></header>
 
 <main>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('管理画面（投票所） | webサイト100個作る人のwebサイト', '管理画面です。', true)}"></head>
-<body>
+<body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('admin')}"></header>
 
 <main>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('体験談を投稿する | フィクションブログ', 'フィクションブログに、架空の体験談を投稿するページです。', true)}"></head>
-<body>
+<body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('fiction')}"></header>
 
 <main>

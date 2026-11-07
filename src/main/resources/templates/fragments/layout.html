@@ -4,8 +4,10 @@
   全ページ共通の部品。
   使い方: <head th:replace="~{fragments/layout :: head('タイトル', '説明文', false)}"></head>
   3つ目を true にすると検索結果に出さない（投稿フォームやエラー画面用）。
+  見出し・色・書体はサイトごとに変える（site は GlobalModelAttributes が決める：hub / fiction / vote）。
+  body には th:class="'site-' + ${site ?: 'hub'}" を付け、色は style.css の .site-〇〇 で切り替える。
 -->
-<head th:fragment="head(title, description, noindex)">
+<head th:fragment="head(title, description, noindex)" th:with="s=${site ?: 'hub'}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${title}">webサイト100個作る人のwebサイト</title>
@@ -22,15 +24,17 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@web100tsukuru">
 
-    <meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#131312" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" th:content="${s == 'fiction'} ? '#f6f1e7' : (${s == 'vote'} ? '#6d4aff' : '#f3efe6')" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" th:content="${s == 'fiction'} ? '#16171b' : (${s == 'vote'} ? '#241d55' : '#131312')" media="(prefers-color-scheme: dark)">
     <meta name="color-scheme" content="light dark">
     <link rel="icon" th:href="@{/favicon.ico}">
 
-    <!-- 数字と英字の見出しだけに使う書体（日本語は端末の書体） -->
+    <!-- サイトごとの書体。トップは数字と英字の見出しだけ、ブログは明朝、投票所は丸ゴシック -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
+    <link rel="stylesheet" th:if="${s == 'hub'}" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
+    <link rel="stylesheet" th:if="${s == 'fiction'}" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&display=swap">
+    <link rel="stylesheet" th:if="${s == 'vote'}" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <meta name="google-site-verification" content="yj4LGgoltxROKbI2DaOK9eTDbavhFgUfPISmX5yaD44">
@@ -40,27 +44,65 @@
 </head>
 <body>
 
-<header class="site-header" th:fragment="header(active)">
-    <div class="wrap site-header-inner">
-        <a class="logo" th:href="@{/}" aria-label="webサイト100個作る人のwebサイト トップへ">
-            <span class="logo-mark" aria-hidden="true">100</span>
-            <span class="logo-text">webサイト100個作る人</span>
-        </a>
-        <nav class="site-nav" aria-label="メニュー">
-            <a th:href="@{/}" th:attr="aria-current=${active == 'home'} ? 'page' : null">作ったサイト</a>
-            <a th:href="@{/fiction}" th:attr="aria-current=${active == 'fiction'} ? 'page' : null"><span class="nav-long">フィクション</span>ブログ</a>
-            <a th:href="@{/vote}" th:attr="aria-current=${active == 'vote'} ? 'page' : null"><span class="nav-long">ちいさな</span>投票所</a>
-            <a class="nav-ext" href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note</a>
-            <a class="nav-ext" href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X</a>
-        </nav>
+<th:block th:fragment="header(active)" th:with="s=${site ?: 'hub'}">
+    <!-- 中のサイト（ブログ・投票所）では、いちばん上に細い帯を出して、トップへ戻れるようにする -->
+    <div class="hub-strip" th:unless="${s == 'hub'}">
+        <div class="wrap hub-strip-inner">
+            <a th:href="@{/}"><span aria-hidden="true">←</span> webサイト100個作る人</a>
+            <span th:text="${s == 'fiction'} ? 'No.002 / 100' : 'No.003 / 100'">No.002 / 100</span>
+        </div>
     </div>
-</header>
 
-<footer class="site-footer" th:fragment="footer">
+    <!-- トップ（webサイト100個作る人） -->
+    <header class="site-header" th:if="${s == 'hub'}">
+        <div class="wrap site-header-inner">
+            <a class="logo" th:href="@{/}" aria-label="webサイト100個作る人のwebサイト トップへ">
+                <span class="logo-mark" aria-hidden="true">100</span>
+                <span class="logo-text">webサイト100個作る人</span>
+            </a>
+            <nav class="site-nav" aria-label="メニュー">
+                <a th:href="@{/}" th:attr="aria-current=${active == 'home'} ? 'page' : null">作ったサイト</a>
+                <a th:href="@{/fiction}"><span class="nav-long">フィクション</span>ブログ</a>
+                <a th:href="@{/vote}"><span class="nav-long">ちいさな</span>投票所</a>
+                <a class="nav-ext" href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note</a>
+                <a class="nav-ext" href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- No.002 フィクションブログ：文芸誌の表紙のような題字 -->
+    <header class="fiction-masthead" th:if="${s == 'fiction'}">
+        <div class="wrap fiction-masthead-inner">
+            <a class="fiction-title" th:href="@{/fiction}">フィクションブログ</a>
+            <p class="fiction-tagline">ありそうでない、やってみた話。</p>
+            <nav class="fiction-nav" aria-label="フィクションブログのメニュー">
+                <a th:href="@{/fiction}" th:attr="aria-current=${currentPath == '/fiction'} ? 'page' : null">読む</a>
+                <a th:href="@{/fiction/new}" th:attr="aria-current=${currentPath == '/fiction/new'} ? 'page' : null">書く</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- No.003 ちいさな投票所：投票券の残りなどが入った見出し（vote/parts :: bar） -->
+    <th:block th:if="${s == 'vote'}">
+        <div th:replace="~{vote/parts :: bar}"></div>
+    </th:block>
+</th:block>
+
+<footer class="site-footer" th:fragment="footer" th:with="s=${site ?: 'hub'}">
     <div class="wrap site-footer-inner">
-        <div>
-            <p class="footer-title">webサイト100個作る人のwebサイト</p>
-            <p class="footer-text">webサイトを100個つくる挑戦の記録です。作る過程は note と X で発信しています。</p>
+        <div th:switch="${s}">
+            <th:block th:case="'fiction'">
+                <p class="footer-title">フィクションブログ</p>
+                <p class="footer-text">ありそうでない「やってみた」話を集めるブログです。webサイト100個作る人の No.002 です。</p>
+            </th:block>
+            <th:block th:case="'vote'">
+                <p class="footer-title">ちいさな投票所</p>
+                <p class="footer-text">だれかの小さな選択を、投票券で決める投票所です。webサイト100個作る人の No.003 です。</p>
+            </th:block>
+            <th:block th:case="*">
+                <p class="footer-title">webサイト100個作る人のwebサイト</p>
+                <p class="footer-text">webサイトを100個つくる挑戦の記録です。作る過程は note と X で発信しています。</p>
+            </th:block>
         </div>
         <ul class="footer-links">
             <li><a th:href="@{/}">作ったサイト</a></li>

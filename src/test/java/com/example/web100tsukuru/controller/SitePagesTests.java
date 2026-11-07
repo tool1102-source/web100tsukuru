@@ -177,6 +177,31 @@ class SitePagesTests {
     }
 
     @Test
+    void サイトごとに見出しと書体が分かれ_中のサイトからはトップへ戻れる() throws Exception {
+        mvc.perform(get("/"))
+                .andExpect(content().string(containsString("class=\"site-hub\"")))
+                .andExpect(content().string(containsString("class=\"site-header\"")))
+                .andExpect(content().string(containsString("family=Space+Grotesk")))
+                .andExpect(content().string(not(containsString("class=\"hub-strip\""))));
+        mvc.perform(get("/fiction"))
+                .andExpect(content().string(containsString("class=\"site-fiction\"")))
+                .andExpect(content().string(containsString("class=\"fiction-masthead\"")))
+                .andExpect(content().string(containsString("family=Shippori+Mincho")))
+                .andExpect(content().string(containsString("No.002 / 100")))
+                .andExpect(content().string(not(containsString("class=\"site-header\""))));
+        mvc.perform(get("/vote"))
+                .andExpect(content().string(containsString("class=\"site-vote\"")))
+                .andExpect(content().string(containsString("class=\"vote-bar\"")))
+                .andExpect(content().string(containsString("family=M+PLUS+Rounded+1c")))
+                .andExpect(content().string(containsString("No.003 / 100")));
+        // エラー画面は、もともと開こうとしたページのサイトに合わせる（MockMvc はエラー画面を描かないので、判定だけ確かめる）
+        assertThat(GlobalModelAttributes.siteOf("/fiction/99999")).isEqualTo("fiction");
+        assertThat(GlobalModelAttributes.siteOf("/vote/1/report")).isEqualTo("vote");
+        assertThat(GlobalModelAttributes.siteOf("/fictionx")).isEqualTo("hub");
+        assertThat(GlobalModelAttributes.siteOf("/admin/vote")).isEqualTo("hub");
+    }
+
+    @Test
     void 合言葉が未設定なら管理画面は無い() throws Exception {
         mvc.perform(get("/admin")).andExpect(status().isNotFound());
         mvc.perform(post("/admin/login").param("password", "")).andExpect(status().isNotFound());

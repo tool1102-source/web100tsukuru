@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(${poll.title} + ' | ちいさな投票所', ${poll.open} ? '「' + ${#strings.listJoin(view.options().![label()], '」「')} + '」どれにするか、投票券で決めてください。1位のとおりに、本当にやります。' : '投票の結果と、そのとおりにやった報告。', false)}"></head>
-<body>
+<body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
-<div th:replace="~{vote/parts :: bar}"></div>
 
 <main>
     <div class="wrap">

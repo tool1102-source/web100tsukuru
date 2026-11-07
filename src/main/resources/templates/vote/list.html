@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('ちいさな投票所 | webサイト100個作る人のwebサイト', 'だれかの小さな選択を、あなたの投票券で決める投票所。券は何枚でも入れられて、1位にならなかった券は全部戻ってきます。', false)}"></head>
-<body>
+<body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
-<div th:replace="~{vote/parts :: bar}"></div>
 
 <main>
     <div class="wrap">
         <div th:replace="~{vote/parts :: messages}"></div>
 
         <section class="page-head">
-            <p class="eyebrow">No.003 · small votes</p>
-            <h1>ちいさな投票所</h1>
-            <p class="lead">だれかの小さな選択を、あなたの投票券で決める。1位になったとおりに、出した人が本当にやって報告します。</p>
+            <p class="eyebrow">ちいさな投票所</p>
+            <h1>あなたの投票券で、<br>だれかの明日がちょっと変わる。</h1>
+            <p class="lead">だれかの小さな選択を、みんなの投票券で決める投票所です。1位になったとおりに、出した人が本当にやって報告します。</p>
             <ol class="vote-rules">
                 <li><b>券は何枚でも入れられる</b><span>どうしても決めたいなら、たくさん入れてください。</span></li>
                 <li><b>1位にならなかった券は、全部戻る</b><span>負けても券は減りません。減るのは、入れた先が1位になったときだけ。</span></li>
