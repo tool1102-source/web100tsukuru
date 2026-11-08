@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('お題を作成 | ちいさな投票所', 'ちいさな投票所で、自分の小さな選択をお題として作成するページです。', true)}"></head>
+<head th:replace="~{fragments/layout :: head('投票を作成 | ちいさな投票所', 'ちいさな投票所で、自分の小さな選択を決めてもらう投票を作成するページです。', true)}"></head>
 <body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
 
@@ -8,7 +8,7 @@
     <div class="wrap">
         <p class="breadcrumb"><a th:href="@{/vote}">← ちいさな投票所</a></p>
         <section class="page-head">
-            <h1>お題を作成</h1>
+            <h1>投票を作成</h1>
             <p class="lead">あなたの小さな選択を、みんなの投票で決めてもらいます。締め切り後は、1位の結果どおりに実行して報告してください。</p>
         </section>
 
@@ -16,7 +16,7 @@
             <div th:replace="~{vote/parts :: messages}"></div>
             <form th:action="@{/vote}" method="post" enctype="multipart/form-data" class="form" novalidate>
                 <div class="form-group">
-                    <label for="title">お題 <span class="required">必須</span></label>
+                    <label for="title">タイトル <span class="required">必須</span></label>
                     <input type="text" id="title" name="title" th:value="${pollTitle}" placeholder="例：明日の昼ごはん、どっちにする？"
                            maxlength="60" required>
                 </div>
@@ -61,7 +61,7 @@
 
                 <p class="hint">締め切り後は、1位の結果どおりに実行して報告してください。それがこの投票所の約束です。</p>
                 <div class="form-actions">
-                    <button type="submit" class="button">お題を作成する</button>
+                    <button type="submit" class="button">投票を作成する</button>
                 </div>
             </form>
         </div>

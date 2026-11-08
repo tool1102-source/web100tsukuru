@@ -13,7 +13,7 @@
         <div th:replace="~{vote/parts :: messages}"></div>
 
         <div class="vote-home">
-            <nav class="vote-side" aria-label="お題の切り替え">
+            <nav class="vote-side" aria-label="投票の切り替え">
                 <a th:href="@{/vote}" th:attr="aria-current=${tab == 'all'} ? 'page'">すべて</a>
                 <a th:href="@{/vote(tab='open')}" th:attr="aria-current=${tab == 'open'} ? 'page'">受付中</a>
                 <a th:href="@{/vote(tab='closed')}" th:attr="aria-current=${tab == 'closed'} ? 'page'">終了</a>
@@ -28,7 +28,7 @@
                 <section class="vote-intro" th:if="${me == null and tab == 'all'}" aria-labelledby="intro-h">
                     <h1 id="intro-h">あなたの投票券で、<br>だれかの明日がちょっと変わる。</h1>
                     <ol class="vote-rules">
-                        <li><b>投票券は何枚でも使える</b><span>1つのお題に、何票でも投票できます。</span></li>
+                        <li><b>投票券は何枚でも使える</b><span>1人で何票でも、何回でも投票できます。</span></li>
                         <li><b>1位以外への投票券は、全部返却</b><span>投票券が減るのは、投票した選択肢が1位になったときだけです。</span></li>
                         <li><b>作成者は、1位の結果どおりに実行</b><span>締め切り後、写真つきの実行報告が届きます。</span></li>
                     </ol>
@@ -42,7 +42,7 @@
 
                 <th:block th:if="${tab == 'all'}">
                     <section class="vote-section" th:unless="${hot.isEmpty()}" aria-labelledby="hot-h">
-                        <h2 class="feed-head" id="hot-h">人気のお題</h2>
+                        <h2 class="feed-head" id="hot-h">人気の投票</h2>
                         <ol class="poll-ranks">
                             <th:block th:each="s, st : ${hot}"><li th:replace="~{vote/parts :: rank(${s}, ${st.count})}"></li></th:block>
                         </ol>
@@ -50,15 +50,15 @@
 
                     <section class="vote-section" aria-labelledby="open-h">
                         <h2 class="feed-head" id="open-h"><a th:href="@{/vote(tab='open')}">受付中<span class="chevron" aria-hidden="true"></span></a></h2>
-                        <p th:if="${open.isEmpty()}" class="empty">いま受付中のお題はありません。最初のお題を作成してみませんか？</p>
+                        <p th:if="${open.isEmpty()}" class="empty">いま受付中の投票はありません。最初の投票を作成してみませんか？</p>
                         <ol class="poll-cards" th:unless="${open.isEmpty()}">
                             <th:block th:each="s : ${open}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
                         </ol>
                     </section>
 
                     <section class="vote-section" aria-labelledby="closed-h">
-                        <h2 class="feed-head" id="closed-h"><a th:href="@{/vote(tab='closed')}">終了したお題<span class="chevron" aria-hidden="true"></span></a></h2>
-                        <p th:if="${closed.isEmpty()}" class="empty">終了したお題は、まだありません。</p>
+                        <h2 class="feed-head" id="closed-h"><a th:href="@{/vote(tab='closed')}">終了した投票<span class="chevron" aria-hidden="true"></span></a></h2>
+                        <p th:if="${closed.isEmpty()}" class="empty">終了した投票は、まだありません。</p>
                         <ol class="poll-cards" th:unless="${closed.isEmpty()}">
                             <th:block th:each="s : ${closed}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
                         </ol>
@@ -67,7 +67,7 @@
 
                 <section class="vote-section" th:if="${tab == 'open'}" aria-labelledby="open-h">
                     <h2 class="feed-head" id="open-h">受付中<small>締め切りが近い順</small></h2>
-                    <p th:if="${open.isEmpty()}" class="empty">いま受付中のお題はありません。最初のお題を作成してみませんか？</p>
+                    <p th:if="${open.isEmpty()}" class="empty">いま受付中の投票はありません。最初の投票を作成してみませんか？</p>
                     <ol class="poll-cards" th:unless="${open.isEmpty()}">
                         <th:block th:each="s : ${open}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
                     </ol>
@@ -75,10 +75,10 @@
 
                 <section class="vote-section" th:if="${tab == 'closed' or tab == 'reported'}" aria-labelledby="closed-h">
                     <h2 class="feed-head" id="closed-h">
-                        <th:block th:text="${tab == 'reported'} ? '実行報告があるお題' : '終了したお題'">終了したお題</th:block><small>新しい順</small>
+                        <th:block th:text="${tab == 'reported'} ? '実行報告がある投票' : '終了した投票'">終了した投票</th:block><small>新しい順</small>
                     </h2>
                     <p th:if="${closed.isEmpty()}" class="empty"
-                       th:text="${tab == 'reported'} ? '実行報告があるお題は、まだありません。' : '終了したお題は、まだありません。'">終了したお題は、まだありません。</p>
+                       th:text="${tab == 'reported'} ? '実行報告がある投票は、まだありません。' : '終了した投票は、まだありません。'">終了した投票は、まだありません。</p>
                     <ol class="poll-cards" th:unless="${closed.isEmpty()}">
                         <th:block th:each="s : ${closed}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
                     </ol>

@@ -298,7 +298,7 @@ class PollTests {
         mvc.perform(post("/vote").session(owner).param("title", "どっち").param("option", "A", "A").param("duration", "DAY_1"))
                 .andExpect(content().string(containsString("同じ選択肢が2つあります。")));
         mvc.perform(post("/vote").session(owner).param("title", " ").param("option", "A", "B").param("duration", "DAY_1"))
-                .andExpect(content().string(containsString("お題は1〜60文字で書いてください。")));
+                .andExpect(content().string(containsString("タイトルは1〜60文字で入力してください。")));
         assertThat(polls.count()).isZero();
     }
 
@@ -375,18 +375,18 @@ class PollTests {
         Long openId = createPoll(owner, "うどん", "そば");
         Long closedId = createPoll(owner, "海", "山");
         mvc.perform(get("/vote"))
-                .andExpect(content().string(not(containsString("人気のお題"))));
+                .andExpect(content().string(not(containsString("人気の投票"))));
         vote(owner, openId, optionIds(openId).get(0), 7);
         close(closedId);
         mvc.perform(get("/vote"))
-                .andExpect(content().string(containsString("人気のお題")))
+                .andExpect(content().string(containsString("人気の投票")))
                 .andExpect(content().string(containsString("class=\"poll-rank-no\">1</span>")));
         mvc.perform(get("/vote").param("tab", "open"))
                 .andExpect(content().string(containsString("href=\"/vote?tab=open\" aria-current=\"page\"")))
                 .andExpect(content().string(containsString("うどん ／ そば")))
                 .andExpect(content().string(not(containsString("海 ／ 山"))));
         mvc.perform(get("/vote").param("tab", "reported"))
-                .andExpect(content().string(containsString("実行報告があるお題は、まだありません。")))
+                .andExpect(content().string(containsString("実行報告がある投票は、まだありません。")))
                 .andExpect(content().string(not(containsString("海 ／ 山"))));
         // 知らない切り替えの名前は「すべて」にする
         mvc.perform(get("/vote").param("tab", "<script>"))

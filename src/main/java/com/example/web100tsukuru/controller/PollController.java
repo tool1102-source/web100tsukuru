@@ -123,7 +123,7 @@ public class PollController {
         }
         if (!createLimiter.tryAcquire(request.getRemoteAddr())) {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            model.addAttribute("error", "短い時間に続けてお題が作成されたため、受け付けを一時的に止めています。10分ほどたってから、もう一度お試しください。");
+            model.addAttribute("error", "短い時間に続けて投票が作成されたため、受け付けを一時的に止めています。10分ほどたってから、もう一度お試しください。");
             return "vote/new";
         }
         ProcessedImage processed = null;
@@ -171,7 +171,7 @@ public class PollController {
         VoteResult result = polls.vote(id, optionId, userId, count);
         switch (result) {
             case OK -> redirect.addFlashAttribute("notice", count + "票を投票しました。");
-            case CLOSED -> redirect.addFlashAttribute("error", "このお題の投票は締め切られました。");
+            case CLOSED -> redirect.addFlashAttribute("error", "この投票は締め切られました。");
             case NOT_ENOUGH -> redirect.addFlashAttribute("error", "投票券が足りません。");
             case INVALID -> redirect.addFlashAttribute("error", "投票数は1票以上で入力してください。");
             case NOT_FOUND -> throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -238,7 +238,7 @@ public class PollController {
     /** お題の中身を確かめる。問題がなければ null */
     private static String validate(String title, String detail, List<String> labels, String duration) {
         if (title.isBlank() || title.strip().length() > TITLE_MAX) {
-            return "お題は1〜" + TITLE_MAX + "文字で書いてください。";
+            return "タイトルは1〜" + TITLE_MAX + "文字で入力してください。";
         }
         if (detail.strip().length() > DETAIL_MAX) {
             return "説明は" + DETAIL_MAX + "文字までです。";

@@ -28,16 +28,16 @@
         </section>
 
         <section class="vote-section" aria-labelledby="voted-h">
-            <div class="section-head"><h2 id="voted-h">投票したお題</h2></div>
-            <p th:if="${voted.isEmpty()}" class="empty">まだありません。<a th:href="@{/vote}">受付中のお題</a>に投票してみましょう。</p>
+            <div class="section-head"><h2 id="voted-h">参加した投票</h2></div>
+            <p th:if="${voted.isEmpty()}" class="empty">まだありません。<a th:href="@{/vote}">受付中の投票</a>に参加してみましょう。</p>
             <ol class="poll-cards" th:unless="${voted.isEmpty()}">
                 <th:block th:each="s : ${voted}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
             </ol>
         </section>
 
         <section class="vote-section" aria-labelledby="owned-h">
-            <div class="section-head"><h2 id="owned-h">作成したお題</h2></div>
-            <p th:if="${owned.isEmpty()}" class="empty">まだありません。<a th:href="@{/vote/new}">お題を作成する</a></p>
+            <div class="section-head"><h2 id="owned-h">作成した投票</h2></div>
+            <p th:if="${owned.isEmpty()}" class="empty">まだありません。<a th:href="@{/vote/new}">投票を作成する</a></p>
             <ol class="poll-cards" th:unless="${owned.isEmpty()}">
                 <th:block th:each="s : ${owned}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
             </ol>
@@ -50,7 +50,7 @@
                     <time th:text="${#temporals.format(l.createdAt, 'M/d HH:mm')}">日時</time>
                     <span class="ledger-reason">
                         <span th:text="${l.reasonType.label}">理由</span>
-                        <a th:if="${l.pollId != null}" th:href="@{/vote/{id}(id=${l.pollId})}">お題を見る</a>
+                        <a th:if="${l.pollId != null}" th:href="@{/vote/{id}(id=${l.pollId})}">投票を見る</a>
                     </span>
                     <b class="ledger-delta" th:classappend="${l.totalDelta < 0} ? 'is-minus' : 'is-plus'"
                        th:text="(${l.totalDelta > 0} ? '+' : '') + ${#numbers.formatInteger(l.totalDelta, 1, 'COMMA')} + '枚'">+10枚</b>

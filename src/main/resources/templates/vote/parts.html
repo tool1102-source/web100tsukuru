@@ -13,7 +13,7 @@
 
 <svg th:fragment="ticket" class="icon-ticket" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a1.5 1.5 0 0 1 1.5-1.5h14a1.5 1.5 0 0 1 1.5 1.5v2.2a2.3 2.3 0 0 0 0 4.6v2.2a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5v-2.2a2.3 2.3 0 0 0 0-4.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14.5 7.5v9" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.6 1.8"/></svg>
 
-<!-- 見出し：白地に名前、右に投票券の残り・黒い「お題を作成」・自分のアイコン（note のような形） -->
+<!-- 見出し：白地に名前、右に投票券の残り・黒い「投票を作成」・自分のアイコン（note のような形） -->
 <div class="vote-bar" th:fragment="bar">
     <div class="wrap vote-bar-inner">
         <a class="vote-brand" th:href="@{/vote}"><span class="vote-brand-mark" aria-hidden="true">票</span><span><span class="nav-long">ちいさな</span>投票所</span></a>
@@ -24,7 +24,7 @@
                 </a>
                 <a class="button button-small vote-post" th:href="@{/vote/new}">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-                    <span class="vote-post-text">お題を作成</span>
+                    <span class="vote-post-text">投票を作成</span>
                 </a>
                 <a class="avatar" th:classappend="'avatar-' + ${me.avatarColor}" th:href="@{/vote/me}"
                    th:title="${me.displayName} + ' さんのマイページ'" th:text="${me.initial}">み</a>

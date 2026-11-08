@@ -5,7 +5,7 @@
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
 
 <!--
-  お題のページ。言い方は一般的な投票の仕組みにそろえる：
+  投票のページ。言い方は一般的な投票の仕組みにそろえる：
   手持ちは「投票券 ○枚」、選択肢ごとの数は「○票」、することは「投票する」、戻ることは「返却」
 -->
 <main>
@@ -21,13 +21,13 @@
                 <p class="meta poll-author">
                     <span class="avatar avatar-small" th:classappend="'avatar-' + ${view.ownerColor()}" aria-hidden="true"
                           th:text="${view.ownerInitial()}">み</span>
-                    <span><span class="author" th:text="${view.ownerName()}">作成者</span> さんのお題</span>
+                    <span><span class="author" th:text="${view.ownerName()}">作成者</span> さんの投票</span>
                     <span>締め切り <time th:datetime="${poll.closesAt}" th:text="${#temporals.format(poll.closesAt, 'M月d日 HH:mm')}">日時</time></span>
                 </p>
             </header>
 
             <figure class="article-figure poll-figure" th:if="${view.questionImage() != null}">
-                <img th:src="@{/vote/{id}/images/0.jpg(id=${poll.id})}" alt="お題の画像"
+                <img th:src="@{/vote/{id}/images/0.jpg(id=${poll.id})}" alt="投票の画像"
                      th:width="${view.questionImage().width}" th:height="${view.questionImage().height}" decoding="async">
             </figure>
             <p class="prose poll-detail" th:if="${poll.detail != null}" th:text="${poll.detail}">説明</p>
@@ -91,7 +91,7 @@
                     <a class="button button-outline" th:href="@{/vote/login(next=${currentPath})}">ログインして投票する</a>
                 </p>
                 <p class="hint poll-hint" th:if="${poll.open}">
-                    投票券1枚で1票。1つのお題に、何票でも何回でも投票できます。1位にならなかった選択肢への投票券は、締め切り後にすべて返却されます。
+                    投票券1枚で1票。1人で何票でも、何回でも投票できます。1位にならなかった選択肢への投票券は、締め切り後にすべて返却されます。
                     票数が同じ場合は、投票した人数が多いほうが1位です。人数も同じ場合は引き分けとなり、投票券はすべて返却されます。
                 </p>
             </section>
@@ -116,7 +116,7 @@
             <footer class="article-foot">
                 <a class="button button-outline button-small" target="_blank" rel="noopener"
                    th:href="@{https://x.com/intent/post(text=${poll.reported} ? '投票の結果どおりに実行しました：' + ${poll.title} : '「' + ${poll.title} + '」どれがいいか投票してください #ちいさな投票所', url=${baseUrl + currentPath})}">X でシェア ↗</a>
-                <a class="button button-small" th:href="@{/vote/new}">あなたもお題を作成する</a>
+                <a class="button button-small" th:href="@{/vote/new}">あなたも投票を作成する</a>
             </footer>
         </article>
     </div>

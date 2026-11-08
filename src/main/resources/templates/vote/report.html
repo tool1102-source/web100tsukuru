@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('実行報告を書く | ちいさな投票所', 'お題の結果どおりに実行したことを報告するページです。', true)}"></head>
+<head th:replace="~{fragments/layout :: head('実行報告を書く | ちいさな投票所', '投票の結果どおりに実行したことを報告するページです。', true)}"></head>
 <body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
 
 <main>
     <div class="wrap">
-        <p class="breadcrumb"><a th:href="@{/vote/{id}(id=${poll.id})}">← お題に戻る</a></p>
+        <p class="breadcrumb"><a th:href="@{/vote/{id}(id=${poll.id})}">← 投票に戻る</a></p>
         <section class="page-head">
             <h1>実行報告を書く</h1>
             <p class="lead">

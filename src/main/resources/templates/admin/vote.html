@@ -13,15 +13,15 @@
                 <a th:href="@{/admin}">フィクションブログ</a>
                 <a th:href="@{/admin/vote}" aria-current="page">ちいさな投票所</a>
             </nav>
-            <p class="lead">消したいお題にチェックを入れて、下の「選んだお題を消す」を押してください。入っていた投票券は、入れた人に全部返します。消したお題は元に戻せません。</p>
+            <p class="lead">消したい投票にチェックを入れて、下の「選んだ投票を消す」を押してください。投票に使われた投票券は、すべて投票した人に返却します。消した投票は元に戻せません。</p>
         </section>
 
-        <p class="status" role="status" th:if="${deletedCount != null}" th:text="${deletedCount} + '件のお題を消しました。'">1件のお題を消しました。</p>
+        <p class="status" role="status" th:if="${deletedCount != null}" th:text="${deletedCount} + '件の投票を消しました。'">1件の投票を消しました。</p>
 
-        <p th:if="${summaries.isEmpty()}" class="empty">お題はありません。</p>
+        <p th:if="${summaries.isEmpty()}" class="empty">投票はありません。</p>
 
         <form id="delete-form" th:unless="${summaries.isEmpty()}" th:action="@{/admin/vote/delete}" method="post">
-            <p class="admin-count" th:text="'お題は全部で ' + ${polls.totalElements} + ' 件'">お題は全部で 3 件</p>
+            <p class="admin-count" th:text="'投票は全部で ' + ${polls.totalElements} + ' 件'">投票は全部で 3 件</p>
             <ol class="admin-list">
                 <li class="admin-item" th:each="s : ${summaries}">
                     <label>
@@ -39,21 +39,21 @@
                             </span>
                             <span class="excerpt" th:text="${#strings.listJoin(s.optionLabels(), ' ／ ')}">A ／ B</span>
                             <span class="admin-thumbs" th:if="${s.hasImage()}">
-                                <img th:src="@{/vote/{id}/images/0.jpg(id=${s.poll().id})}" alt="お題の画像" width="64" height="64" loading="lazy">
+                                <img th:src="@{/vote/{id}/images/0.jpg(id=${s.poll().id})}" alt="投票の画像" width="64" height="64" loading="lazy">
                             </span>
                         </span>
                     </label>
                 </li>
             </ol>
             <div class="admin-bar">
-                <button type="submit" class="button button-danger">選んだお題を消す</button>
+                <button type="submit" class="button button-danger">選んだ投票を消す</button>
             </div>
         </form>
 
         <nav class="pager" aria-label="ページ送り" th:if="${polls.totalPages > 1}">
-            <a class="button button-outline button-small" th:if="${polls.hasPrevious()}" th:href="@{/admin/vote(page=${page - 1})}" rel="prev">← 新しいお題</a>
+            <a class="button button-outline button-small" th:if="${polls.hasPrevious()}" th:href="@{/admin/vote(page=${page - 1})}" rel="prev">← 新しい投票</a>
             <span class="pager-status" th:text="${page} + ' / ' + ${polls.totalPages}">1 / 3</span>
-            <a class="button button-outline button-small" th:if="${polls.hasNext()}" th:href="@{/admin/vote(page=${page + 1})}" rel="next">古いお題 →</a>
+            <a class="button button-outline button-small" th:if="${polls.hasNext()}" th:href="@{/admin/vote(page=${page + 1})}" rel="next">古い投票 →</a>
         </nav>
         <div class="pager" th:unless="${polls.totalPages > 1}"></div>
     </div>
@@ -69,8 +69,8 @@
             const count = deleteForm.querySelectorAll('input[name="ids"]:checked').length;
             if (count === 0) {
                 event.preventDefault();
-                alert('消したいお題にチェックを入れてください。');
-            } else if (!confirm(count + '件のお題を消します。投票に使われた投票券は、すべて投票した人に返却します。元に戻せません。よろしいですか？')) {
+                alert('消したい投票にチェックを入れてください。');
+            } else if (!confirm(count + '件の投票を消します。投票に使われた投票券は、すべて投票した人に返却します。元に戻せません。よろしいですか？')) {
                 event.preventDefault();
             }
         });

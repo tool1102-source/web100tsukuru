@@ -27,7 +27,7 @@ public class TicketLedger {
         VOTE("投票"),
         REFUND("返却（1位にならなかったため）"),
         DRAW("返却（引き分けのため）"),
-        POLL_DELETED("返却（お題が削除されたため）");
+        POLL_DELETED("返却（投票が削除されたため）");
 
         private final String label;
 
