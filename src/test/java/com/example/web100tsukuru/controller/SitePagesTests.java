@@ -210,6 +210,14 @@ class SitePagesTests {
                 .andExpect(content().string(containsString("class=\"vote-bar\"")))
                 .andExpect(content().string(not(containsString("fonts.googleapis.com"))))
                 .andExpect(content().string(containsString("No.003 / 100")));
+        // X などで共有したときの画像は、サイトごとに分かれ、大きいカードで出す
+        for (String[] page : new String[][]{{"/", "hub"}, {"/fiction", "fiction"}, {"/vote", "vote"}, {"/vote/terms", "vote"}}) {
+            mvc.perform(get(page[0]))
+                    .andExpect(content().string(containsString(
+                            "<meta property=\"og:image\" content=\"https://web100tsukuru.com/img/og/" + page[1] + ".jpg\">")))
+                    .andExpect(content().string(containsString("<meta name=\"twitter:card\" content=\"summary_large_image\">")));
+        }
+        mvc.perform(get("/img/og/vote.jpg")).andExpect(status().isOk());
         // エラー画面は、もともと開こうとしたページのサイトに合わせる（MockMvc はエラー画面を描かないので、判定だけ確かめる）
         assertThat(GlobalModelAttributes.siteOf("/fiction/99999")).isEqualTo("fiction");
         assertThat(GlobalModelAttributes.siteOf("/vote/1/report")).isEqualTo("vote");

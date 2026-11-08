@@ -163,6 +163,10 @@ public class PollController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("view", view);
         model.addAttribute("poll", view.poll());
+        // X などで共有したときは、選挙に付けた画像を出す（なければ投票所の画像）
+        if (view.questionImage() != null) {
+            model.addAttribute("ogImage", "/vote/" + id + "/images/0.jpg");
+        }
         return "vote/show";
     }
 

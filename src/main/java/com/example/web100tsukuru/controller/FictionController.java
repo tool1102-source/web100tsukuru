@@ -1,5 +1,6 @@
 package com.example.web100tsukuru.controller;
 
+import com.example.web100tsukuru.dto.ArticleBlock;
 import com.example.web100tsukuru.dto.FictionForm;
 import com.example.web100tsukuru.entity.Fiction;
 import com.example.web100tsukuru.entity.FictionImage;
@@ -64,7 +65,11 @@ public class FictionController {
         Fiction fiction = fictionService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("fiction", fiction);
-        model.addAttribute("blocks", fictionService.articleBlocks(fiction));
+        List<ArticleBlock> blocks = fictionService.articleBlocks(fiction);
+        model.addAttribute("blocks", blocks);
+        // X などで共有したときは、記事の1枚目の画像を出す（なければブログの画像）
+        blocks.stream().filter(b -> b.image() != null).findFirst()
+                .ifPresent(b -> model.addAttribute("ogImage", "/fiction/" + id + "/images/" + b.image().getImageNo() + ".jpg"));
         // 記事の下に「ほかの体験談」を新しい順に3件
         List<Fiction> more = fictionService.findLatest(4).stream()
                 .filter(f -> !f.getId().equals(id))

@@ -21,9 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -228,6 +233,27 @@ class PollTests {
         // 出した人は、引き分けでもどうしたかを報告できる
         mvc.perform(get("/vote/" + pollId + "/report").session(owner))
                 .andExpect(content().string(containsString("引き分けでした")));
+    }
+
+    @Test
+    void 画像つきの選挙を共有すると_その画像が出る() throws Exception {
+        MockHttpSession owner = signup("owner12");
+        BufferedImage picture = new BufferedImage(120, 80, BufferedImage.TYPE_INT_RGB);
+        ByteArrayOutputStream png = new ByteArrayOutputStream();
+        ImageIO.write(picture, "png", png);
+        String location = mvc.perform(multipart("/vote").file(new MockMultipartFile("image", "a.png", "image/png", png.toByteArray()))
+                        .session(owner).param("title", "画像つきの選挙").param("option", "A", "B").param("duration", "DAY_1"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn().getResponse().getRedirectedUrl();
+        Long withImage = Long.valueOf(location.substring(location.lastIndexOf('/') + 1));
+        mvc.perform(get("/vote/" + withImage))
+                .andExpect(content().string(containsString(
+                        "<meta property=\"og:image\" content=\"https://web100tsukuru.com/vote/" + withImage + "/images/0.jpg\">")));
+        // 画像のない選挙は、投票所の画像
+        Long plain = createPoll(owner, "C", "D");
+        mvc.perform(get("/vote/" + plain))
+                .andExpect(content().string(containsString(
+                        "<meta property=\"og:image\" content=\"https://web100tsukuru.com/img/og/vote.jpg\">")));
     }
 
     @Test

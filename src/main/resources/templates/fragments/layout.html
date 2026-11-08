@@ -4,10 +4,12 @@
   全ページ共通の部品。
   使い方: <head th:replace="~{fragments/layout :: head('タイトル', '説明文', false)}"></head>
   3つ目を true にすると検索結果に出さない（投稿フォームやエラー画面用）。
+  共有したときの画像は、モデルに ogImage（/ から始まるパス）があればそれ、なければサイトごとの画像。
   見出し・色・書体はサイトごとに変える（site は GlobalModelAttributes が決める：hub / fiction / vote）。
   body には th:class="'site-' + ${site ?: 'hub'}" を付け、色は style.css の .site-〇〇 で切り替える。
 -->
-<head th:fragment="head(title, description, noindex)" th:with="s=${site ?: 'hub'}">
+<head th:fragment="head(title, description, noindex)"
+      th:with="s=${site ?: 'hub'}, ogImg=${ogImage ?: (s == 'fiction' ? '/img/og/fiction.jpg' : (s == 'vote' ? '/img/og/vote.jpg' : '/img/og/hub.jpg'))}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${title}">webサイト100個作る人のwebサイト</title>
@@ -21,7 +23,19 @@
     <meta property="og:description" th:content="${description}">
     <meta property="og:url" th:if="${baseUrl != null}" th:content="${baseUrl + currentPath}">
     <meta property="og:locale" content="ja_JP">
-    <meta name="twitter:card" content="summary">
+    <!--
+      X などで共有したときの画像。選挙・投稿に画像があればそれ（コントローラーが ogImage を渡す）、
+      なければサイトごとの画像（static/img/og/、1200×630）
+    -->
+    <th:block th:if="${baseUrl != null}">
+        <meta property="og:image" th:content="${baseUrl + ogImg}">
+        <th:block th:if="${ogImage == null}">
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
+        </th:block>
+        <meta name="twitter:image" th:content="${baseUrl + ogImg}">
+    </th:block>
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@web100tsukuru">
 
     <meta name="theme-color" th:content="${s == 'fiction'} ? '#111111' : (${s == 'vote'} ? '#ffffff' : '#f3efe6')" media="(prefers-color-scheme: light)">

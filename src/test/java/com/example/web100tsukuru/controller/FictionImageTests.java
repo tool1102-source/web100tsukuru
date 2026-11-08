@@ -74,6 +74,8 @@ class FictionImageTests {
         assertThat(after).isGreaterThan(first);
         assertThat(second).isGreaterThan(after);
         assertThat(html).contains("width=\"200\" height=\"100\"").doesNotContain("[IMG]");
+        // X などで共有したときは、記事の1枚目の画像を出す
+        assertThat(page).contains("<meta property=\"og:image\" content=\"https://web100tsukuru.com/fiction/" + id + "/images/1.jpg\">");
     }
 
     @Test
@@ -119,7 +121,10 @@ class FictionImageTests {
     void 画像を選ばずに投稿しても今までどおり保存できる() throws Exception {
         Long id = post("画像なし", new MockMultipartFile("images", "", "application/octet-stream", new byte[0]));
         assertThat(imageRepository.count()).isZero();
-        mvc.perform(get("/fiction/" + id)).andExpect(content().string(containsString("画像なし")));
+        mvc.perform(get("/fiction/" + id))
+                .andExpect(content().string(containsString("画像なし")))
+                // 画像のない記事を共有したときは、ブログの画像を出す
+                .andExpect(content().string(containsString("<meta property=\"og:image\" content=\"https://web100tsukuru.com/img/og/fiction.jpg\">")));
     }
 
     @Test
