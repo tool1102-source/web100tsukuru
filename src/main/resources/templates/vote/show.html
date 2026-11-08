@@ -21,7 +21,7 @@
                 <p class="meta poll-author">
                     <span class="avatar avatar-small" th:classappend="'avatar-' + ${view.ownerColor()}" aria-hidden="true"
                           th:text="${view.ownerInitial()}">み</span>
-                    <span><span class="author" th:text="${view.ownerName()}">主催者</span> さんが主催</span>
+                    <span><a class="author" th:href="@{/vote/users/{id}(id=${poll.ownerUserId})}" th:text="${view.ownerName()}">主催者</a> さんが主催</span>
                     <span>締め切り <time th:datetime="${poll.closesAt}" th:text="${#temporals.format(poll.closesAt, 'M月d日 HH:mm')}">日時</time></span>
                 </p>
             </header>

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
  * 1. 締め切りを過ぎたお題の、1位以外の券を返す（残りの枚数を正しく出すため）
  * 2. ログインしていれば、その人（me）を画面に渡し、今日まだならログインボーナスを渡す
  */
-@ControllerAdvice(assignableTypes = {PollController.class, AccountController.class})
+@ControllerAdvice(assignableTypes = {PollController.class, AccountController.class, VoteUserController.class})
 public class VoteModelAdvice {
 
     private final PollSettlement settlement;

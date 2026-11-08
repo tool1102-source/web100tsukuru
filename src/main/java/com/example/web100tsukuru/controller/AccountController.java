@@ -3,6 +3,7 @@ package com.example.web100tsukuru.controller;
 import com.example.web100tsukuru.entity.AppUser;
 import com.example.web100tsukuru.service.AccountService;
 import com.example.web100tsukuru.service.AccountService.SignupException;
+import com.example.web100tsukuru.service.FollowService;
 import com.example.web100tsukuru.service.GoogleIdTokens;
 import com.example.web100tsukuru.service.GoogleIdTokens.GoogleIdentity;
 import com.example.web100tsukuru.service.PollService;
@@ -33,6 +34,7 @@ public class AccountController {
 
     private final AccountService accounts;
     private final PollService polls;
+    private final FollowService follows;
     private final VoteLogin login;
     private final GoogleIdTokens google;
     // 投票券ほしさにアカウントを作りまくられないように、同じ接続元からの登録は1日3件まで
@@ -40,11 +42,13 @@ public class AccountController {
     // パスワードの総当たり対策（同じ接続元から 10分に10回まで）
     private final PostRateLimiter loginLimiter;
 
-    public AccountController(AccountService accounts, PollService polls, VoteLogin login, GoogleIdTokens google,
+    public AccountController(AccountService accounts, PollService polls, FollowService follows, VoteLogin login,
+                             GoogleIdTokens google,
                              @Value("${app.vote.signup-limit:3}") int signupLimit,
                              @Value("${app.vote.login-limit:10}") int loginLimit) {
         this.accounts = accounts;
         this.polls = polls;
+        this.follows = follows;
         this.login = login;
         this.google = google;
         this.signupLimiter = new PostRateLimiter(signupLimit, Duration.ofDays(1));
@@ -220,13 +224,15 @@ public class AccountController {
         return "redirect:/vote";
     }
 
-    /** マイページ：券の残り・出入り・自分のお題・券を入れたお題 */
+    /** マイページ：投票券の残り・履歴・開催した選挙・投票した選挙・フォロー */
     @GetMapping("/vote/me")
     public String me(HttpServletRequest request, Model model) {
         Long userId = login.currentUserId(request);
         if (userId == null) {
             return "redirect:/vote/login?next=/vote/me";
         }
+        model.addAttribute("followees", follows.followees(userId));
+        model.addAttribute("followerCount", follows.followerCount(userId));
         model.addAttribute("ledger", accounts.recentLedger(userId));
         model.addAttribute("owned", polls.ownedBy(userId));
         model.addAttribute("voted", polls.votedBy(userId));

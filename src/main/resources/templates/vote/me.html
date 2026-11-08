@@ -11,7 +11,16 @@
         <section class="page-head me-head">
             <div class="me-name">
                 <span class="avatar avatar-large" th:classappend="'avatar-' + ${me.avatarColor}" aria-hidden="true" th:text="${me.initial}">み</span>
-                <h1 th:text="${me.displayName} + ' さん'">さん</h1>
+                <div class="profile-name">
+                    <h1 th:text="${me.displayName} + ' さん'">さん</h1>
+                    <p class="profile-counts">
+                        フォロー <b th:text="${#numbers.formatInteger(followees.size(), 1, 'COMMA')}">0</b>人
+                        <span aria-hidden="true">・</span>
+                        フォロワー <b th:text="${#numbers.formatInteger(followerCount, 1, 'COMMA')}">0</b>人
+                        <span aria-hidden="true">・</span>
+                        <a th:href="@{/vote/users/{id}(id=${me.id})}">ほかの人から見た自分のページ</a>
+                    </p>
+                </div>
                 <form th:action="@{/vote/logout}" method="post">
                     <button type="submit" class="button button-outline button-small">ログアウト</button>
                 </form>
@@ -25,6 +34,19 @@
                     ・ 毎日のログインで<span th:text="${dailyBonus}">10</span>枚ずつ受け取れます
                 </p>
             </div>
+        </section>
+
+        <section class="vote-section" aria-labelledby="follows-h">
+            <div class="section-head"><h2 id="follows-h">フォロー中の人</h2><p>この一覧は、あなたにだけ見えます</p></div>
+            <p th:if="${followees.isEmpty()}" class="empty">まだだれもフォローしていません。選挙のページで主催者の名前を押すと、その人をフォローできます。</p>
+            <ul class="me-follows" th:unless="${followees.isEmpty()}">
+                <li th:each="u : ${followees}">
+                    <a th:href="@{/vote/users/{id}(id=${u.id})}">
+                        <span class="avatar avatar-small" th:classappend="'avatar-' + ${u.avatarColor}" aria-hidden="true" th:text="${u.initial}">あ</span>
+                        <span th:text="${u.displayName}">名前</span>
+                    </a>
+                </li>
+            </ul>
         </section>
 
         <section class="vote-section" aria-labelledby="voted-h">

@@ -674,3 +674,15 @@ a.avatar:hover { color: var(--c-ink); opacity: .8; }
 /* 票数の入力欄：数字の右に「票」 */
 .ticket-field { display: inline-flex; align-items: center; gap: 6px; }
 .ticket-unit { color: var(--muted); font-size: .9rem; }
+/* 人ごとのページ：名前・フォロー数・フォローボタン */
+.profile-name { display: grid; gap: 2px; min-width: 0; }
+.profile-counts { color: var(--muted); font-size: .9rem; }
+.profile-counts b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.follow-off { display: none; }
+.follow-button:hover .follow-on, .follow-button:focus-visible .follow-on { display: none; }
+.follow-button:hover .follow-off, .follow-button:focus-visible .follow-off { display: inline; color: var(--danger); }
+.follow-button:hover { border-color: var(--danger); }
+.poll-author a { color: inherit; }
+.me-follows { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.me-follows a { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; font-size: .9rem; }
+.me-follows a:hover { background: var(--line-soft); color: var(--ink); }

@@ -15,6 +15,7 @@
         <div class="vote-home">
             <nav class="vote-side" aria-label="選挙の切り替え">
                 <a th:href="@{/vote}" th:attr="aria-current=${tab == 'all'} ? 'page'">すべて</a>
+                <a th:href="@{/vote(tab='following')}" th:attr="aria-current=${tab == 'following'} ? 'page'">フォロー中</a>
                 <a th:href="@{/vote(tab='open')}" th:attr="aria-current=${tab == 'open'} ? 'page'">受付中</a>
                 <a th:href="@{/vote(tab='closed')}" th:attr="aria-current=${tab == 'closed'} ? 'page'">開票済み</a>
                 <a th:href="@{/vote(tab='reported')}" th:attr="aria-current=${tab == 'reported'} ? 'page'">報告あり</a>
@@ -39,6 +40,23 @@
                     </div>
                 </section>
                 <h1 class="visually-hidden" th:unless="${me == null and tab == 'all'}">ちいさな投票所</h1>
+
+                <!-- フォロー中：フォローしている人が開催した選挙 -->
+                <section class="vote-section" th:if="${tab == 'following'}" aria-labelledby="following-h">
+                    <h2 class="feed-head" id="following-h">フォロー中の人が開催した選挙<small>新しい順</small></h2>
+                    <p th:if="${me == null}" class="empty">
+                        <a th:href="@{/vote/login(next='/vote?tab=following')}">ログイン</a>すると、フォローしている人が開催した選挙がここに並びます。
+                    </p>
+                    <p th:if="${me != null and !followsAnyone}" class="empty">
+                        まだだれもフォローしていません。選挙のページで主催者の名前を押すと、その人をフォローできます。
+                    </p>
+                    <p th:if="${me != null and followsAnyone and followed.isEmpty()}" class="empty">
+                        フォローしている人は、まだ選挙を開催していません。
+                    </p>
+                    <ol class="poll-cards" th:unless="${followed.isEmpty()}">
+                        <th:block th:each="s : ${followed}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
+                    </ol>
+                </section>
 
                 <th:block th:if="${tab == 'all'}">
                     <section class="vote-section" th:unless="${hot.isEmpty()}" aria-labelledby="hot-h">

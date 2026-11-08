@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,9 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
 
     // マイページ：自分が出したお題
     List<Poll> findByOwnerUserIdOrderByCreatedAtDescIdDesc(Long ownerUserId);
+
+    // 「フォロー中」：フォローしている人が開催した選挙（新しい順）
+    List<Poll> findByOwnerUserIdInOrderByCreatedAtDescIdDesc(Collection<Long> ownerUserIds, Pageable pageable);
 
     // 締め切ったのに、まだ1位以外の券を返していないお題
     @Query("select p.id from Poll p where p.closesAt <= :now and p.settledAt is null order by p.closesAt")

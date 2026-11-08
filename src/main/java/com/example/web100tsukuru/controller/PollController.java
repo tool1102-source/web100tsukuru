@@ -1,6 +1,7 @@
 package com.example.web100tsukuru.controller;
 
 import com.example.web100tsukuru.entity.Poll;
+import com.example.web100tsukuru.service.FollowService;
 import com.example.web100tsukuru.service.ImageProcessor;
 import com.example.web100tsukuru.service.ImageProcessor.InvalidImageException;
 import com.example.web100tsukuru.service.ImageProcessor.ProcessedImage;
@@ -40,30 +41,41 @@ public class PollController {
     public static final int REPORT_MAX = 1000;
 
     private final PollService polls;
+    private final FollowService follows;
     private final VoteLogin login;
     private final ImageProcessor imageProcessor;
     // 選挙の開きすぎ・投票のしすぎを止める（同じ接続元から 10分あたり）
     private final PostRateLimiter createLimiter;
     private final PostRateLimiter voteLimiter;
 
-    public PollController(PollService polls, VoteLogin login, ImageProcessor imageProcessor,
+    public PollController(PollService polls, FollowService follows, VoteLogin login, ImageProcessor imageProcessor,
                           @Value("${app.vote.create-limit:5}") int createLimit,
                           @Value("${app.vote.vote-limit:120}") int voteLimit) {
         this.polls = polls;
+        this.follows = follows;
         this.login = login;
         this.imageProcessor = imageProcessor;
         this.createLimiter = new PostRateLimiter(createLimit, Duration.ofMinutes(10));
         this.voteLimiter = new PostRateLimiter(voteLimit, Duration.ofMinutes(10));
     }
 
-    /** 投票所のトップ：受付中と結果が出たもの (GET /vote) */
+    /** 投票所のトップ：受付中と開票済みの選挙 (GET /vote) */
     @GetMapping("/vote")
-    public String list(@RequestParam(defaultValue = "all") String tab, Model model) {
-        // 左の切り替え（note のホームのような形）：すべて / 受付中 / 結果が出た / 報告あり
+    public String list(@RequestParam(defaultValue = "all") String tab, HttpServletRequest request, Model model) {
+        // 左の切り替え（note のホームのような形）：すべて / フォロー中 / 受付中 / 開票済み / 報告あり
         String current = switch (tab) {
-            case "open", "closed", "reported" -> tab;
+            case "following", "open", "closed", "reported" -> tab;
             default -> "all";
         };
+        if (current.equals("following")) {
+            // フォローしている人が開催した選挙（新しい順）。ログインしていなければ、画面でログインをすすめる
+            Long userId = login.currentUserId(request);
+            List<Long> followeeIds = userId == null ? List.of() : follows.followeeIds(userId);
+            model.addAttribute("tab", current);
+            model.addAttribute("followsAnyone", !followeeIds.isEmpty());
+            model.addAttribute("followed", polls.hostedBy(followeeIds, 60));
+            return "vote/list";
+        }
         // 受付中は60件まで読み、「すべて」では締め切りが近い12件だけ並べる（順位は60件の中から選ぶ）
         List<PollService.PollSummary> openAll = polls.openPolls(60);
         List<PollService.PollSummary> closed = polls.closedPolls(current.equals("all") ? 8 : 60);

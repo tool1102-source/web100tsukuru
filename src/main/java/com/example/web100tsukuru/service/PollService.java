@@ -259,6 +259,14 @@ public class PollService {
         return summaries(polls.findByOwnerUserIdOrderByCreatedAtDescIdDesc(userId));
     }
 
+    /** 「フォロー中」：フォローしている人が開催した選挙（新しい順） */
+    public List<PollSummary> hostedBy(Collection<Long> ownerUserIds, int limit) {
+        if (ownerUserIds.isEmpty()) {
+            return List.of();
+        }
+        return summaries(polls.findByOwnerUserIdInOrderByCreatedAtDescIdDesc(ownerUserIds, PageRequest.of(0, limit)));
+    }
+
     /** マイページ：自分が券を入れたお題 */
     public List<PollSummary> votedBy(Long userId) {
         List<Poll> voted = polls.findAllById(votes.pollIdsVotedBy(userId)).stream()

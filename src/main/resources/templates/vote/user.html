@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${user.displayName} + ' さん | ちいさな投票所', ${user.displayName} + ' さんが開催した選挙の一覧です。', true)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('vote')}"></header>
+
+<!--
+  人ごとのページ。出すのは表示名・フォロー数とフォロワー数・開催した選挙だけ
+  （ログイン ID や、だれがどの選挙に投票したかは出さない）
+-->
+<main>
+    <div class="wrap">
+        <p class="breadcrumb"><a th:href="@{/vote}">← ちいさな投票所</a></p>
+        <div th:replace="~{vote/parts :: messages}"></div>
+
+        <section class="page-head profile-head">
+            <div class="me-name">
+                <span class="avatar avatar-large" th:classappend="'avatar-' + ${user.avatarColor}" aria-hidden="true" th:text="${user.initial}">み</span>
+                <div class="profile-name">
+                    <h1 th:text="${user.displayName} + ' さん'">さん</h1>
+                    <p class="profile-counts">
+                        フォロー <b th:text="${#numbers.formatInteger(followingCount, 1, 'COMMA')}">0</b>人
+                        <span aria-hidden="true">・</span>
+                        フォロワー <b th:text="${#numbers.formatInteger(followerCount, 1, 'COMMA')}">0</b>人
+                    </p>
+                </div>
+                <a class="button button-outline button-small" th:if="${self}" th:href="@{/vote/me}">マイページへ</a>
+                <form th:unless="${self or following}" th:action="@{/vote/users/{id}/follow(id=${user.id})}" method="post">
+                    <button type="submit" class="button button-small">フォローする</button>
+                </form>
+                <form th:if="${following}" th:action="@{/vote/users/{id}/unfollow(id=${user.id})}" method="post"
+                      th:attr="data-confirm=${user.displayName} + ' さんのフォローを解除しますか？'">
+                    <button type="submit" class="button button-outline button-small follow-button" aria-label="フォローを解除する">
+                        <span class="follow-on">フォロー中</span><span class="follow-off" aria-hidden="true">フォロー解除</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <section class="vote-section" aria-labelledby="hosted-h">
+            <div class="section-head"><h2 id="hosted-h">開催した選挙</h2></div>
+            <p th:if="${hosted.isEmpty()}" class="empty">まだありません。</p>
+            <ol class="poll-cards" th:unless="${hosted.isEmpty()}">
+                <th:block th:each="s : ${hosted}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
+            </ol>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script>
+    // フォローの解除は、押しまちがえないように一度確かめる
+    document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!confirm(form.dataset.confirm)) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+</body>
+</html>
