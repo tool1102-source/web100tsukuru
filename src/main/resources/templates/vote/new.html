@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('お題を出す | ちいさな投票所', 'ちいさな投票所に、自分の小さな選択をお題として出すページです。', true)}"></head>
+<head th:replace="~{fragments/layout :: head('お題を作成 | ちいさな投票所', 'ちいさな投票所で、自分の小さな選択をお題として作成するページです。', true)}"></head>
 <body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
 
@@ -8,8 +8,8 @@
     <div class="wrap">
         <p class="breadcrumb"><a th:href="@{/vote}">← ちいさな投票所</a></p>
         <section class="page-head">
-            <h1>お題を出す</h1>
-            <p class="lead">あなたの小さな選択を、みんなの投票券で決めてもらいます。締め切りで1位になったとおりに、本当にやって報告してください。</p>
+            <h1>お題を作成</h1>
+            <p class="lead">あなたの小さな選択を、みんなの投票で決めてもらいます。締め切り後は、1位の結果どおりに実行して報告してください。</p>
         </section>
 
         <div class="form-card">
@@ -34,7 +34,7 @@
                     <div class="choice-row">
                         <label class="choice" th:each="d : ${durations}">
                             <input type="radio" name="duration" th:value="${d.name()}" th:checked="${d.name() == duration}">
-                            <span th:text="${d.label} + 'あと'">1日あと</span>
+                            <span th:text="${d.label} + '後'">1日後</span>
                         </label>
                     </div>
                 </fieldset>
@@ -59,9 +59,9 @@
                     <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
                 </div>
 
-                <p class="hint">出したお題は、締め切りのあとで報告してください。1位のとおりにやるのがこの投票所の約束です。</p>
+                <p class="hint">締め切り後は、1位の結果どおりに実行して報告してください。それがこの投票所の約束です。</p>
                 <div class="form-actions">
-                    <button type="submit" class="button">お題を出す</button>
+                    <button type="submit" class="button">お題を作成する</button>
                 </div>
             </form>
         </div>

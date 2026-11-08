@@ -2,29 +2,29 @@
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <!--
   「ちいさな投票所」の画面で共通に使う部品。
-  bar … 投票所の見出しと、券の残り・マイページ・ログアウト（ログインしていなければ登録・ログイン）
-  messages … 「入れました」などのお知らせ
+  bar … 投票所の見出しと、投票券の残り・マイページ・ログアウト（ログインしていなければ登録・ログイン）
+  messages … 「投票しました」などのお知らせ
   card(s) … 一覧の1件（s は PollService.PollSummary）
   rank(s, n) … 順位つきの1件
-  ticket … 券の絵（文字と同じ色・同じ大きさ）
+  ticket … 投票券の絵（文字と同じ色・同じ大きさ）
   見た目は note のホームのような形（白地・黒い丸ボタン・画像つきのカード）
 -->
 <body>
 
 <svg th:fragment="ticket" class="icon-ticket" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a1.5 1.5 0 0 1 1.5-1.5h14a1.5 1.5 0 0 1 1.5 1.5v2.2a2.3 2.3 0 0 0 0 4.6v2.2a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5v-2.2a2.3 2.3 0 0 0 0-4.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14.5 7.5v9" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.6 1.8"/></svg>
 
-<!-- 見出し：白地に名前、右に券の残り・黒い「お題を出す」・自分のアイコン（note のような形） -->
+<!-- 見出し：白地に名前、右に投票券の残り・黒い「お題を作成」・自分のアイコン（note のような形） -->
 <div class="vote-bar" th:fragment="bar">
     <div class="wrap vote-bar-inner">
         <a class="vote-brand" th:href="@{/vote}"><span class="vote-brand-mark" aria-hidden="true">票</span><span><span class="nav-long">ちいさな</span>投票所</span></a>
         <nav class="vote-bar-nav" aria-label="投票所のメニュー">
             <th:block th:if="${me != null}">
                 <a class="ticket-balance" th:href="@{/vote/me}" title="投票券の残り（マイページへ）">
-                    <svg th:replace="~{vote/parts :: ticket}"></svg> <b th:text="${#numbers.formatInteger(me.totalTickets, 1, 'COMMA')}">100</b>枚
+                    <svg th:replace="~{vote/parts :: ticket}"></svg><span class="visually-hidden">投票券の残り</span> <b th:text="${#numbers.formatInteger(me.totalTickets, 1, 'COMMA')}">100</b>枚
                 </a>
                 <a class="button button-small vote-post" th:href="@{/vote/new}">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-                    <span class="vote-post-text">お題を出す</span>
+                    <span class="vote-post-text">お題を作成</span>
                 </a>
                 <a class="avatar" th:classappend="'avatar-' + ${me.avatarColor}" th:href="@{/vote/me}"
                    th:title="${me.displayName} + ' さんのマイページ'" th:text="${me.initial}">み</a>
@@ -36,7 +36,7 @@
             <th:block th:if="${me == null}"
                       th:with="back=${currentPath == '/vote/signup' or currentPath == '/vote/login'} ? '/vote' : ${currentPath}">
                 <a class="vote-login" th:href="@{/vote/login(next=${back})}">ログイン</a>
-                <a class="button button-small" th:href="@{/vote/signup(next=${back})}"><span><span class="nav-long">登録して</span>券をもらう</span></a>
+                <a class="button button-small" th:href="@{/vote/signup(next=${back})}">新規登録</a>
             </th:block>
         </nav>
     </div>
@@ -44,7 +44,7 @@
 
 <div th:fragment="messages" class="vote-messages">
     <p class="status" role="status" th:if="${bonusGranted != null}"
-       th:text="'ログインボーナスで投票券を' + ${bonusGranted} + '枚もらいました。'">ログインボーナス</p>
+       th:text="'ログインボーナスとして、投票券を' + ${bonusGranted} + '枚受け取りました。'">ログインボーナス</p>
     <p class="status" role="status" th:if="${notice != null}" th:text="${notice}">お知らせ</p>
     <p class="alert" role="alert" th:if="${error != null}" th:text="${error}">エラー</p>
 </div>
@@ -70,10 +70,10 @@
         }
     </script>
     <script src="https://accounts.google.com/gsi/client" async></script>
-    <p class="hint">Google から受け取るのは、アカウントを見分ける番号だけです。名前やメールアドレスは使いません。</p>
+    <p class="hint">保存するのは、Google アカウントを識別する番号だけです。名前やメールアドレスは保存しません。</p>
 </div>
 
-<!-- 一覧の1件：上に画像（なければ選択肢を大きく）、太いお題、アイコンと名前、券の数（note の記事カードのような形） -->
+<!-- 一覧の1件：上に画像（なければ選択肢を大きく）、太いお題、アイコンと名前、票数（note の記事カードのような形） -->
 <li class="poll-card" th:fragment="card(s)">
     <a th:href="@{/vote/{id}(id=${s.poll().id})}">
         <span class="poll-thumb" th:classappend="'thumb-' + ${s.thumbColor()}">
@@ -82,7 +82,7 @@
             <span th:unless="${s.hasImage()}" class="poll-thumb-text"><span
                   th:text="${#strings.listJoin(s.optionLabels(), '？ ') + '？'}">カレー？ ラーメン？</span></span>
             <span class="poll-thumb-state" th:classappend="${s.poll().open} ? 'is-open'"
-                  th:text="${s.poll().open} ? '受付中' : (${s.poll().reported} ? '報告あり' : '結果が出た')">受付中</span>
+                  th:text="${s.poll().open} ? '受付中' : (${s.poll().reported} ? '報告あり' : '終了')">受付中</span>
         </span>
         <span class="poll-card-title" th:text="${s.poll().title}">お題</span>
         <span class="poll-card-options" th:text="${#strings.listJoin(s.optionLabels(), ' ／ ')}">A ／ B</span>
@@ -90,11 +90,11 @@
             <span class="avatar avatar-small" th:classappend="'avatar-' + ${s.ownerColor()}" aria-hidden="true"
                   th:text="${s.ownerInitial()}">み</span>
             <span class="poll-card-name" th:text="${s.ownerName()}">名前</span>
-            <span class="poll-card-time" th:text="${s.poll().open} ? ${s.poll().timeLeft} : '締め切り'">あと1日</span>
+            <span class="poll-card-time" th:text="${s.poll().open} ? ${s.poll().timeLeft} : '終了'">あと1日</span>
         </span>
         <span class="poll-card-meta">
-            <span class="poll-card-tickets" th:title="'入った投票券 ' + ${s.totalTickets()} + '枚'">
-                <svg th:replace="~{vote/parts :: ticket}"></svg> <span th:text="${#numbers.formatInteger(s.totalTickets(), 1, 'COMMA')}">0</span>
+            <span class="poll-card-tickets" th:title="'総投票数 ' + ${s.totalTickets()} + '票'">
+                <svg th:replace="~{vote/parts :: ticket}"></svg> <span th:text="${#numbers.formatInteger(s.totalTickets(), 1, 'COMMA')} + '票'">0票</span>
             </span>
             <th:block th:unless="${s.poll().open}">
                 <span th:if="${s.draw()}" class="winner-label">引き分け</span>
@@ -106,14 +106,14 @@
     </a>
 </li>
 
-<!-- 順位つきの1件（「券が集まっているお題」）：黒い四角に番号 -->
+<!-- 順位つきの1件（「人気のお題」）：黒い四角に番号 -->
 <li class="poll-rank" th:fragment="rank(s, n)">
     <a th:href="@{/vote/{id}(id=${s.poll().id})}">
         <span class="poll-rank-no" th:text="${n}">1</span>
         <span class="poll-rank-body">
             <span class="poll-rank-title" th:text="${s.poll().title}">お題</span>
             <span class="poll-rank-meta">
-                <svg th:replace="~{vote/parts :: ticket}"></svg> <span th:text="${#numbers.formatInteger(s.totalTickets(), 1, 'COMMA')} + '枚'">0枚</span>
+                <svg th:replace="~{vote/parts :: ticket}"></svg> <span th:text="${#numbers.formatInteger(s.totalTickets(), 1, 'COMMA')} + '票'">0票</span>
                 ・ <span th:text="${s.poll().timeLeft}">あと1日</span>
             </span>
         </span>

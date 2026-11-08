@@ -9,7 +9,7 @@
         <p class="breadcrumb"><a th:href="@{/vote}">← ちいさな投票所</a></p>
         <section class="page-head">
             <h1>ログイン</h1>
-            <p class="lead">1日1回のログインで、投票券が <b th:text="${@accountService.dailyBonus}">10</b> 枚増えます。</p>
+            <p class="lead">1日1回のログインで、投票券を<b th:text="${@accountService.dailyBonus}">10</b>枚受け取れます。</p>
         </section>
 
         <div class="form-card">
@@ -31,7 +31,7 @@
                     <button type="submit" class="button">ログイン</button>
                 </div>
             </form>
-            <p class="form-foot">はじめての方は <a th:href="@{/vote/signup(next=${next})}">登録</a>（投票券を <span th:text="${@accountService.signupTickets}">100</span> 枚もらえます）</p>
+            <p class="form-foot">はじめての方は <a th:href="@{/vote/signup(next=${next})}">新規登録</a>（投票券を<span th:text="${@accountService.signupTickets}">100</span>枚受け取れます）</p>
         </div>
     </div>
 </main>

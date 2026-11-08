@@ -82,7 +82,7 @@ public class AccountController {
         try {
             AppUser user = accounts.signup(loginId, displayName, password);
             login.login(request, response, user);
-            redirect.addFlashAttribute("notice", "登録しました。投票券を" + accounts.getSignupTickets() + "枚どうぞ。");
+            redirect.addFlashAttribute("notice", "登録が完了しました。投票券を" + accounts.getSignupTickets() + "枚受け取りました。");
             return "redirect:" + safeNext(next);
         } catch (SignupException e) {
             model.addAttribute("error", e.getMessage());
@@ -106,7 +106,7 @@ public class AccountController {
         model.addAttribute("loginId", loginId);
         if (!loginLimiter.tryAcquire(request.getRemoteAddr())) {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            model.addAttribute("error", "短い時間に何度も試したため、受け付けを止めています。10分ほどたってから、もう一度お試しください。");
+            model.addAttribute("error", "短い時間に続けてログインが試されたため、受け付けを一時的に止めています。10分ほどたってから、もう一度お試しください。");
             return "vote/login";
         }
         Optional<AppUser> user = accounts.authenticate(loginId, password);
@@ -119,7 +119,7 @@ public class AccountController {
         // ログインした時点でボーナスを渡しておく（次の画面で「もらいました」と出る）
         long bonus = accounts.grantDailyBonus(user.get().getId());
         if (bonus > 0) {
-            redirect.addFlashAttribute("notice", "ログインボーナスで投票券を" + bonus + "枚もらいました。");
+            redirect.addFlashAttribute("notice", "ログインボーナスとして、投票券を" + bonus + "枚受け取りました。");
         }
         return "redirect:" + safeNext(next);
     }
@@ -137,7 +137,7 @@ public class AccountController {
         if (identity.isEmpty()) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             model.addAttribute("next", safeNext(next));
-            model.addAttribute("error", "Google でのログインを確かめられませんでした。もう一度お試しください。");
+            model.addAttribute("error", "Google でのログインを確認できませんでした。もう一度お試しください。");
             return "vote/login";
         }
         Optional<AppUser> user = accounts.findByGoogleSub(identity.get().subject());
@@ -145,7 +145,7 @@ public class AccountController {
             login.login(request, response, user.get());
             long bonus = accounts.grantDailyBonus(user.get().getId());
             if (bonus > 0) {
-                redirect.addFlashAttribute("notice", "ログインボーナスで投票券を" + bonus + "枚もらいました。");
+                redirect.addFlashAttribute("notice", "ログインボーナスとして、投票券を" + bonus + "枚受け取りました。");
             }
             return "redirect:" + safeNext(next);
         }
@@ -193,7 +193,7 @@ public class AccountController {
                 session.removeAttribute(PENDING_NEXT);
             }
             login.login(request, response, user);
-            redirect.addFlashAttribute("notice", "登録しました。投票券を" + accounts.getSignupTickets() + "枚どうぞ。");
+            redirect.addFlashAttribute("notice", "登録が完了しました。投票券を" + accounts.getSignupTickets() + "枚受け取りました。");
             return "redirect:" + safeNext(next);
         } catch (SignupException e) {
             model.addAttribute("error", e.getMessage());

@@ -120,7 +120,7 @@ class GoogleLoginTests {
     void 確かめられない証明書ではログインできない() throws Exception {
         mvc.perform(post("/vote/login/google").param("credential", "fake-token"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string(containsString("Google でのログインを確かめられませんでした")));
+                .andExpect(content().string(containsString("Google でのログインを確認できませんでした")));
         mvc.perform(get("/vote/signup/google")).andExpect(redirectedUrl("/vote/login"));
         mvc.perform(post("/vote/signup/google").param("displayName", "勝手に登録")).andExpect(redirectedUrl("/vote/login"));
         assertThat(users.count()).isZero();

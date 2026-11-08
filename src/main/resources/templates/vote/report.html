@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('報告する | ちいさな投票所', 'お題の結果のとおりにやったことを報告するページです。', true)}"></head>
+<head th:replace="~{fragments/layout :: head('実行報告を書く | ちいさな投票所', 'お題の結果どおりに実行したことを報告するページです。', true)}"></head>
 <body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
 
 <main>
     <div class="wrap">
-        <p class="breadcrumb"><a th:href="@{/vote/{id}(id=${poll.id})}">← お題にもどる</a></p>
+        <p class="breadcrumb"><a th:href="@{/vote/{id}(id=${poll.id})}">← お題に戻る</a></p>
         <section class="page-head">
-            <h1>やったことを報告する</h1>
+            <h1>実行報告を書く</h1>
             <p class="lead">
                 「<span th:text="${poll.title}">お題</span>」は
-                <th:block th:if="${view.draw()}">引き分けでした（券は全部戻りました）。どうしたかを書いてください。</th:block>
+                <th:block th:if="${view.draw()}">引き分けでした（投票券はすべて返却済みです）。どうしたかを書いてください。</th:block>
                 <th:block th:if="${view.winners().isEmpty() and !view.draw()}">投票がありませんでした。どうしたかを書いてください。</th:block>
                 <th:block th:unless="${view.winners().isEmpty()}">
-                    「<b th:text="${#strings.listJoin(view.winners().![label()], '・')}">A</b>」に決まりました。そのとおりにやってみて、どうだったかを書いてください。
+                    「<b th:text="${#strings.listJoin(view.winners().![label()], '・')}">A</b>」に決まりました。結果どおりに実行して、どうだったかを書いてください。
                 </th:block>
             </p>
         </section>
@@ -34,7 +34,7 @@
                     <input type="file" id="images" name="images" accept="image/*" multiple data-shrink data-max="3" data-previews="image-previews">
                     <ol class="image-previews" id="image-previews" aria-label="選んだ写真"></ol>
                 </div>
-                <p class="hint">報告は1回だけで、あとから書き直せません。</p>
+                <p class="hint">報告できるのは1回だけです。あとから書き直すことはできません。</p>
                 <div class="form-actions">
                     <button type="submit" class="button">報告する</button>
                 </div>

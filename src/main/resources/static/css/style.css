@@ -671,3 +671,6 @@ a.avatar:hover { color: var(--c-ink); opacity: .8; }
 .icon-ticket { display: inline-block; width: 1.15em; height: 1.15em; flex: none; vertical-align: -.22em; }
 /* 見出しは文節で折り返す（「変わ / る。」のような切れ方をさせない。対応していない端末ではふつうに折り返す） */
 .site-vote h1, .site-vote h2, .poll-card-title, .poll-rank-title { word-break: auto-phrase; }
+/* 票数の入力欄：数字の右に「票」 */
+.ticket-field { display: inline-flex; align-items: center; gap: 6px; }
+.ticket-unit { color: var(--muted); font-size: .9rem; }

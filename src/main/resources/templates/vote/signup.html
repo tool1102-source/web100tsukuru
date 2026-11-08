@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('登録 | ちいさな投票所', 'ちいさな投票所に登録するページです。', true)}"></head>
+<head th:replace="~{fragments/layout :: head('新規登録 | ちいさな投票所', 'ちいさな投票所に登録するページです。', true)}"></head>
 <body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
 
@@ -8,10 +8,10 @@
     <div class="wrap">
         <p class="breadcrumb"><a th:href="@{/vote}">← ちいさな投票所</a></p>
         <section class="page-head">
-            <h1>登録する</h1>
+            <h1>新規登録</h1>
             <p class="lead">
-                登録すると投票券を <b th:text="${signupTickets}">100</b> 枚もらえます。そのあとも、1日1回のログインで
-                <b th:text="${@accountService.dailyBonus}">10</b> 枚ずつ増えます。
+                登録すると、投票券を<b th:text="${signupTickets}">100</b>枚受け取れます。そのあとも、1日1回のログインで
+                <b th:text="${@accountService.dailyBonus}">10</b>枚ずつ受け取れます。
             </p>
         </section>
 
@@ -35,7 +35,7 @@
                     <label for="displayName">表示名 <span class="required">必須</span></label>
                     <input type="text" id="displayName" name="displayName" th:value="${displayName}" maxlength="20"
                            placeholder="ニックネームでOK" required>
-                    <p class="hint">お題を出したときに、ほかの人に見える名前です。本名は入れないでください。</p>
+                    <p class="hint">お題を作成したときに、ほかの人に表示される名前です。本名は入れないでください。</p>
                 </div>
                 <div class="form-group">
                     <label for="password">パスワード <span class="required">必須</span></label>
@@ -53,7 +53,7 @@
                     <button type="submit" class="button">登録して投票券をもらう</button>
                 </div>
             </form>
-            <p class="form-foot">登録ずみの方は <a th:href="@{/vote/login(next=${next})}">ログイン</a></p>
+            <p class="form-foot">登録済みの方は <a th:href="@{/vote/login(next=${next})}">ログイン</a></p>
         </div>
     </div>
 </main>

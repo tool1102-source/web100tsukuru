@@ -22,12 +22,12 @@ public class TicketLedger {
 
     /** 増減の理由 */
     public enum Reason {
-        SIGNUP("はじめての投票券"),
+        SIGNUP("新規登録の特典"),
         DAILY_BONUS("ログインボーナス"),
         VOTE("投票"),
-        REFUND("1位にならなかったので返却"),
-        DRAW("引き分けなので返却"),
-        POLL_DELETED("お題が消されたので返却");
+        REFUND("返却（1位にならなかったため）"),
+        DRAW("返却（引き分けのため）"),
+        POLL_DELETED("返却（お題が削除されたため）");
 
         private final String label;
 

@@ -123,7 +123,7 @@ public class PollController {
         }
         if (!createLimiter.tryAcquire(request.getRemoteAddr())) {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            model.addAttribute("error", "短い時間にお題が続いたため、受け付けを止めています。10分ほどたってから、もう一度お試しください。");
+            model.addAttribute("error", "短い時間に続けてお題が作成されたため、受け付けを一時的に止めています。10分ほどたってから、もう一度お試しください。");
             return "vote/new";
         }
         ProcessedImage processed = null;
@@ -159,7 +159,7 @@ public class PollController {
             return "redirect:/vote/login?next=/vote/" + id;
         }
         if (!voteLimiter.tryAcquire(request.getRemoteAddr())) {
-            redirect.addFlashAttribute("error", "短い時間に投票が続いたため、受け付けを止めています。10分ほどたってから、もう一度お試しください。");
+            redirect.addFlashAttribute("error", "短い時間に続けて投票されたため、受け付けを一時的に止めています。10分ほどたってから、もう一度お試しください。");
             return "redirect:/vote/" + id;
         }
         long count;
@@ -170,10 +170,10 @@ public class PollController {
         }
         VoteResult result = polls.vote(id, optionId, userId, count);
         switch (result) {
-            case OK -> redirect.addFlashAttribute("notice", "投票券を" + count + "枚入れました。");
-            case CLOSED -> redirect.addFlashAttribute("error", "このお題は締め切られました。");
+            case OK -> redirect.addFlashAttribute("notice", count + "票を投票しました。");
+            case CLOSED -> redirect.addFlashAttribute("error", "このお題の投票は締め切られました。");
             case NOT_ENOUGH -> redirect.addFlashAttribute("error", "投票券が足りません。");
-            case INVALID -> redirect.addFlashAttribute("error", "入れる枚数を1枚以上で選んでください。");
+            case INVALID -> redirect.addFlashAttribute("error", "投票数は1票以上で入力してください。");
             case NOT_FOUND -> throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return "redirect:/vote/" + id + "#options";
@@ -230,7 +230,7 @@ public class PollController {
         }
         ReportResult result = polls.report(id, userId, text, processed);
         if (result == ReportResult.OK) {
-            redirect.addFlashAttribute("notice", "報告しました。");
+            redirect.addFlashAttribute("notice", "実行報告を載せました。");
         }
         return "redirect:/vote/" + id;
     }

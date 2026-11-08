@@ -70,7 +70,7 @@
             if (count === 0) {
                 event.preventDefault();
                 alert('消したいお題にチェックを入れてください。');
-            } else if (!confirm(count + '件のお題を消します。入っていた券は全部返します。元に戻せません。よろしいですか？')) {
+            } else if (!confirm(count + '件のお題を消します。投票に使われた投票券は、すべて投票した人に返却します。元に戻せません。よろしいですか？')) {
                 event.preventDefault();
             }
         });

@@ -97,9 +97,9 @@ class PollTests {
         users.save(user);
 
         mvc.perform(get("/vote").session(session))
-                .andExpect(content().string(containsString("ログインボーナスで投票券を10枚もらいました。")));
+                .andExpect(content().string(containsString("ログインボーナスとして、投票券を10枚受け取りました。")));
         mvc.perform(get("/vote").session(session))
-                .andExpect(content().string(not(containsString("ログインボーナスで"))));
+                .andExpect(content().string(not(containsString("ログインボーナスとして"))));
         assertThat(users.findById(user.getId()).orElseThrow().getTotalTickets()).isEqualTo(110);
     }
 
@@ -141,9 +141,9 @@ class PollTests {
 
         assertThat(users.findByLoginId("voter2").orElseThrow().getTotalTickets()).isEqualTo(35);
         mvc.perform(get("/vote/" + pollId).session(voter))
-                .andExpect(content().string(containsString("<b>50</b>枚")))
-                .andExpect(content().string(containsString("<b>15</b>枚")))
-                .andExpect(content().string(containsString("合計 65枚")));
+                .andExpect(content().string(containsString("<b>50</b>票")))
+                .andExpect(content().string(containsString("<b>15</b>票")))
+                .andExpect(content().string(containsString("総投票数 65票")));
     }
 
     @Test
@@ -160,8 +160,8 @@ class PollTests {
         close(pollId);
         mvc.perform(get("/vote/" + pollId).session(a))
                 .andExpect(content().string(containsString("ラーメン")))
-                .andExpect(content().string(containsString("（1位にならなかったので戻りました）")))
-                .andExpect(content().string(containsString("（1位になったので使われました）")));
+                .andExpect(content().string(containsString("（1位にならなかったため、投票券は返却されました）")))
+                .andExpect(content().string(containsString("（1位になったため、投票券は使用されました）")));
         // もう一度開いても、二重には返さない
         mvc.perform(get("/vote").session(a));
 
@@ -188,9 +188,9 @@ class PollTests {
         vote(d, pollId, ids.get(1), 30);   // 左 30枚・1人
         close(pollId);
         mvc.perform(get("/vote/" + pollId).session(d))
-                .andExpect(content().string(containsString("1位（券の枚数が同じだったので、入れた人数で決まりました）")))
-                .andExpect(content().string(containsString("2人")))
-                .andExpect(content().string(containsString("（1位にならなかったので戻りました）")));
+                .andExpect(content().string(containsString("1位（票数が同じため、投票した人数で決定）")))
+                .andExpect(content().string(containsString("2人が投票")))
+                .andExpect(content().string(containsString("（1位にならなかったため、投票券は返却されました）")));
         assertThat(users.findByLoginId("voter_c").orElseThrow().getTotalTickets()).isEqualTo(85);
         assertThat(users.findByLoginId("voter_e").orElseThrow().getTotalTickets()).isEqualTo(85);
         assertThat(users.findByLoginId("voter_d").orElseThrow().getTotalTickets()).isEqualTo(100);
@@ -212,8 +212,8 @@ class PollTests {
         close(pollId);
         mvc.perform(get("/vote/" + pollId).session(c))
                 .andExpect(content().string(containsString("引き分け")))
-                .andExpect(content().string(containsString("（引き分けなので戻りました）")))
-                .andExpect(content().string(not(containsString("（1位になったので使われました）"))));
+                .andExpect(content().string(containsString("（引き分けのため、投票券は返却されました）")))
+                .andExpect(content().string(not(containsString("（1位になったため、投票券は使用されました）"))));
         for (String id : List.of("voter_f", "voter_g", "voter_h")) {
             assertThat(users.findByLoginId(id).orElseThrow().getTotalTickets()).isEqualTo(100);
         }
@@ -222,7 +222,7 @@ class PollTests {
                 .extracting(TicketLedger::getReasonType)
                 .containsOnlyOnce(TicketLedger.Reason.DRAW);
         mvc.perform(get("/vote/me").session(c))
-                .andExpect(content().string(containsString("引き分けなので返却")));
+                .andExpect(content().string(containsString("返却（引き分けのため）")));
         mvc.perform(get("/vote").param("tab", "closed"))
                 .andExpect(content().string(containsString("class=\"winner-label\">引き分け</span>")));
         // 出した人は、引き分けでもどうしたかを報告できる
@@ -286,7 +286,7 @@ class PollTests {
         mvc.perform(post("/vote/" + pollId + "/report").session(owner).param("text", "書き直し"));
         assertThat(polls.findById(pollId).orElseThrow().getReportText()).isEqualTo("切りました。さっぱり。");
         mvc.perform(get("/vote/" + pollId))
-                .andExpect(content().string(containsString("やりました！")))
+                .andExpect(content().string(containsString("実行報告")))
                 .andExpect(content().string(containsString("切りました。さっぱり。")));
     }
 
@@ -375,18 +375,18 @@ class PollTests {
         Long openId = createPoll(owner, "うどん", "そば");
         Long closedId = createPoll(owner, "海", "山");
         mvc.perform(get("/vote"))
-                .andExpect(content().string(not(containsString("券が集まっているお題"))));
+                .andExpect(content().string(not(containsString("人気のお題"))));
         vote(owner, openId, optionIds(openId).get(0), 7);
         close(closedId);
         mvc.perform(get("/vote"))
-                .andExpect(content().string(containsString("券が集まっているお題")))
+                .andExpect(content().string(containsString("人気のお題")))
                 .andExpect(content().string(containsString("class=\"poll-rank-no\">1</span>")));
         mvc.perform(get("/vote").param("tab", "open"))
                 .andExpect(content().string(containsString("href=\"/vote?tab=open\" aria-current=\"page\"")))
                 .andExpect(content().string(containsString("うどん ／ そば")))
                 .andExpect(content().string(not(containsString("海 ／ 山"))));
         mvc.perform(get("/vote").param("tab", "reported"))
-                .andExpect(content().string(containsString("まだ報告は届いていません。")))
+                .andExpect(content().string(containsString("実行報告があるお題は、まだありません。")))
                 .andExpect(content().string(not(containsString("海 ／ 山"))));
         // 知らない切り替えの名前は「すべて」にする
         mvc.perform(get("/vote").param("tab", "<script>"))

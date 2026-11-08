@@ -20,31 +20,31 @@
                 <p class="ticket-summary-total"><svg th:replace="~{vote/parts :: ticket}"></svg>
                     <b th:text="${#numbers.formatInteger(me.totalTickets, 1, 'COMMA')}">100</b>枚</p>
                 <p class="hint">
-                    無料の券 <span th:text="${#numbers.formatInteger(me.freeTickets, 1, 'COMMA')}">100</span>枚
-                    <th:block th:if="${me.paidTickets > 0}"> ・ 有料の券 <span th:text="${#numbers.formatInteger(me.paidTickets, 1, 'COMMA')}">0</span>枚</th:block>
-                    ・ 毎日のログインで <span th:text="${dailyBonus}">10</span>枚ずつ増えます
+                    無料の投票券 <span th:text="${#numbers.formatInteger(me.freeTickets, 1, 'COMMA')}">100</span>枚
+                    <th:block th:if="${me.paidTickets > 0}"> ・ 有料の投票券 <span th:text="${#numbers.formatInteger(me.paidTickets, 1, 'COMMA')}">0</span>枚</th:block>
+                    ・ 毎日のログインで<span th:text="${dailyBonus}">10</span>枚ずつ受け取れます
                 </p>
             </div>
         </section>
 
         <section class="vote-section" aria-labelledby="voted-h">
-            <div class="section-head"><h2 id="voted-h">券を入れたお題</h2></div>
-            <p th:if="${voted.isEmpty()}" class="empty">まだありません。<a th:href="@{/vote}">受付中のお題</a>に券を入れてみましょう。</p>
+            <div class="section-head"><h2 id="voted-h">投票したお題</h2></div>
+            <p th:if="${voted.isEmpty()}" class="empty">まだありません。<a th:href="@{/vote}">受付中のお題</a>に投票してみましょう。</p>
             <ol class="poll-cards" th:unless="${voted.isEmpty()}">
                 <th:block th:each="s : ${voted}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
             </ol>
         </section>
 
         <section class="vote-section" aria-labelledby="owned-h">
-            <div class="section-head"><h2 id="owned-h">出したお題</h2></div>
-            <p th:if="${owned.isEmpty()}" class="empty">まだありません。<a th:href="@{/vote/new}">お題を出す</a></p>
+            <div class="section-head"><h2 id="owned-h">作成したお題</h2></div>
+            <p th:if="${owned.isEmpty()}" class="empty">まだありません。<a th:href="@{/vote/new}">お題を作成する</a></p>
             <ol class="poll-cards" th:unless="${owned.isEmpty()}">
                 <th:block th:each="s : ${owned}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
             </ol>
         </section>
 
         <section class="vote-section" aria-labelledby="ledger-h">
-            <div class="section-head"><h2 id="ledger-h">券の出入り</h2><p>最近の50件</p></div>
+            <div class="section-head"><h2 id="ledger-h">投票券の履歴</h2><p>最近の50件</p></div>
             <ol class="ledger">
                 <li th:each="l : ${ledger}">
                     <time th:text="${#temporals.format(l.createdAt, 'M/d HH:mm')}">日時</time>
