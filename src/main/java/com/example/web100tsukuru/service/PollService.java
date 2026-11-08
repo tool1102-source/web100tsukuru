@@ -13,11 +13,12 @@ import com.example.web100tsukuru.repository.PollImageRepository;
 import com.example.web100tsukuru.repository.PollOptionRepository;
 import com.example.web100tsukuru.repository.PollRepositories.OptionTotal;
 import com.example.web100tsukuru.repository.PollRepositories.PollImageInfo;
-import com.example.web100tsukuru.repository.PollRepositories.PollTotal;
+import com.example.web100tsukuru.repository.PollRepositories.OptionTally;
 import com.example.web100tsukuru.repository.PollRepository;
 import com.example.web100tsukuru.repository.PollVoteRepository;
 import com.example.web100tsukuru.repository.TicketLedgerRepository;
 import com.example.web100tsukuru.service.ImageProcessor.ProcessedImage;
+import com.example.web100tsukuru.service.PollSettlement.Outcome;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -66,13 +67,15 @@ public class PollService {
         }
     }
 
-    /** 選択肢1つの表示用 */
-    public record OptionView(Long id, int optionNo, String label, long tickets, int percent, long myTickets, boolean winner) {
+    /** 選択肢1つの表示用（voters は入れた人数） */
+    public record OptionView(Long id, int optionNo, String label, long tickets, long voters, int percent, long myTickets,
+                             boolean winner) {
     }
 
-    /** お題のページの表示用 */
+    /** お題のページの表示用。draw は引き分け、byVoters は券の枚数が同じで人数で1位が決まったとき */
     public record PollView(Poll poll, String ownerName, List<OptionView> options, long totalTickets, long myTotal,
-                           PollImageInfo questionImage, List<PollImageInfo> reportImages, boolean owner) {
+                           PollImageInfo questionImage, List<PollImageInfo> reportImages, boolean owner,
+                           boolean draw, boolean byVoters) {
 
         public List<OptionView> winners() {
             return options.stream().filter(OptionView::winner).toList();
@@ -87,9 +90,9 @@ public class PollService {
         }
     }
 
-    /** 一覧の1件 */
+    /** 一覧の1件。draw は引き分け */
     public record PollSummary(Poll poll, String ownerName, List<String> optionLabels, long totalTickets,
-                              List<String> winnerLabels, boolean hasImage) {
+                              List<String> winnerLabels, boolean draw, boolean hasImage) {
 
         public String ownerInitial() {
             return Avatars.initial(ownerName);
@@ -219,16 +222,19 @@ public class PollService {
         if (poll == null) {
             return Optional.empty();
         }
-        Map<Long, Long> totals = toMap(votes.totalsByOption(pollId));
+        List<OptionTally> tallies = votes.talliesByOptionIn(List.of(pollId));
+        Map<Long, OptionTally> byOption = tallies.stream().collect(Collectors.toMap(OptionTally::getOptionId, t -> t));
         Map<Long, Long> mine = viewerUserId == null ? Map.of() : toMap(votes.totalsByOptionForUser(pollId, viewerUserId));
-        long total = totals.values().stream().mapToLong(Long::longValue).sum();
-        Set<Long> winners = poll.isOpen() ? Set.of() : settlement.winners(pollId);
+        long total = tallies.stream().mapToLong(OptionTally::getTickets).sum();
+        Outcome outcome = poll.isOpen() ? Outcome.NO_VOTES : PollSettlement.decide(tallies);
         List<OptionView> optionViews = options.findByPollIdOrderByOptionNo(pollId).stream()
                 .map(o -> {
-                    long t = totals.getOrDefault(o.getId(), 0L);
+                    OptionTally tally = byOption.get(o.getId());
+                    long t = tally == null ? 0 : tally.getTickets();
+                    long voters = tally == null ? 0 : tally.getVoters();
                     int percent = total == 0 ? 0 : (int) Math.round(t * 100.0 / total);
-                    return new OptionView(o.getId(), o.getOptionNo(), o.getLabel(), t, percent,
-                            mine.getOrDefault(o.getId(), 0L), winners.contains(o.getId()));
+                    return new OptionView(o.getId(), o.getOptionNo(), o.getLabel(), t, voters, percent,
+                            mine.getOrDefault(o.getId(), 0L), o.getId().equals(outcome.winner()));
                 })
                 .toList();
         List<PollImageInfo> allImages = images.findByPollIdOrderBySlot(pollId);
@@ -237,7 +243,7 @@ public class PollService {
         String ownerName = users.findById(poll.getOwnerUserId()).map(AppUser::getDisplayName).orElse("退会した人");
         long myTotal = mine.values().stream().mapToLong(Long::longValue).sum();
         return Optional.of(new PollView(poll, ownerName, optionViews, total, myTotal, question, report,
-                poll.getOwnerUserId().equals(viewerUserId)));
+                poll.getOwnerUserId().equals(viewerUserId), outcome.draw(), outcome.byVoters()));
     }
 
     public List<PollSummary> openPolls(int limit) {
@@ -273,9 +279,8 @@ public class PollService {
         List<Long> ids = list.stream().map(Poll::getId).toList();
         Map<Long, List<PollOption>> optionsByPoll = options.findByPollIdInOrderByPollIdAscOptionNoAsc(ids).stream()
                 .collect(Collectors.groupingBy(PollOption::getPollId));
-        Map<Long, Long> totalByOption = toMap(votes.totalsByOptionIn(ids));
-        Map<Long, Long> totalByPoll = votes.totalsByPoll(ids).stream()
-                .collect(Collectors.toMap(PollTotal::getPollId, PollTotal::getTickets));
+        Map<Long, List<OptionTally>> talliesByPoll = votes.talliesByOptionIn(ids).stream()
+                .collect(Collectors.groupingBy(OptionTally::getPollId));
         Set<Long> withImage = images.findByPollIdInAndSlot(ids, PollImage.QUESTION_SLOT).stream()
                 .map(PollImageInfo::getPollId).collect(Collectors.toSet());
         Map<Long, String> names = ownerNames(list.stream().map(Poll::getOwnerUserId).toList());
@@ -283,17 +288,13 @@ public class PollService {
         List<PollSummary> result = new ArrayList<>();
         for (Poll poll : list) {
             List<PollOption> opts = optionsByPoll.getOrDefault(poll.getId(), List.of());
-            List<String> winnerLabels = List.of();
-            if (!poll.isOpen()) {
-                long max = opts.stream().mapToLong(o -> totalByOption.getOrDefault(o.getId(), 0L)).max().orElse(0);
-                if (max > 0) {
-                    winnerLabels = opts.stream().filter(o -> totalByOption.getOrDefault(o.getId(), 0L) == max)
-                            .map(PollOption::getLabel).toList();
-                }
-            }
+            List<OptionTally> tallies = talliesByPoll.getOrDefault(poll.getId(), List.of());
+            Outcome outcome = poll.isOpen() ? Outcome.NO_VOTES : PollSettlement.decide(tallies);
+            List<String> winnerLabels = opts.stream().filter(o -> o.getId().equals(outcome.winner()))
+                    .map(PollOption::getLabel).toList();
             result.add(new PollSummary(poll, names.getOrDefault(poll.getOwnerUserId(), "退会した人"),
-                    opts.stream().map(PollOption::getLabel).toList(), totalByPoll.getOrDefault(poll.getId(), 0L),
-                    winnerLabels, withImage.contains(poll.getId())));
+                    opts.stream().map(PollOption::getLabel).toList(), tallies.stream().mapToLong(OptionTally::getTickets).sum(),
+                    winnerLabels, outcome.draw(), withImage.contains(poll.getId())));
         }
         return result;
     }

@@ -11,7 +11,8 @@
             <h1>やったことを報告する</h1>
             <p class="lead">
                 「<span th:text="${poll.title}">お題</span>」は
-                <th:block th:if="${view.winners().isEmpty()}">投票がありませんでした。どうしたかを書いてください。</th:block>
+                <th:block th:if="${view.draw()}">引き分けでした（券は全部戻りました）。どうしたかを書いてください。</th:block>
+                <th:block th:if="${view.winners().isEmpty() and !view.draw()}">投票がありませんでした。どうしたかを書いてください。</th:block>
                 <th:block th:unless="${view.winners().isEmpty()}">
                     「<b th:text="${#strings.listJoin(view.winners().![label()], '・')}">A</b>」に決まりました。そのとおりにやってみて、どうだったかを書いてください。
                 </th:block>

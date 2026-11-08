@@ -26,6 +26,7 @@ public class TicketLedger {
         DAILY_BONUS("ログインボーナス"),
         VOTE("投票"),
         REFUND("1位にならなかったので返却"),
+        DRAW("引き分けなので返却"),
         POLL_DELETED("お題が消されたので返却");
 
         private final String label;

@@ -401,6 +401,8 @@ a.avatar:hover { color: var(--c-ink); opacity: .8; }
 .poll-option.is-winner .poll-option-label::before { content: "1位 "; color: var(--accent); }
 .poll-option-count { flex: none; font-size: .9rem; }
 .poll-option-count b { font-family: var(--display); font-size: 1.2rem; }
+.poll-option-voters { color: var(--muted); }
+.poll-option-voters::before { content: "・"; }
 .poll-bar { margin-top: 10px; height: 10px; border-radius: 999px; background: var(--line-soft); overflow: hidden; }
 .poll-bar span { display: block; height: 100%; border-radius: 999px; background: var(--accent); min-width: 0; transition: width .3s; }
 .poll-option-mine { margin-top: 8px; font-size: .86rem; color: var(--ink-2); }

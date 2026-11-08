@@ -17,11 +17,15 @@ public final class PollRepositories {
         Long getTickets();
     }
 
-    /** お題ごとの券の合計 */
-    public interface PollTotal {
+    /** 選択肢ごとの券の合計と、入れた人数（1位を決めるのに使う） */
+    public interface OptionTally {
         Long getPollId();
 
+        Long getOptionId();
+
         Long getTickets();
+
+        Long getVoters();
     }
 
     /** 画像の中身を読まずに、表示に要る情報だけを取り出す */

@@ -7,7 +7,7 @@ import com.example.web100tsukuru.entity.PollVote;
 import com.example.web100tsukuru.entity.TicketLedger;
 import com.example.web100tsukuru.entity.TicketLedger.Reason;
 import com.example.web100tsukuru.repository.AppUserRepository;
-import com.example.web100tsukuru.repository.PollRepositories.OptionTotal;
+import com.example.web100tsukuru.repository.PollRepositories.OptionTally;
 import com.example.web100tsukuru.repository.PollRepository;
 import com.example.web100tsukuru.repository.PollVoteRepository;
 import com.example.web100tsukuru.repository.TicketLedgerRepository;
@@ -18,11 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
- * 締め切ったお題の後かたづけ：1位にならなかった選択肢に入れた券を、入れた人に返す。
+ * 締め切ったお題の後かたづけ：1位にならなかった選択肢に入れた券を、入れた人に返す（引き分けなら全部返す）。
  *
  * 決まった時刻に動かす仕組みは使わない（DB を定期的に起こすと、無料の Neon の稼働時間を使い切るため）。
  * 代わりに、だれかが投票所のページを開いたときに、締め切りを過ぎたお題をまとめて片づける。
@@ -53,6 +51,17 @@ public class PollSettlement {
         }
     }
 
+    /**
+     * 締め切りの結果。
+     * winner … 1位の選択肢（だれも入れていない・引き分けなら null）
+     * draw … 引き分け（券の枚数も入れた人数も同じで並んだ）。このときは券を全部返す
+     * byVoters … 券の枚数が同じで、入れた人数で1位が決まった
+     */
+    public record Outcome(Long winner, boolean draw, boolean byVoters) {
+
+        public static final Outcome NO_VOTES = new Outcome(null, false, false);
+    }
+
     /** 1件を片づける。片づけたら true（受付中・片づけずみなら false） */
     @Transactional
     public boolean settle(Long pollId) {
@@ -60,22 +69,41 @@ public class PollSettlement {
         if (poll == null || poll.isOpen() || poll.getSettledAt() != null) {
             return false;
         }
-        Set<Long> winners = winners(pollId);
-        refund(votes.findByPollIdAndRefundedFalse(pollId).stream()
-                .filter(v -> !winners.contains(v.getOptionId()))
-                .toList(), Reason.REFUND);
+        Outcome outcome = outcome(pollId);
+        List<PollVote> notRefunded = votes.findByPollIdAndRefundedFalse(pollId);
+        if (outcome.draw()) {
+            refund(notRefunded, Reason.DRAW);
+        } else {
+            refund(notRefunded.stream().filter(v -> !v.getOptionId().equals(outcome.winner())).toList(), Reason.REFUND);
+        }
         poll.markSettled();
         return true;
     }
 
-    /** 券がいちばん多い選択肢（同じ数で並んだら全部が1位）。だれも入れていなければ空 */
-    public Set<Long> winners(Long pollId) {
-        List<OptionTotal> totals = votes.totalsByOption(pollId);
-        long max = totals.stream().mapToLong(OptionTotal::getTickets).max().orElse(0);
-        if (max == 0) {
-            return Set.of();
+    public Outcome outcome(Long pollId) {
+        return decide(votes.talliesByOptionIn(List.of(pollId)));
+    }
+
+    /**
+     * 1位を決める（1つのお題の選択肢ごとの集計から）。
+     * 券がいちばん多い選択肢が1位。券の枚数が同じなら、入れた人数が多いほうが1位。
+     * 人数も同じなら引き分け。だれも入れていなければ NO_VOTES
+     */
+    public static Outcome decide(List<OptionTally> tallies) {
+        long maxTickets = tallies.stream().mapToLong(OptionTally::getTickets).max().orElse(0);
+        if (maxTickets == 0) {
+            return Outcome.NO_VOTES;
         }
-        return totals.stream().filter(t -> t.getTickets() == max).map(OptionTotal::getOptionId).collect(Collectors.toSet());
+        List<OptionTally> top = tallies.stream().filter(t -> t.getTickets() == maxTickets).toList();
+        if (top.size() == 1) {
+            return new Outcome(top.get(0).getOptionId(), false, false);
+        }
+        long maxVoters = top.stream().mapToLong(OptionTally::getVoters).max().orElse(0);
+        List<OptionTally> topByVoters = top.stream().filter(t -> t.getVoters() == maxVoters).toList();
+        if (topByVoters.size() == 1) {
+            return new Outcome(topByVoters.get(0).getOptionId(), false, true);
+        }
+        return new Outcome(null, true, false);
     }
 
     /**

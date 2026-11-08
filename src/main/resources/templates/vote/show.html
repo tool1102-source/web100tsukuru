@@ -29,11 +29,17 @@
             <p class="prose poll-detail" th:if="${poll.detail != null}" th:text="${poll.detail}">説明</p>
 
             <section class="poll-result" th:unless="${poll.open}" aria-label="結果">
-                <th:block th:if="${view.winners().isEmpty()}">
+                <th:block th:if="${view.winners().isEmpty() and !view.draw()}">
                     <p class="poll-result-head">投票はありませんでした</p>
                 </th:block>
+                <!-- 券の枚数も入れた人数も同じで並んだときは、引き分けで券は全部戻る -->
+                <th:block th:if="${view.draw()}">
+                    <p class="poll-result-label">券の枚数も、入れた人数も同じでした</p>
+                    <p class="poll-result-head">引き分け</p>
+                    <p class="poll-result-note">入れた券は、全部戻りました。</p>
+                </th:block>
                 <th:block th:unless="${view.winners().isEmpty()}">
-                    <p class="poll-result-label" th:text="${view.winners().size() > 1} ? '同じ枚数で1位が並びました' : '1位'">1位</p>
+                    <p class="poll-result-label" th:text="${view.byVoters()} ? '1位（券の枚数が同じだったので、入れた人数で決まりました）' : '1位'">1位</p>
                     <p class="poll-result-head" th:text="${#strings.listJoin(view.winners().![label()], '・')}">A</p>
                     <p class="poll-result-note" th:unless="${poll.reported}"
                        th:text="${view.ownerName()} + ' さんは、このとおりにやって報告します。'">報告します</p>
@@ -47,14 +53,16 @@
                         <span class="poll-option-count">
                             <b th:text="${#numbers.formatInteger(o.tickets(), 1, 'COMMA')}">0</b>枚
                             <span class="muted" th:text="'（' + ${o.percent()} + '%）'">（0%）</span>
+                            <span class="poll-option-voters" th:text="${#numbers.formatInteger(o.voters(), 1, 'COMMA')} + '人'">0人</span>
                         </span>
                     </div>
                     <div class="poll-bar" aria-hidden="true"><span th:style="'width:' + ${o.percent()} + '%'"></span></div>
                     <p class="poll-option-mine" th:if="${o.myTickets() > 0}">
                         あなたは <b th:text="${#numbers.formatInteger(o.myTickets(), 1, 'COMMA')}">0</b>枚
                         <th:block th:unless="${poll.open}">
+                            <span th:if="${view.draw()}">（引き分けなので戻りました）</span>
                             <span th:if="${o.winner()}">（1位になったので使われました）</span>
-                            <span th:unless="${o.winner()}">（1位にならなかったので戻りました）</span>
+                            <span th:unless="${o.winner() or view.draw()}">（1位にならなかったので戻りました）</span>
                         </th:block>
                     </p>
                     <form class="poll-vote-form" th:if="${poll.open and me != null and me.totalTickets > 0}" th:action="@{/vote/{id}/tickets(id=${poll.id})}" method="post">
@@ -76,6 +84,7 @@
                 </p>
                 <p class="hint poll-hint" th:if="${poll.open}">
                     券は何枚でも、何回でも入れられます。締め切りで1位にならなかった選択肢に入れた券は、全部戻ってきます。
+                    券の枚数が同じなら、入れた人数が多いほうが1位。人数も同じなら引き分けで、券は全部戻ります。
                 </p>
             </section>
 
@@ -89,9 +98,11 @@
                              th:alt="'報告の写真（' + ${img.slot} + '枚目）'" loading="lazy" decoding="async">
                     </figure>
                 </th:block>
-                <p class="hint" th:if="${!poll.reported and !view.owner()}">出した人が1位のとおりにやったら、ここに報告が届きます。</p>
+                <p class="hint" th:if="${!poll.reported and !view.owner()}"
+                   th:text="${view.winners().isEmpty()} ? '1位が決まらなかったので、どうしたかは出した人しだいです。報告が届いたら、ここに出ます。' : '出した人が1位のとおりにやったら、ここに報告が届きます。'">報告が届きます</p>
                 <p th:if="${!poll.reported and view.owner()}">
-                    <a class="button" th:href="@{/vote/{id}/report(id=${poll.id})}">1位のとおりにやったら、報告する</a>
+                    <a class="button" th:href="@{/vote/{id}/report(id=${poll.id})}"
+                       th:text="${view.winners().isEmpty()} ? 'どうしたかを報告する' : '1位のとおりにやったら、報告する'">報告する</a>
                 </p>
             </section>
 

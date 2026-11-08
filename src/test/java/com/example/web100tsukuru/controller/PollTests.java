@@ -8,10 +8,12 @@ import com.example.web100tsukuru.entity.TicketLedger;
 import com.example.web100tsukuru.repository.AppUserRepository;
 import com.example.web100tsukuru.repository.PollImageRepository;
 import com.example.web100tsukuru.repository.PollOptionRepository;
+import com.example.web100tsukuru.repository.PollRepositories.OptionTally;
 import com.example.web100tsukuru.repository.PollRepository;
 import com.example.web100tsukuru.repository.PollVoteRepository;
 import com.example.web100tsukuru.repository.TicketLedgerRepository;
 import com.example.web100tsukuru.service.PollService;
+import com.example.web100tsukuru.service.PollSettlement;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -173,19 +175,83 @@ class PollTests {
     }
 
     @Test
-    void 同じ枚数で並んだら両方1位で_どちらの券も戻らない() throws Exception {
+    void 同じ枚数で並んだら入れた人数が多いほうが1位() throws Exception {
         MockHttpSession owner = signup("owner4");
-        MockHttpSession a = signup("voter_c");
-        MockHttpSession b = signup("voter_d");
+        MockHttpSession c = signup("voter_c");
+        MockHttpSession d = signup("voter_d");
+        MockHttpSession e = signup("voter_e");
         Long pollId = createPoll(owner, "右", "左");
         List<Long> ids = optionIds(pollId);
-        vote(a, pollId, ids.get(0), 30);
-        vote(b, pollId, ids.get(1), 30);
+        vote(c, pollId, ids.get(0), 10);   // 右 30枚・2人
+        vote(c, pollId, ids.get(0), 5);    // 同じ人が2回入れても1人
+        vote(e, pollId, ids.get(0), 15);
+        vote(d, pollId, ids.get(1), 30);   // 左 30枚・1人
         close(pollId);
-        mvc.perform(get("/vote/" + pollId))
-                .andExpect(content().string(containsString("同じ枚数で1位が並びました")));
-        assertThat(users.findByLoginId("voter_c").orElseThrow().getTotalTickets()).isEqualTo(70);
-        assertThat(users.findByLoginId("voter_d").orElseThrow().getTotalTickets()).isEqualTo(70);
+        mvc.perform(get("/vote/" + pollId).session(d))
+                .andExpect(content().string(containsString("1位（券の枚数が同じだったので、入れた人数で決まりました）")))
+                .andExpect(content().string(containsString("2人")))
+                .andExpect(content().string(containsString("（1位にならなかったので戻りました）")));
+        assertThat(users.findByLoginId("voter_c").orElseThrow().getTotalTickets()).isEqualTo(85);
+        assertThat(users.findByLoginId("voter_e").orElseThrow().getTotalTickets()).isEqualTo(85);
+        assertThat(users.findByLoginId("voter_d").orElseThrow().getTotalTickets()).isEqualTo(100);
+        mvc.perform(get("/vote").param("tab", "closed"))
+                .andExpect(content().string(containsString("1位：右")));
+    }
+
+    @Test
+    void 枚数も人数も同じなら引き分けで_券は全部戻る() throws Exception {
+        MockHttpSession owner = signup("owner6");
+        MockHttpSession c = signup("voter_f");
+        MockHttpSession d = signup("voter_g");
+        MockHttpSession e = signup("voter_h");
+        Long pollId = createPoll(owner, "右", "左", "まっすぐ");
+        List<Long> ids = optionIds(pollId);
+        vote(c, pollId, ids.get(0), 30);   // 右 30枚・1人
+        vote(d, pollId, ids.get(1), 30);   // 左 30枚・1人
+        vote(e, pollId, ids.get(2), 5);    // まっすぐ 5枚（1位ではないので、これも戻る）
+        close(pollId);
+        mvc.perform(get("/vote/" + pollId).session(c))
+                .andExpect(content().string(containsString("引き分け")))
+                .andExpect(content().string(containsString("（引き分けなので戻りました）")))
+                .andExpect(content().string(not(containsString("（1位になったので使われました）"))));
+        for (String id : List.of("voter_f", "voter_g", "voter_h")) {
+            assertThat(users.findByLoginId(id).orElseThrow().getTotalTickets()).isEqualTo(100);
+        }
+        Long cId = users.findByLoginId("voter_f").orElseThrow().getId();
+        assertThat(ledger.findTop50ByUserIdOrderByCreatedAtDescIdDesc(cId))
+                .extracting(TicketLedger::getReasonType)
+                .containsOnlyOnce(TicketLedger.Reason.DRAW);
+        mvc.perform(get("/vote/me").session(c))
+                .andExpect(content().string(containsString("引き分けなので返却")));
+        mvc.perform(get("/vote").param("tab", "closed"))
+                .andExpect(content().string(containsString("class=\"winner-label\">引き分け</span>")));
+        // 出した人は、引き分けでもどうしたかを報告できる
+        mvc.perform(get("/vote/" + pollId + "/report").session(owner))
+                .andExpect(content().string(containsString("引き分けでした")));
+    }
+
+    @Test
+    void 一位の決め方() {
+        // 券がいちばん多いほうが1位
+        assertThat(PollSettlement.decide(List.of(tally(1, 50, 1), tally(2, 40, 9))))
+                .isEqualTo(new PollSettlement.Outcome(1L, false, false));
+        // 券が同じなら人数が多いほう
+        assertThat(PollSettlement.decide(List.of(tally(1, 40, 2), tally(2, 40, 3), tally(3, 10, 8))))
+                .isEqualTo(new PollSettlement.Outcome(2L, false, true));
+        // 券も人数も同じなら引き分け（3つ並んでも同じ）
+        assertThat(PollSettlement.decide(List.of(tally(1, 40, 2), tally(2, 40, 2), tally(3, 40, 1))))
+                .isEqualTo(new PollSettlement.Outcome(null, true, false));
+        // だれも入れていない
+        assertThat(PollSettlement.decide(List.of())).isEqualTo(PollSettlement.Outcome.NO_VOTES);
+    }
+
+    private static OptionTally tally(long optionId, long tickets, long voters) {
+        return new OptionTally() {
+            public Long getPollId() { return 1L; }
+            public Long getOptionId() { return optionId; }
+            public Long getTickets() { return tickets; }
+            public Long getVoters() { return voters; }
+        };
     }
 
     @Test

@@ -97,7 +97,8 @@
                 <svg th:replace="~{vote/parts :: ticket}"></svg> <span th:text="${#numbers.formatInteger(s.totalTickets(), 1, 'COMMA')}">0</span>
             </span>
             <th:block th:unless="${s.poll().open}">
-                <span th:if="${s.winnerLabels().isEmpty()}" class="muted">投票なし</span>
+                <span th:if="${s.draw()}" class="winner-label">引き分け</span>
+                <span th:if="${s.winnerLabels().isEmpty() and !s.draw()}" class="muted">投票なし</span>
                 <span th:unless="${s.winnerLabels().isEmpty()}" class="winner-label"
                       th:text="'1位：' + ${#strings.listJoin(s.winnerLabels(), '・')}">1位：A</span>
             </th:block>
