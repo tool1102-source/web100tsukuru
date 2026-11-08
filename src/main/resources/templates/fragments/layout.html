@@ -24,18 +24,18 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@web100tsukuru">
 
-    <meta name="theme-color" th:content="${s == 'fiction'} ? '#f6f1e7' : (${s == 'vote'} ? '#ffffff' : '#f3efe6')" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" th:content="${s == 'fiction'} ? '#16171b' : (${s == 'vote'} ? '#121212' : '#131312')" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" th:content="${s == 'fiction'} ? '#111111' : (${s == 'vote'} ? '#ffffff' : '#f3efe6')" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" th:content="${s == 'fiction'} ? '#000000' : (${s == 'vote'} ? '#121212' : '#131312')" media="(prefers-color-scheme: dark)">
     <meta name="color-scheme" content="light dark">
     <link rel="icon" th:href="@{/favicon.ico}">
 
-    <!-- サイトごとの書体。トップは数字と英字の見出しだけ、ブログは明朝。投票所は端末の書体のまま（読みもの系のサービスのように） -->
+    <!-- サイトごとの書体。トップは数字と英字の見出しだけ、ブログは極太の見出し用ゴシック。投票所は端末の書体のまま（読みもの系のサービスのように） -->
     <th:block th:unless="${s == 'vote'}">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     </th:block>
     <link rel="stylesheet" th:if="${s == 'hub'}" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-    <link rel="stylesheet" th:if="${s == 'fiction'}" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&display=swap">
+    <link rel="stylesheet" th:if="${s == 'fiction'}" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <meta name="google-site-verification" content="yj4LGgoltxROKbI2DaOK9eTDbavhFgUfPISmX5yaD44">
@@ -71,14 +71,19 @@
         </div>
     </header>
 
-    <!-- No.002 フィクションブログ：文芸誌の表紙のような題字 -->
-    <header class="fiction-masthead" th:if="${s == 'fiction'}">
-        <div class="wrap fiction-masthead-inner">
-            <a class="fiction-title" th:href="@{/fiction}">フィクションブログ</a>
-            <p class="fiction-tagline">ありそうでない、やってみた話。</p>
+    <!-- No.002 フィクションブログ：「やってみた」系のWebマガジンのような黄色い帯と極太の題字 -->
+    <header class="fiction-bar" th:if="${s == 'fiction'}">
+        <div class="wrap fiction-bar-inner">
+            <a class="fiction-logo" th:href="@{/fiction}">
+                <span class="fiction-logo-main">フィクションブログ</span>
+                <span class="fiction-logo-sub">ありそうでない、やってみた話。</span>
+            </a>
             <nav class="fiction-nav" aria-label="フィクションブログのメニュー">
                 <a th:href="@{/fiction}" th:attr="aria-current=${currentPath == '/fiction'} ? 'page' : null">読む</a>
-                <a th:href="@{/fiction/new}" th:attr="aria-current=${currentPath == '/fiction/new'} ? 'page' : null">書く</a>
+                <a class="fiction-write" th:href="@{/fiction/new}" th:attr="aria-current=${currentPath == '/fiction/new'} ? 'page' : null">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>
+                    書く
+                </a>
             </nav>
         </div>
     </header>

@@ -113,6 +113,22 @@ class SitePagesTests {
         String html = mvc.perform(get("/fiction")).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         assertThat(html.indexOf("新しい話")).isLessThan(html.indexOf("古い話"));
+        // いちばん新しい1本は大きく出し、残りはカードで並べる
+        assertThat(html).contains("いちばん新しい話", "新着の体験談");
+        assertThat(html.split("class=\"story-card\"", -1).length - 1).isEqualTo(1);
+        // 記事の下には、ほかの投稿が出る（自分自身は出ない）
+        Long oldId = repository.findAll().stream().filter(f -> f.getTitle().equals("古い話")).findFirst().orElseThrow().getId();
+        String article = mvc.perform(get("/fiction/" + oldId)).andReturn().getResponse().getContentAsString();
+        assertThat(article).contains("ほかの体験談", "新しい話");
+        assertThat(article.split("class=\"story-card\"", -1).length - 1).isEqualTo(1);
+    }
+
+    @Test
+    void 投稿がないときは書き方の例を出す() throws Exception {
+        mvc.perform(get("/fiction"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("まだ投稿がありません。")))
+                .andExpect(content().string(containsString("100円玉だけで1か月暮らしてみた")));
     }
 
     @Test
@@ -185,8 +201,8 @@ class SitePagesTests {
                 .andExpect(content().string(not(containsString("class=\"hub-strip\""))));
         mvc.perform(get("/fiction"))
                 .andExpect(content().string(containsString("class=\"site-fiction\"")))
-                .andExpect(content().string(containsString("class=\"fiction-masthead\"")))
-                .andExpect(content().string(containsString("family=Shippori+Mincho")))
+                .andExpect(content().string(containsString("class=\"fiction-bar\"")))
+                .andExpect(content().string(containsString("family=Dela+Gothic+One")))
                 .andExpect(content().string(containsString("No.002 / 100")))
                 .andExpect(content().string(not(containsString("class=\"site-header\""))));
         mvc.perform(get("/vote"))

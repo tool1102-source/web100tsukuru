@@ -165,15 +165,7 @@ main { flex: 1; }
 .breadcrumb a { text-decoration: none; }
 .breadcrumb a:hover { text-decoration: underline; }
 
-/* ---------- フィクションブログ：一覧 ---------- */
-.posts { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
-.post-item { border-bottom: 1px solid var(--line); }
-.post-item a { display: grid; gap: 6px; padding: 24px 4px; text-decoration: none; }
-@media (min-width: 720px) { .post-item a { grid-template-columns: 1fr 11em; gap: 6px 32px; } }
-.post-item h2 { font-family: var(--serif); font-size: clamp(1.2rem, 2.8vw, 1.45rem); font-weight: 700; overflow-wrap: anywhere; }
-.post-item a:hover h2 { color: var(--accent); }
-.post-item .excerpt { color: var(--muted); font-size: .92rem; overflow-wrap: anywhere; }
-@media (min-width: 720px) { .post-item .excerpt { grid-column: 1; } .post-item .meta { grid-column: 2; grid-row: 1 / span 2; text-align: right; } }
+/* ---------- 一覧の共通の小物（投稿者・空のとき・ページ送り） ---------- */
 .meta { font-size: .82rem; color: var(--muted); }
 .meta .author { color: var(--ink-2); font-weight: 600; }
 .empty { padding: 48px 0; text-align: center; color: var(--muted); border-top: 1.5px solid var(--ink); }
@@ -185,7 +177,6 @@ main { flex: 1; }
 .article-head { padding: 28px 0 28px; border-bottom: 1px solid var(--line); }
 .article-head h1 { font-family: var(--serif); font-size: clamp(1.7rem, 5vw, 2.4rem); line-height: 1.45; font-weight: 700; letter-spacing: 0; overflow-wrap: anywhere; }
 .article-head .meta { margin-top: 14px; }
-.notice { margin-top: 8px; font-size: .78rem; color: var(--muted); }
 .article-body { padding-top: 32px; display: grid; gap: 1.6em; }
 .article-figure { margin: 0; }
 .article-figure img { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--card); }
@@ -480,69 +471,142 @@ a.avatar:hover { color: var(--c-ink); opacity: .8; }
 .hub-strip a:hover { opacity: 1; color: inherit; text-decoration: underline; }
 .hub-strip span { opacity: .7; font-variant-numeric: tabular-nums; }
 
-/* ---------- No.002 フィクションブログ：文芸誌（生成りの紙・墨・藍・明朝） ---------- */
+/* ---------- No.002 フィクションブログ：「やってみた」系のWebマガジン（黄色の帯・極太の見出し・動画のサムネイルのような題字） ---------- */
 .site-fiction {
-    --paper: #f6f1e7;
-    --card: #fbf8f1;
-    --ink: #24211c;
-    --ink-2: #47423a;
-    --muted: #7a7368;
-    --line: #dcd2c0;
-    --line-soft: #ebe3d4;
-    --accent: #2b4c7e;
+    --paper: #ffffff;
+    --card: #ffffff;
+    --ink: #111111;
+    --ink-2: #333333;
+    --muted: #6b6b6b;
+    --line: #e6e6e6;
+    --line-soft: #f4f4f4;
+    --accent: #d60029;
     --accent-ink: #ffffff;
-    --accent-soft: #e2e8f1;
-    --radius: 3px;
-    --serif: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", serif;
-    --display: var(--serif);
-    --strip-bg: #2b4c7e;
-    --strip-ink: #f6f1e7;
-    font-family: var(--serif);
+    --accent-soft: #ffe5ea;
+    --yellow: #ffd600;
+    --badge: #e6002e;
+    --marker: #ffe766;
+    --radius: 10px;
+    --heavy: "Dela Gothic One", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+    --display: var(--heavy);
+    --strip-bg: #111111;
+    --strip-ink: #ffffff;
 }
 @media (prefers-color-scheme: dark) {
     .site-fiction {
-        --paper: #16171b;
-        --card: #1d1f25;
-        --ink: #ece6d9;
-        --ink-2: #cfc8b9;
-        --muted: #9a9384;
-        --line: #33343a;
-        --line-soft: #26272d;
-        --accent: #94b2e4;
-        --accent-ink: #10141c;
-        --accent-soft: rgba(148, 178, 228, .14);
-        --strip-bg: #1f2b40;
-        --strip-ink: #d6dff0;
+        --paper: #121212;
+        --card: #1b1b1b;
+        --ink: #f2f2f2;
+        --ink-2: #d2d2d2;
+        --muted: #9c9c9c;
+        --line: #2e2e2e;
+        --line-soft: #1e1e1e;
+        --accent: #ff6b86;
+        --accent-ink: #121212;
+        --accent-soft: rgba(255, 107, 134, .15);
+        --marker: rgba(255, 214, 0, .38);
+        --strip-bg: #000000;
+        --strip-ink: #e6e6e6;
     }
 }
-.fiction-masthead { border-bottom: 4px double var(--ink); }
-.fiction-masthead-inner { display: grid; justify-items: center; gap: 6px; padding-top: 34px; padding-bottom: 18px; text-align: center; }
-.fiction-title { font-family: var(--serif); font-weight: 800; font-size: clamp(2rem, 7vw, 3.1rem); letter-spacing: .12em; line-height: 1.25; text-decoration: none; }
-.fiction-title:hover { color: var(--accent); }
-.fiction-tagline { color: var(--muted); font-size: .9rem; letter-spacing: .3em; }
-.fiction-nav { display: flex; gap: 4px 28px; margin-top: 8px; font-size: .95rem; letter-spacing: .2em; }
-.fiction-nav a { text-decoration: none; padding: 2px 2px 4px; border-bottom: 1px solid transparent; }
-.fiction-nav a[aria-current="page"], .fiction-nav a:hover { color: var(--accent); border-bottom-color: currentColor; }
-.site-fiction .button { border-radius: var(--radius); background: var(--accent); border-color: var(--accent); color: var(--accent-ink); letter-spacing: .08em; font-family: var(--serif); }
-.site-fiction .button:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-.site-fiction .button-outline { background: transparent; border-color: var(--ink); color: var(--ink); }
-.site-fiction .button-outline:hover { background: var(--ink); color: var(--paper); }
-.site-fiction .eyebrow { font-family: var(--serif); letter-spacing: .3em; color: var(--accent); }
-.site-fiction .page-head { justify-items: center; text-align: center; padding-top: 40px; }
-.site-fiction .page-head h1 { font-family: var(--serif); font-weight: 800; letter-spacing: .06em; }
-.site-fiction .page-head .lead { max-width: 30em; }
-.site-fiction .posts { border-top: 3px double var(--ink); }
-.site-fiction .post-item { border-bottom: 1px dashed var(--line); }
-.site-fiction .post-item h2 { font-weight: 800; }
-.site-fiction .post-item a:hover h2 { color: var(--accent); }
-.site-fiction .article-head { text-align: center; border-bottom: 3px double var(--line); }
-.site-fiction .article-head h1 { font-weight: 800; }
-.site-fiction .prose { font-size: 1.1rem; line-height: 2.15; }
-.site-fiction .article-figure img { border-radius: var(--radius); }
-.site-fiction .form-card { border-radius: var(--radius); box-shadow: 0 1px 0 var(--line); }
-.site-fiction .form input[type="text"], .site-fiction .form textarea { border-radius: var(--radius); font-family: var(--serif); }
-.site-fiction .required { border-radius: 2px; background: var(--accent); }
-.site-fiction .site-footer { border-top: 4px double var(--ink); }
+
+/* 見出し：黄色い帯に極太の題字。暗い画面でも帯は黄色のまま */
+.fiction-bar { background: var(--yellow); color: #111111; border-bottom: 3px solid #111111; }
+.fiction-bar-inner { display: flex; align-items: center; justify-content: space-between; gap: 10px 20px; min-height: 78px; padding-top: 10px; padding-bottom: 10px; }
+.fiction-logo { display: grid; gap: 4px; min-width: 0; color: #111111; text-decoration: none; }
+.fiction-logo:hover { color: #111111; }
+.fiction-logo-main { font-family: var(--heavy); font-size: clamp(1.35rem, 4.6vw, 2rem); line-height: 1.1; white-space: nowrap; }
+.fiction-logo-sub { justify-self: start; padding: 1px 8px; background: #111111; color: var(--yellow); font-size: .7rem; font-weight: 700; letter-spacing: .06em; white-space: nowrap; }
+.fiction-nav { display: flex; align-items: center; gap: 4px; flex: none; }
+.fiction-nav a { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; color: #111111; font-weight: 800; font-size: .92rem; text-decoration: none; }
+.fiction-nav a:hover { background: rgba(0, 0, 0, .08); color: #111111; }
+.fiction-nav a[aria-current="page"]:not(.fiction-write) { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
+.fiction-nav .fiction-write, .fiction-nav .fiction-write:hover { background: #111111; color: var(--yellow); text-decoration: none; }
+.fiction-nav .fiction-write:hover { background: #333333; }
+.fiction-write svg { width: 15px; height: 15px; }
+@media (max-width: 480px) { .fiction-nav a:not(.fiction-write) { padding: 8px 10px; } .fiction-logo-sub { font-size: .64rem; } }
+
+/* ボタン：黒地。上に乗せると黄色 */
+.site-fiction .button { background: var(--ink); border-color: var(--ink); color: var(--paper); font-weight: 800; }
+.site-fiction .button:hover { background: var(--yellow); border-color: #111111; color: #111111; }
+.site-fiction .button-outline { background: transparent; color: var(--ink); }
+.site-fiction .button-danger, .site-fiction .button-danger:hover { background: var(--danger); border-color: var(--danger); color: #ffffff; }
+
+/* 「作り話です」の注意書き：工事現場のテープのような黄色と黒のしま */
+.fiction-tape { margin: 0; padding: 7px 12px; border-radius: 6px; background: repeating-linear-gradient(-45deg, #111111 0 12px, var(--yellow) 12px 24px); text-align: center; }
+.fiction-tape span { display: inline-block; padding: 2px 12px; background: var(--yellow); color: #111111; font-size: .84rem; font-weight: 800; line-height: 1.6; }
+
+/* 一覧の上の案内 */
+.story-intro { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; padding: 28px 0 18px; }
+.story-intro-text { max-width: 34em; color: var(--ink-2); word-break: auto-phrase; }
+.story-intro-text b { background: linear-gradient(transparent 58%, var(--marker) 58%); color: var(--ink); }
+
+/* 見出し（「新着の体験談」など） */
+.story-head { display: flex; align-items: center; gap: 10px; margin: 40px 0 18px; font-family: var(--heavy); font-size: clamp(1.15rem, 3vw, 1.4rem); font-weight: 400; line-height: 1.45; }
+.story-head::before { content: ""; flex: none; width: 14px; height: 14px; border: 3px solid var(--ink); border-radius: 3px; background: var(--yellow); }
+
+/* サムネイル：画像があれば画像、なければ集中線の上に白い文字＋黒いふち（動画のサムネイルのように） */
+.story-thumb { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius); background: var(--tone, var(--yellow)); }
+.story-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .25s; }
+.story-thumb-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12% 7% 4%; background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255, 255, 255, .2) 0 5deg, transparent 5deg 12deg); color: #ffffff; text-align: center; font-family: var(--heavy); font-size: clamp(1.05rem, 2.2vw, 1.4rem); line-height: 1.4; overflow-wrap: anywhere; word-break: auto-phrase;
+    text-shadow: 3px 0 #111, -3px 0 #111, 0 3px #111, 0 -3px #111, 2px 2px #111, -2px 2px #111, 2px -2px #111, -2px -2px #111, 3px 4px 0 #111; }
+.story-thumb-text > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; padding: 4px 6px 0; }
+.story-new { position: absolute; top: 10px; left: 10px; padding: 1px 10px; border-radius: 4px; background: var(--badge); color: #ffffff; font-size: .74rem; font-weight: 800; line-height: 1.7; box-shadow: 0 2px 0 rgba(0, 0, 0, .3); }
+.tone-0 { --tone: #ffc400; }
+.tone-1 { --tone: #ff3b3b; }
+.tone-2 { --tone: #2f6bff; }
+.tone-3 { --tone: #13a85a; }
+.tone-4 { --tone: #ff4f9a; }
+.tone-5 { --tone: #8a4dff; }
+
+/* いちばん新しい1本（大きく） */
+.story-feature { display: grid; gap: 16px 32px; margin-top: 28px; text-decoration: none; }
+@media (min-width: 820px) { .story-feature { grid-template-columns: 1.3fr 1fr; align-items: center; } }
+.story-feature:hover { color: var(--ink); }
+.story-feature:hover img, .story-card a:hover img { transform: scale(1.04); }
+.story-feature .story-thumb-text { font-size: clamp(1.4rem, 3.8vw, 2.5rem); }
+.story-feature-body { display: grid; gap: 10px; align-content: center; min-width: 0; }
+.story-label { justify-self: start; padding: 1px 10px; border-radius: 4px; background: var(--badge); color: #ffffff; font-size: .74rem; font-weight: 800; line-height: 1.7; }
+.story-feature-title { font-family: var(--heavy); font-size: clamp(1.4rem, 3.4vw, 2rem); line-height: 1.45; overflow-wrap: anywhere; word-break: auto-phrase; }
+.story-feature:hover .story-feature-title { text-decoration: underline; text-decoration-thickness: 3px; text-decoration-color: var(--yellow); text-underline-offset: 6px; }
+.story-excerpt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; color: var(--ink-2); font-size: .95rem; overflow-wrap: anywhere; }
+
+/* カードの並び */
+.story-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 32px 22px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.story-card a { display: grid; gap: 10px; align-content: start; text-decoration: none; }
+.story-card a:hover { color: var(--ink); }
+.story-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-weight: 800; font-size: 1.05rem; line-height: 1.55; overflow-wrap: anywhere; word-break: auto-phrase; }
+.story-card a:hover .story-title { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.story-meta { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--muted); font-size: .8rem; }
+.story-author { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); font-weight: 600; }
+.story-meta time { flex: none; margin-left: auto; font-variant-numeric: tabular-nums; }
+.story-empty { padding-bottom: 24px; }
+.story-empty .story-head { margin-bottom: 6px; }
+.story-empty > .muted { margin-bottom: 18px; }
+.story-example .story-meta { color: var(--ink); font-weight: 700; }
+.story-more { padding: 8px 0 56px; border-top: 3px solid var(--ink); }
+
+/* 記事 */
+.site-fiction .article-head { padding-bottom: 18px; border-bottom: 0; }
+.site-fiction .article-head h1 { font-family: var(--heavy); font-size: clamp(1.6rem, 5vw, 2.3rem); font-weight: 400; line-height: 1.45; letter-spacing: .01em; word-break: auto-phrase; }
+.story-kicker { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--muted); font-size: .85rem; }
+.story-byline { display: flex; align-items: center; gap: 10px; margin-top: 18px; color: var(--muted); font-size: .9rem; }
+.story-byline .author { color: var(--ink); font-weight: 700; }
+.site-fiction .prose { font-family: var(--sans); font-size: 1.06rem; line-height: 2.05; }
+.site-fiction .article-figure img { border: 0; border-radius: var(--radius); }
+
+/* 投稿フォーム */
+.site-fiction .form-card { border-radius: 14px; }
+.site-fiction .form input[type="text"], .site-fiction .form textarea { border-radius: 10px; font-family: var(--sans); }
+.site-fiction .form input:focus, .site-fiction .form textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 4px var(--marker); }
+.site-fiction .required { background: var(--badge); }
+.site-fiction .page-head h1 { font-family: var(--heavy); font-weight: 400; }
+
+/* 足もと：黒地に黄色の題字 */
+.site-fiction .site-footer { border-top: 0; background: #111111; color: #e6e6e6; }
+.site-fiction .site-footer .footer-title { font-family: var(--heavy); font-weight: 400; font-size: 1.15rem; color: var(--yellow); }
+.site-fiction .site-footer .footer-text, .site-fiction .site-footer .copyright { color: #a8a8a8; }
+.site-fiction .site-footer a:hover { color: var(--yellow); }
 
 /* ---------- No.003 ちいさな投票所：読みもの系のサービスのような白地（白・黒・黒い丸ボタン・緑を少し・端末の書体） ---------- */
 .site-vote {

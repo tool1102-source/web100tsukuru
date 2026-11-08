@@ -4,29 +4,64 @@
 <body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('fiction')}"></header>
 
+<!--
+  投稿一覧。1ページ目は、いちばん新しい1本を大きく出し、残りをカードで並べる。
+  images … 投稿ごとの画像の番号（1枚目をサムネイルに使う）
+-->
 <main>
     <div class="wrap">
-        <!-- 題字は上の見出し（fragments/layout の fiction-masthead）にあるので、ここは案内だけ -->
-        <section class="page-head">
+        <!-- 題字は上の黄色い帯（fragments/layout の fiction-bar）にあるので、ここは案内だけ -->
+        <section class="story-intro">
             <h1 class="visually-hidden">フィクションブログ</h1>
-            <p class="lead">「やってみた」風の、ありそうでない体験談を集めたブログです。読むのも書くのも、だれでもどうぞ。</p>
-            <div class="actions"><a class="button" th:href="@{/fiction/new}">体験談を投稿する</a></div>
+            <p class="story-intro-text">「やってみた」風の、<b>ありそうでない</b>体験談を集めたブログです。読むのも書くのも、だれでもどうぞ。</p>
+            <a class="button" th:href="@{/fiction/new}">体験談を投稿する</a>
+        </section>
+        <p class="fiction-tape"><span>※ ここにある話は、ぜんぶ作り話です</span></p>
+
+        <!-- まだ1本もないとき：どんな話を書けばいいか、例を見せる -->
+        <section class="story-empty" th:if="${fictions.empty}" aria-labelledby="empty-h">
+            <h2 class="story-head" id="empty-h">まだ投稿がありません。最初の1本を書いてみませんか？</h2>
+            <p class="muted">たとえば、こんな話。</p>
+            <ul class="story-grid">
+                <li class="story-card story-example" th:each="t, st : ${#strings.arraySplit('電車で一輪車をこいでみた話,100円玉だけで1か月暮らしてみた,家の中で富士山に登ってみた', ',')}">
+                    <a th:href="@{/fiction/new}">
+                        <span class="story-thumb" th:classappend="'tone-' + ${st.index * 2}">
+                            <span class="story-thumb-text"><span th:text="${t}">題名</span></span>
+                            <span class="story-new">例</span>
+                        </span>
+                        <span class="story-title" th:text="${t}">題名</span>
+                        <span class="story-meta">この話を書いてみる →</span>
+                    </a>
+                </li>
+            </ul>
         </section>
 
-        <p th:if="${fictions.empty}" class="empty">まだ投稿がありません。最初の1本を書いてみませんか？</p>
+        <th:block th:unless="${fictions.empty}" th:with="first=${fictions.content[0]}">
+            <a class="story-feature" th:if="${page == 1}" th:href="@{/fiction/{id}(id=${first.id})}">
+                <span th:replace="~{fiction/parts :: thumb(${first}, ${images[first.id] != null ? images[first.id][0] : null})}"></span>
+                <span class="story-feature-body">
+                    <span class="story-label">いちばん新しい話</span>
+                    <span class="story-feature-title" th:text="${first.title}">題名</span>
+                    <span class="story-excerpt" th:text="${first.excerpt}">本文の冒頭</span>
+                    <span class="story-meta">
+                        <span class="avatar avatar-small" th:classappend="'avatar-' + ${first.authorColor}" aria-hidden="true"
+                              th:text="${first.authorInitial}">あ</span>
+                        <span class="story-author" th:text="${first.authorName}">投稿者</span>
+                        <time th:datetime="${first.createdAt}" th:text="${#temporals.format(first.createdAt, 'yyyy.MM.dd')}">2026.11.08</time>
+                    </span>
+                </span>
+            </a>
 
-        <ol class="posts" th:unless="${fictions.empty}">
-            <li class="post-item" th:each="f : ${fictions}">
-                <a th:href="@{/fiction/{id}(id=${f.id})}">
-                    <h2 th:text="${f.title}">タイトル</h2>
-                    <p class="meta">
-                        <span class="author" th:text="${f.authorName}">投稿者</span><br>
-                        <time th:datetime="${f.createdAt}" th:text="${#temporals.format(f.createdAt, 'yyyy.MM.dd HH:mm')}">日時</time>
-                    </p>
-                    <p class="excerpt" th:text="${f.excerpt}">本文の冒頭</p>
-                </a>
-            </li>
-        </ol>
+            <section th:if="${page > 1 or fictions.numberOfElements > 1}" aria-labelledby="list-h">
+                <h2 class="story-head" id="list-h" th:text="${page == 1} ? '新着の体験談' : '体験談（' + ${page} + 'ページ目）'">新着の体験談</h2>
+                <ol class="story-grid">
+                    <!-- 1ページ目の1本目は上で大きく出したので飛ばす（th:replace は th:if より先に動くので、条件は外側に置く） -->
+                    <th:block th:each="f, st : ${fictions.content}"><th:block th:if="${page > 1 or !st.first}">
+                        <li th:replace="~{fiction/parts :: card(${f}, ${images[f.id] != null ? images[f.id][0] : null})}"></li>
+                    </th:block></th:block>
+                </ol>
+            </section>
+        </th:block>
 
         <nav class="pager" aria-label="ページ送り" th:if="${fictions.totalPages > 1}">
             <a class="button button-outline button-small" th:if="${fictions.hasPrevious()}" th:href="@{/fiction(page=${page - 1})}" rel="prev">← 新しい投稿</a>

@@ -1,6 +1,7 @@
 package com.example.web100tsukuru.entity;
 
 import com.example.web100tsukuru.Web100tsukuruApplication;
+import com.example.web100tsukuru.service.Avatars;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -103,5 +104,25 @@ public class Fiction {
     /** 一覧や検索結果に出す短い抜粋 */
     public String getExcerpt() {
         return FictionText.excerpt(body, 80);
+    }
+
+    /** 投稿者の丸いアイコンに出す、名前の1文字目 */
+    public String getAuthorInitial() {
+        return Avatars.initial(authorName);
+    }
+
+    /** 投稿者の丸いアイコンの色の番号 */
+    public int getAuthorColor() {
+        return Avatars.color(authorName);
+    }
+
+    /** 画像のない投稿の、サムネイルの色の番号（投稿ごとに変える） */
+    public int getThumbColor() {
+        return id == null ? 0 : (int) Math.floorMod(id, (long) Avatars.COLORS);
+    }
+
+    /** 投稿から3日以内なら「NEW」を付ける */
+    public boolean isRecent() {
+        return createdAt != null && createdAt.isAfter(LocalDateTime.now(Web100tsukuruApplication.ZONE).minusDays(3));
     }
 }

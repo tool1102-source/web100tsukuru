@@ -9,14 +9,18 @@
         <article class="article">
             <p class="breadcrumb"><a th:href="@{/fiction}">← フィクションブログ</a></p>
             <header class="article-head">
-                <h1 th:text="${fiction.title}">タイトル</h1>
-                <p class="meta">
-                    <span class="author" th:text="${fiction.authorName}">投稿者</span>
-                    <span aria-hidden="true"> ・ </span>
+                <p class="story-kicker">
+                    <span class="story-label">体験談</span>
                     <time th:datetime="${fiction.createdAt}" th:text="${#temporals.format(fiction.createdAt, 'yyyy年M月d日 HH:mm')}">日時</time>
                 </p>
-                <p class="notice">※ この記事はフィクションです。実在の人物・団体とは関係ありません。</p>
+                <h1 th:text="${fiction.title}">タイトル</h1>
+                <p class="story-byline">
+                    <span class="avatar" th:classappend="'avatar-' + ${fiction.authorColor}" aria-hidden="true"
+                          th:text="${fiction.authorInitial}">あ</span>
+                    <span><span class="author" th:text="${fiction.authorName}">投稿者</span> さんの体験談</span>
+                </p>
             </header>
+            <p class="fiction-tape"><span>※ この記事はフィクションです。実在の人物・団体とは関係ありません。</span></p>
 
             <div class="article-body">
                 <th:block th:each="b : ${blocks}">
@@ -36,6 +40,15 @@
                 <a class="button button-small" th:href="@{/fiction/new}">あなたも投稿する</a>
             </footer>
         </article>
+
+        <section class="story-more" th:unless="${more.empty}" aria-labelledby="more-h">
+            <h2 class="story-head" id="more-h">ほかの体験談</h2>
+            <ol class="story-grid">
+                <th:block th:each="f : ${more}">
+                    <li th:replace="~{fiction/parts :: card(${f}, ${images[f.id] != null ? images[f.id][0] : null})}"></li>
+                </th:block>
+            </ol>
+        </section>
     </div>
 </main>
 

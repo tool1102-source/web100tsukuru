@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<!--
+  フィクションブログの画面で共通に使う部品。
+  thumb(f, img) … 16:9 のサムネイル。img は1枚目の画像の番号（なければ null で、題名を動画のサムネイルのように大きく書く）
+  card(f, img) … 一覧の1件
+  見た目は「やってみた」系のWebマガジンのような形（黄色の帯・極太の見出し・写真が主役のカード）
+-->
+<body>
+
+<span class="story-thumb" th:fragment="thumb(f, img)" th:classappend="'tone-' + ${f.thumbColor}">
+    <img th:if="${img != null}" th:src="@{/fiction/{id}/images/{no}.jpg(id=${f.id},no=${img})}"
+         alt="" loading="lazy" decoding="async">
+    <span th:unless="${img != null}" class="story-thumb-text"><span th:text="${f.title}">題名</span></span>
+    <span class="story-new" th:if="${f.recent}">新着</span>
+</span>
+
+<li class="story-card" th:fragment="card(f, img)">
+    <a th:href="@{/fiction/{id}(id=${f.id})}">
+        <span th:replace="~{fiction/parts :: thumb(${f}, ${img})}"></span>
+        <span class="story-title" th:text="${f.title}">題名</span>
+        <span class="story-meta">
+            <span class="avatar avatar-small" th:classappend="'avatar-' + ${f.authorColor}" aria-hidden="true"
+                  th:text="${f.authorInitial}">あ</span>
+            <span class="story-author" th:text="${f.authorName}">投稿者</span>
+            <time th:datetime="${f.createdAt}" th:text="${#temporals.format(f.createdAt, 'yyyy.MM.dd')}">2026.11.08</time>
+        </span>
+    </a>
+</li>
+
+</body>
+</html>

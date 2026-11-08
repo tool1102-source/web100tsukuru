@@ -53,6 +53,8 @@ public class FictionController {
         }
         model.addAttribute("fictions", fictions);
         model.addAttribute("page", page);
+        // カードのサムネイルには、それぞれの1枚目の画像を使う（画像のない投稿は題名を大きく書く）
+        model.addAttribute("images", fictionService.imageNumbers(fictions.map(Fiction::getId).toList()));
         return "fiction/list";
     }
 
@@ -63,6 +65,13 @@ public class FictionController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("fiction", fiction);
         model.addAttribute("blocks", fictionService.articleBlocks(fiction));
+        // 記事の下に「ほかの体験談」を新しい順に3件
+        List<Fiction> more = fictionService.findLatest(4).stream()
+                .filter(f -> !f.getId().equals(id))
+                .limit(3)
+                .toList();
+        model.addAttribute("more", more);
+        model.addAttribute("images", fictionService.imageNumbers(more.stream().map(Fiction::getId).toList()));
         return "fiction/show";
     }
 
