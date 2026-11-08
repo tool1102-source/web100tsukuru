@@ -74,7 +74,7 @@ class FollowTests {
         MockHttpSession host = signup("host_secret", "しゅさい");
         MockHttpSession fan = signup("fan_secret", "ふぁん");
         Long hostId = users.findByLoginId("host_secret").orElseThrow().getId();
-        Long pollId = createPoll(host);
+        Long pollId = createPoll(host, "今日の選挙");
 
         // 選挙のページの主催者の名前から、その人のページへ行ける
         mvc.perform(get("/vote/" + pollId))
@@ -132,6 +132,34 @@ class FollowTests {
                 .andExpect(content().string(containsString("すると、フォローしている人が開催した選挙がここに並びます。")));
     }
 
+    @Test
+    void ホームにはフォロー中の人の選挙と_フォローしていない人のおすすめが混ざって出る() throws Exception {
+        MockHttpSession host = signup("feed_host", "ふぉろーさき");
+        MockHttpSession other = signup("feed_other", "ほかのひと");
+        MockHttpSession viewer = signup("feed_viewer", "みるひと");
+        Long hostId = users.findByLoginId("feed_host").orElseThrow().getId();
+        createPoll(host, "フォロー先の選挙");
+        createPoll(other, "知らない人の選挙");
+        Long votedPoll = createPoll(other, "投票ずみの選挙");
+        createPoll(viewer, "自分の選挙");
+        mvc.perform(post("/vote/users/" + hostId + "/follow").session(viewer));
+        Long optionId = options.findByPollIdOrderByOptionNo(votedPoll).get(0).getId();
+        mvc.perform(post("/vote/" + votedPoll + "/tickets").session(viewer)
+                .param("optionId", optionId.toString()).param("tickets", "1"));
+
+        String html = mvc.perform(get("/vote").session(viewer)).andReturn().getResponse().getContentAsString();
+        String feed = html.substring(html.indexOf("id=\"feed-h\""), html.indexOf("id=\"hot-h\""));
+        assertThat(feed).contains("あなたへのおすすめ", "フォロー先の選挙", "知らない人の選挙",
+                "class=\"poll-card-reason is-follow\">フォロー中の人", "class=\"poll-card-reason\">おすすめ");
+        // フォロー中の人の選挙が先頭。自分の選挙と、もう投票した選挙は出さない
+        assertThat(feed.indexOf("フォロー先の選挙")).isLessThan(feed.indexOf("知らない人の選挙"));
+        assertThat(feed).doesNotContain("自分の選挙", "投票ずみの選挙");
+
+        // ログインしていなければ、印を付けずにおすすめだけを出す
+        String guest = mvc.perform(get("/vote")).andReturn().getResponse().getContentAsString();
+        assertThat(guest).contains("おすすめの選挙", "フォロー先の選挙", "自分の選挙").doesNotContain("poll-card-reason");
+    }
+
     private MockHttpSession signup(String loginId, String displayName) throws Exception {
         MvcResult result = mvc.perform(post("/vote/signup")
                         .param("loginId", loginId).param("displayName", displayName).param("password", "password123")
@@ -141,9 +169,9 @@ class FollowTests {
         return (MockHttpSession) result.getRequest().getSession(false);
     }
 
-    private Long createPoll(MockHttpSession owner) throws Exception {
+    private Long createPoll(MockHttpSession owner, String title) throws Exception {
         String location = mvc.perform(post("/vote").session(owner)
-                        .param("title", "今日の選挙").param("option", "A", "B").param("duration", "DAY_1"))
+                        .param("title", title).param("option", "A", "B").param("duration", "DAY_1"))
                 .andExpect(status().is3xxRedirection())
                 .andReturn().getResponse().getRedirectedUrl();
         return Long.valueOf(location.substring(location.lastIndexOf('/') + 1));

@@ -59,18 +59,18 @@ public class PollController {
         this.voteLimiter = new PostRateLimiter(voteLimit, Duration.ofMinutes(10));
     }
 
-    /** 投票所のトップ：受付中と開票済みの選挙 (GET /vote) */
+    /** 投票所のトップ：ホーム（おすすめ）・フォロー中・受付中・開票済み (GET /vote) */
     @GetMapping("/vote")
     public String list(@RequestParam(defaultValue = "all") String tab, HttpServletRequest request, Model model) {
-        // 左の切り替え（note のホームのような形）：すべて / フォロー中 / 受付中 / 開票済み / 報告あり
+        // 左の切り替え（note のホームのような形）：ホーム / フォロー中 / 受付中 / 開票済み / 報告あり
         String current = switch (tab) {
             case "following", "open", "closed", "reported" -> tab;
             default -> "all";
         };
+        Long userId = login.currentUserId(request);
+        List<Long> followeeIds = userId == null ? List.of() : follows.followeeIds(userId);
         if (current.equals("following")) {
             // フォローしている人が開催した選挙（新しい順）。ログインしていなければ、画面でログインをすすめる
-            Long userId = login.currentUserId(request);
-            List<Long> followeeIds = userId == null ? List.of() : follows.followeeIds(userId);
             model.addAttribute("tab", current);
             model.addAttribute("followsAnyone", !followeeIds.isEmpty());
             model.addAttribute("followed", polls.hostedBy(followeeIds, 60));
@@ -84,6 +84,10 @@ public class PollController {
         model.addAttribute("closed", current.equals("reported")
                 ? closed.stream().filter(s -> s.poll().isReported()).toList()
                 : closed);
+        if (current.equals("all")) {
+            // ホームの「あなたへのおすすめ」：フォローしている人の選挙と、フォローしていない人のおすすめを混ぜる
+            model.addAttribute("feed", polls.feed(userId, followeeIds, 12));
+        }
         // 「注目の選挙」：受付中のうち、票の多い順に5件
         model.addAttribute("hot", openAll.stream()
                 .filter(s -> s.totalTickets() > 0)

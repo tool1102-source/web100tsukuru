@@ -28,6 +28,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -90,8 +91,8 @@ public class PollService {
         }
     }
 
-    /** 一覧の1件。draw は引き分け */
-    public record PollSummary(Poll poll, String ownerName, List<String> optionLabels, long totalTickets,
+    /** 一覧の1件。draw は引き分け、voters は投票した人数（候補ごとの人数の合計。おすすめの順に使う目安） */
+    public record PollSummary(Poll poll, String ownerName, List<String> optionLabels, long totalTickets, long voters,
                               List<String> winnerLabels, boolean draw, boolean hasImage) {
 
         public String ownerInitial() {
@@ -259,6 +260,51 @@ public class PollService {
         return summaries(polls.findByOwnerUserIdOrderByCreatedAtDescIdDesc(userId));
     }
 
+    /**
+     * ホームの「あなたへのおすすめ」の1件。fromFollowee はフォローしている人の選挙（違えばおすすめ）
+     */
+    public record FeedItem(PollSummary summary, boolean fromFollowee) {
+    }
+
+    /**
+     * ホームの「あなたへのおすすめ」：投票受付中の選挙を、フォローしている人の選挙（新しい順）と、
+     * フォローしていない人のおすすめ（盛り上がっている順）を 1：2 で交互に並べる（X や note のホームのように）。
+     * 自分が開催した選挙と、もう投票した選挙は出さない。viewerUserId はログインしていなければ null
+     */
+    public List<FeedItem> feed(Long viewerUserId, Collection<Long> followeeIds, int limit) {
+        Set<Long> voted = viewerUserId == null ? Set.of() : new HashSet<>(votes.pollIdsVotedBy(viewerUserId));
+        List<PollSummary> candidates = openPolls(60).stream()
+                .filter(s -> !s.poll().getOwnerUserId().equals(viewerUserId))
+                .filter(s -> !voted.contains(s.poll().getId()))
+                .toList();
+        List<PollSummary> followed = candidates.stream()
+                .filter(s -> followeeIds.contains(s.poll().getOwnerUserId()))
+                .sorted((a, b) -> b.poll().getCreatedAt().compareTo(a.poll().getCreatedAt()))
+                .toList();
+        List<PollSummary> recommended = candidates.stream()
+                .filter(s -> !followeeIds.contains(s.poll().getOwnerUserId()))
+                .sorted((a, b) -> Double.compare(heat(b), heat(a)))
+                .toList();
+        List<FeedItem> feed = new ArrayList<>();
+        int f = 0;
+        int r = 0;
+        while (feed.size() < limit && (f < followed.size() || r < recommended.size())) {
+            // フォロー中1件 → おすすめ2件 の順。片方が尽きたら、もう片方だけを続ける
+            if (f < followed.size() && (feed.size() % 3 == 0 || r >= recommended.size())) {
+                feed.add(new FeedItem(followed.get(f++), true));
+            } else {
+                feed.add(new FeedItem(recommended.get(r++), false));
+            }
+        }
+        return feed;
+    }
+
+    /** おすすめの順：投票した人数を重く、票数はゆるく、開催して1日以内なら少し上げる */
+    private static double heat(PollSummary s) {
+        boolean fresh = s.poll().getCreatedAt().isAfter(now().minusDays(1));
+        return s.voters() * 2.0 + Math.log1p(s.totalTickets()) + (fresh ? 2.0 : 0.0);
+    }
+
     /** 「フォロー中」：フォローしている人が開催した選挙（新しい順） */
     public List<PollSummary> hostedBy(Collection<Long> ownerUserIds, int limit) {
         if (ownerUserIds.isEmpty()) {
@@ -302,6 +348,7 @@ public class PollService {
                     .map(PollOption::getLabel).toList();
             result.add(new PollSummary(poll, names.getOrDefault(poll.getOwnerUserId(), "退会した人"),
                     opts.stream().map(PollOption::getLabel).toList(), tallies.stream().mapToLong(OptionTally::getTickets).sum(),
+                    tallies.stream().mapToLong(OptionTally::getVoters).sum(),
                     winnerLabels, outcome.draw(), withImage.contains(poll.getId())));
         }
         return result;

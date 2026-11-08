@@ -686,3 +686,8 @@ a.avatar:hover { color: var(--c-ink); opacity: .8; }
 .me-follows { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
 .me-follows a { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; font-size: .9rem; }
 .me-follows a:hover { background: var(--line-soft); color: var(--ink); }
+/* ホームのおすすめ：なぜ出ているかの印と、「すべて見る」 */
+.poll-card-reason { padding: 0 8px; border-radius: 999px; background: var(--line-soft); color: var(--ink-2); font-size: .7rem; font-weight: 700; line-height: 1.8; }
+.poll-card-reason.is-follow { background: var(--accent-soft); color: var(--accent); }
+.feed-more { margin-left: auto; font-size: .82rem; font-weight: 600; color: var(--muted); }
+.feed-head .feed-more:hover { color: var(--ink); }

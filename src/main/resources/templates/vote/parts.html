@@ -93,6 +93,9 @@
             <span class="poll-card-time" th:text="${s.poll().open} ? ${s.poll().timeLeft} : '開票済み'">あと1日</span>
         </span>
         <span class="poll-card-meta">
+            <!--/* ホームのおすすめでだけ、なぜ出ているかの印を付ける（呼ぶ側の th:with で feedReason を渡す） */-->
+            <span class="poll-card-reason" th:if="${feedReason != null}" th:classappend="${feedReason == 'フォロー中の人'} ? 'is-follow'"
+                  th:text="${feedReason}">おすすめ</span>
             <span class="poll-card-tickets" th:title="'総投票数 ' + ${s.totalTickets()} + '票'">
                 <svg th:replace="~{vote/parts :: ticket}"></svg> <span th:text="${#numbers.formatInteger(s.totalTickets(), 1, 'COMMA')} + '票'">0票</span>
             </span>

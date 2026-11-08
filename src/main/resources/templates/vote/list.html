@@ -14,7 +14,7 @@
 
         <div class="vote-home">
             <nav class="vote-side" aria-label="選挙の切り替え">
-                <a th:href="@{/vote}" th:attr="aria-current=${tab == 'all'} ? 'page'">すべて</a>
+                <a th:href="@{/vote}" th:attr="aria-current=${tab == 'all'} ? 'page'">ホーム</a>
                 <a th:href="@{/vote(tab='following')}" th:attr="aria-current=${tab == 'following'} ? 'page'">フォロー中</a>
                 <a th:href="@{/vote(tab='open')}" th:attr="aria-current=${tab == 'open'} ? 'page'">受付中</a>
                 <a th:href="@{/vote(tab='closed')}" th:attr="aria-current=${tab == 'closed'} ? 'page'">開票済み</a>
@@ -59,18 +59,28 @@
                 </section>
 
                 <th:block th:if="${tab == 'all'}">
+                    <!--
+                      ホームのいちばん上：フォローしている人の選挙と、フォローしていない人のおすすめを混ぜて並べる。
+                      ログインしていれば、カードに「フォロー中の人」「おすすめ」の印を付ける
+                    -->
+                    <section class="vote-section" aria-labelledby="feed-h">
+                        <h2 class="feed-head" id="feed-h">
+                            <th:block th:text="${me != null} ? 'あなたへのおすすめ' : 'おすすめの選挙'">あなたへのおすすめ</th:block>
+                            <a class="feed-more" th:href="@{/vote(tab='open')}">投票受付中をすべて見る<span class="chevron" aria-hidden="true"></span></a>
+                        </h2>
+                        <p th:if="${feed.isEmpty() and open.isEmpty()}" class="empty">いま投票受付中の選挙はありません。最初の選挙を開催してみませんか？</p>
+                        <p th:if="${feed.isEmpty() and !open.isEmpty()}" class="empty">投票受付中の選挙には、すべて投票しました。開票をお楽しみに。</p>
+                        <ol class="poll-cards" th:unless="${feed.isEmpty()}">
+                            <th:block th:each="item : ${feed}"
+                                      th:with="feedReason=${me == null} ? null : (${item.fromFollowee()} ? 'フォロー中の人' : 'おすすめ')"><li
+                                    th:replace="~{vote/parts :: card(${item.summary()})}"></li></th:block>
+                        </ol>
+                    </section>
+
                     <section class="vote-section" th:unless="${hot.isEmpty()}" aria-labelledby="hot-h">
                         <h2 class="feed-head" id="hot-h">注目の選挙</h2>
                         <ol class="poll-ranks">
                             <th:block th:each="s, st : ${hot}"><li th:replace="~{vote/parts :: rank(${s}, ${st.count})}"></li></th:block>
-                        </ol>
-                    </section>
-
-                    <section class="vote-section" aria-labelledby="open-h">
-                        <h2 class="feed-head" id="open-h"><a th:href="@{/vote(tab='open')}">投票受付中の選挙<span class="chevron" aria-hidden="true"></span></a></h2>
-                        <p th:if="${open.isEmpty()}" class="empty">いま投票受付中の選挙はありません。最初の選挙を開催してみませんか？</p>
-                        <ol class="poll-cards" th:unless="${open.isEmpty()}">
-                            <th:block th:each="s : ${open}"><li th:replace="~{vote/parts :: card(${s})}"></li></th:block>
                         </ol>
                     </section>
 

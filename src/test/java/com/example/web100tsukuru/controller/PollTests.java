@@ -388,7 +388,7 @@ class PollTests {
         mvc.perform(get("/vote").param("tab", "reported"))
                 .andExpect(content().string(containsString("実行報告がある選挙は、まだありません。")))
                 .andExpect(content().string(not(containsString("海 ／ 山"))));
-        // 知らない切り替えの名前は「すべて」にする
+        // 知らない切り替えの名前は「ホーム」にする
         mvc.perform(get("/vote").param("tab", "<script>"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("href=\"/vote\" aria-current=\"page\"")));
