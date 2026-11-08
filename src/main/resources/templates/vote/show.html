@@ -6,7 +6,7 @@
 
 <!--
   投票のページ。言い方は一般的な投票の仕組みにそろえる：
-  手持ちは「投票券 ○枚」、選択肢ごとの数は「○票」、することは「投票する」、戻ることは「返却」
+  手持ちは「投票券 ○枚」、候補ごとの数は「○票」、することは「投票する」、戻ることは「返却」
 -->
 <main>
     <div class="wrap">
@@ -16,23 +16,23 @@
 
             <header class="article-head">
                 <p class="poll-state" th:classappend="${poll.open} ? 'is-open' : 'is-closed'"
-                   th:text="${poll.open} ? '受付中 ・ ' + ${poll.timeLeft} : '投票終了'">受付中</p>
-                <h1 th:text="${poll.title}">お題</h1>
+                   th:text="${poll.open} ? '受付中 ・ ' + ${poll.timeLeft} : '開票済み'">受付中</p>
+                <h1 th:text="${poll.title}">タイトル</h1>
                 <p class="meta poll-author">
                     <span class="avatar avatar-small" th:classappend="'avatar-' + ${view.ownerColor()}" aria-hidden="true"
                           th:text="${view.ownerInitial()}">み</span>
-                    <span><span class="author" th:text="${view.ownerName()}">作成者</span> さんの投票</span>
+                    <span><span class="author" th:text="${view.ownerName()}">主催者</span> さんが主催</span>
                     <span>締め切り <time th:datetime="${poll.closesAt}" th:text="${#temporals.format(poll.closesAt, 'M月d日 HH:mm')}">日時</time></span>
                 </p>
             </header>
 
             <figure class="article-figure poll-figure" th:if="${view.questionImage() != null}">
-                <img th:src="@{/vote/{id}/images/0.jpg(id=${poll.id})}" alt="投票の画像"
+                <img th:src="@{/vote/{id}/images/0.jpg(id=${poll.id})}" alt="選挙の画像"
                      th:width="${view.questionImage().width}" th:height="${view.questionImage().height}" decoding="async">
             </figure>
             <p class="prose poll-detail" th:if="${poll.detail != null}" th:text="${poll.detail}">説明</p>
 
-            <section class="poll-result" th:unless="${poll.open}" aria-label="結果">
+            <section class="poll-result" th:unless="${poll.open}" aria-label="開票結果">
                 <th:block th:if="${view.winners().isEmpty() and !view.draw()}">
                     <p class="poll-result-head">投票はありませんでした</p>
                 </th:block>
@@ -50,10 +50,10 @@
                 </th:block>
             </section>
 
-            <section class="poll-options" id="options" aria-label="選択肢">
+            <section class="poll-options" id="options" aria-label="候補">
                 <div class="poll-option" th:each="o : ${view.options()}" th:classappend="${o.winner()} ? 'is-winner'">
                     <div class="poll-option-head">
-                        <span class="poll-option-label" th:text="${o.label()}">選択肢</span>
+                        <span class="poll-option-label" th:text="${o.label()}">候補</span>
                         <span class="poll-option-count">
                             <b th:text="${#numbers.formatInteger(o.tickets(), 1, 'COMMA')}">0</b>票
                             <span class="muted" th:text="'（' + ${o.percent()} + '%）'">（0%）</span>
@@ -83,7 +83,7 @@
                     </form>
                 </div>
                 <p class="status" th:if="${poll.open and me != null and me.totalTickets == 0}"
-                   th:text="'投票券がありません。明日のログインボーナスで' + ${@accountService.dailyBonus} + '枚受け取れます。1位にならなかった選択肢への投票券も、締め切り後に返却されます。'">投票券がありません</p>
+                   th:text="'投票券がありません。明日のログインボーナスで' + ${@accountService.dailyBonus} + '枚受け取れます。1位にならなかった候補への投票券も、締め切り後に返却されます。'">投票券がありません</p>
                 <p class="poll-total" th:text="'総投票数 ' + ${#numbers.formatInteger(view.totalTickets(), 1, 'COMMA')} + '票'">総投票数 0票</p>
                 <p class="poll-login" th:if="${poll.open and me == null}">
                     <a class="button" th:href="@{/vote/signup(next=${currentPath})}"
@@ -91,7 +91,7 @@
                     <a class="button button-outline" th:href="@{/vote/login(next=${currentPath})}">ログインして投票する</a>
                 </p>
                 <p class="hint poll-hint" th:if="${poll.open}">
-                    投票券1枚で1票。1人で何票でも、何回でも投票できます。1位にならなかった選択肢への投票券は、締め切り後にすべて返却されます。
+                    投票券1枚で1票。1人で何票でも、何回でも投票できます。1位にならなかった候補への投票券は、締め切り後にすべて返却されます。
                     票数が同じ場合は、投票した人数が多いほうが1位です。人数も同じ場合は引き分けとなり、投票券はすべて返却されます。
                 </p>
             </section>
@@ -107,7 +107,7 @@
                     </figure>
                 </th:block>
                 <p class="hint" th:if="${!poll.reported and !view.owner()}"
-                   th:text="${view.winners().isEmpty()} ? '1位が決まらなかったため、どうするかは作成者が決めます。報告が届いたら、ここに載ります。' : '作成者が結果どおりに実行したら、ここに報告が載ります。'">報告が載ります</p>
+                   th:text="${view.winners().isEmpty()} ? '1位が決まらなかったため、どうするかは主催者が決めます。報告が届いたら、ここに載ります。' : '主催者が結果どおりに実行したら、ここに報告が載ります。'">報告が載ります</p>
                 <p th:if="${!poll.reported and view.owner()}">
                     <a class="button" th:href="@{/vote/{id}/report(id=${poll.id})}">実行報告を書く</a>
                 </p>
@@ -115,8 +115,8 @@
 
             <footer class="article-foot">
                 <a class="button button-outline button-small" target="_blank" rel="noopener"
-                   th:href="@{https://x.com/intent/post(text=${poll.reported} ? '投票の結果どおりに実行しました：' + ${poll.title} : '「' + ${poll.title} + '」どれがいいか投票してください #ちいさな投票所', url=${baseUrl + currentPath})}">X でシェア ↗</a>
-                <a class="button button-small" th:href="@{/vote/new}">あなたも投票を作成する</a>
+                   th:href="@{https://x.com/intent/post(text=${poll.reported} ? '選挙の結果どおりに実行しました：' + ${poll.title} : '「' + ${poll.title} + '」どれがいいか投票してください #ちいさな投票所', url=${baseUrl + currentPath})}">X でシェア ↗</a>
+                <a class="button button-small" th:href="@{/vote/new}">あなたも選挙を開催する</a>
             </footer>
         </article>
     </div>

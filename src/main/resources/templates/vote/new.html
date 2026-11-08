@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('投票を作成 | ちいさな投票所', 'ちいさな投票所で、自分の小さな選択を決めてもらう投票を作成するページです。', true)}"></head>
+<head th:replace="~{fragments/layout :: head('選挙を開催 | ちいさな投票所', 'ちいさな投票所で、自分の小さな選択を決めてもらう選挙を開催するページです。', true)}"></head>
 <body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
 
@@ -8,8 +8,8 @@
     <div class="wrap">
         <p class="breadcrumb"><a th:href="@{/vote}">← ちいさな投票所</a></p>
         <section class="page-head">
-            <h1>投票を作成</h1>
-            <p class="lead">あなたの小さな選択を、みんなの投票で決めてもらいます。締め切り後は、1位の結果どおりに実行して報告してください。</p>
+            <h1>選挙を開催</h1>
+            <p class="lead">あなたの小さな選択を、選挙で決めてもらいます。締め切り後は、1位の結果どおりに実行して報告してください。</p>
         </section>
 
         <div class="form-card">
@@ -22,11 +22,11 @@
                 </div>
 
                 <fieldset class="form-group options-group">
-                    <legend>選択肢 <span class="required">2〜4個</span></legend>
+                    <legend>候補 <span class="required">2〜4個</span></legend>
                     <input type="text" name="option" th:each="i : ${#numbers.sequence(0, 3)}"
                            th:value="${options != null and options.size() > i} ? ${options[i]} : ''"
                            th:placeholder="${i == 0} ? '例：カレー' : (${i == 1} ? '例：ラーメン' : '（なくてもよい）')"
-                           maxlength="30" th:attr="aria-label='選択肢' + ${i + 1}">
+                           maxlength="30" th:attr="aria-label='候補' + ${i + 1}">
                 </fieldset>
 
                 <fieldset class="form-group">
@@ -61,7 +61,7 @@
 
                 <p class="hint">締め切り後は、1位の結果どおりに実行して報告してください。それがこの投票所の約束です。</p>
                 <div class="form-actions">
-                    <button type="submit" class="button">投票を作成する</button>
+                    <button type="submit" class="button">選挙を開催する</button>
                 </div>
             </form>
         </div>

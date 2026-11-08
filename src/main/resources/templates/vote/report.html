@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('実行報告を書く | ちいさな投票所', '投票の結果どおりに実行したことを報告するページです。', true)}"></head>
+<head th:replace="~{fragments/layout :: head('実行報告を書く | ちいさな投票所', '選挙の結果どおりに実行したことを報告するページです。', true)}"></head>
 <body th:class="'site-' + ${site ?: 'hub'}">
 <header th:replace="~{fragments/layout :: header('vote')}"></header>
 
 <main>
     <div class="wrap">
-        <p class="breadcrumb"><a th:href="@{/vote/{id}(id=${poll.id})}">← 投票に戻る</a></p>
+        <p class="breadcrumb"><a th:href="@{/vote/{id}(id=${poll.id})}">← 選挙に戻る</a></p>
         <section class="page-head">
             <h1>実行報告を書く</h1>
             <p class="lead">
-                「<span th:text="${poll.title}">お題</span>」は
+                「<span th:text="${poll.title}">タイトル</span>」は
                 <th:block th:if="${view.draw()}">引き分けでした（投票券はすべて返却済みです）。どうしたかを書いてください。</th:block>
                 <th:block th:if="${view.winners().isEmpty() and !view.draw()}">投票がありませんでした。どうしたかを書いてください。</th:block>
                 <th:block th:unless="${view.winners().isEmpty()}">

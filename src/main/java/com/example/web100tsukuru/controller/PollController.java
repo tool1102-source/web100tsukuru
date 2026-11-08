@@ -42,7 +42,7 @@ public class PollController {
     private final PollService polls;
     private final VoteLogin login;
     private final ImageProcessor imageProcessor;
-    // お題の出しすぎ・券の入れすぎを止める（同じ接続元から 10分あたり）
+    // 選挙の開きすぎ・投票のしすぎを止める（同じ接続元から 10分あたり）
     private final PostRateLimiter createLimiter;
     private final PostRateLimiter voteLimiter;
 
@@ -72,7 +72,7 @@ public class PollController {
         model.addAttribute("closed", current.equals("reported")
                 ? closed.stream().filter(s -> s.poll().isReported()).toList()
                 : closed);
-        // 「券が集まっているお題」：受付中のうち、券の多い順に5件
+        // 「注目の選挙」：受付中のうち、票の多い順に5件
         model.addAttribute("hot", openAll.stream()
                 .filter(s -> s.totalTickets() > 0)
                 .sorted((a, b) -> Long.compare(b.totalTickets(), a.totalTickets()))
@@ -81,7 +81,7 @@ public class PollController {
         return "vote/list";
     }
 
-    /** お題を出すフォーム (GET /vote/new)。ログインが要る */
+    /** 選挙を開催するフォーム (GET /vote/new)。ログインが要る */
     @GetMapping("/vote/new")
     public String newForm(HttpServletRequest request, Model model) {
         if (login.currentUserId(request) == null) {
@@ -92,7 +92,7 @@ public class PollController {
         return "vote/new";
     }
 
-    /** お題を受け取って保存する (POST /vote) */
+    /** 選挙を受け取って保存する (POST /vote) */
     @PostMapping("/vote")
     public String create(@RequestParam(defaultValue = "") String title,
                          @RequestParam(defaultValue = "") String detail,
@@ -123,7 +123,7 @@ public class PollController {
         }
         if (!createLimiter.tryAcquire(request.getRemoteAddr())) {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            model.addAttribute("error", "短い時間に続けて投票が作成されたため、受け付けを一時的に止めています。10分ほどたってから、もう一度お試しください。");
+            model.addAttribute("error", "短い時間に続けて選挙が開催されたため、受け付けを一時的に止めています。10分ほどたってから、もう一度お試しください。");
             return "vote/new";
         }
         ProcessedImage processed = null;
@@ -139,7 +139,7 @@ public class PollController {
         return "redirect:/vote/" + poll.getId();
     }
 
-    /** お題のページ (GET /vote/{id}) */
+    /** 選挙のページ (GET /vote/{id}) */
     @GetMapping("/vote/{id:\\d+}")
     public String show(@PathVariable Long id, HttpServletRequest request, Model model) {
         Long userId = login.currentUserId(request);
@@ -171,7 +171,7 @@ public class PollController {
         VoteResult result = polls.vote(id, optionId, userId, count);
         switch (result) {
             case OK -> redirect.addFlashAttribute("notice", count + "票を投票しました。");
-            case CLOSED -> redirect.addFlashAttribute("error", "この投票は締め切られました。");
+            case CLOSED -> redirect.addFlashAttribute("error", "この選挙の投票は締め切られました。");
             case NOT_ENOUGH -> redirect.addFlashAttribute("error", "投票券が足りません。");
             case INVALID -> redirect.addFlashAttribute("error", "投票数は1票以上で入力してください。");
             case NOT_FOUND -> throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -235,7 +235,7 @@ public class PollController {
         return "redirect:/vote/" + id;
     }
 
-    /** お題の中身を確かめる。問題がなければ null */
+    /** 選挙の中身を確かめる。問題がなければ null */
     private static String validate(String title, String detail, List<String> labels, String duration) {
         if (title.isBlank() || title.strip().length() > TITLE_MAX) {
             return "タイトルは1〜" + TITLE_MAX + "文字で入力してください。";
@@ -244,15 +244,15 @@ public class PollController {
             return "説明は" + DETAIL_MAX + "文字までです。";
         }
         if (labels.size() < 2 || labels.size() > 4) {
-            return "選択肢は2〜4個にしてください。";
+            return "候補は2〜4個にしてください。";
         }
         Set<String> seen = new HashSet<>();
         for (String label : labels) {
             if (label.length() > OPTION_MAX) {
-                return "選択肢は1つ" + OPTION_MAX + "文字までです。";
+                return "候補は1つ" + OPTION_MAX + "文字までです。";
             }
             if (!seen.add(label)) {
-                return "同じ選択肢が2つあります。";
+                return "同じ候補が2つあります。";
             }
         }
         try {
