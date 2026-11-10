@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('マイページ | らくがきオークション', 'コインの残りと、持っている絵・描いた絵のページです。', true)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('auction')}"></header>
+
+<main>
+    <div class="wrap">
+        <section class="page-head">
+            <p class="profile-line"><a th:replace="~{auction/parts :: who(${me})}"></a></p>
+            <h1>マイページ</h1>
+        </section>
+        <div th:replace="~{auction/parts :: messages}"></div>
+
+        <div class="wallet-card">
+            <div>
+                <p class="wallet-label">コイン</p>
+                <p class="wallet-coins"><svg th:replace="~{auction/parts :: coin}"></svg><b th:text="${#numbers.formatInteger(wallet.coins(), 1, 'COMMA')}">1,000</b><span>枚</span></p>
+            </div>
+            <dl class="wallet-facts">
+                <div><dt>入札中で押さえている分</dt><dd th:text="${#numbers.formatInteger(wallet.hold(), 1, 'COMMA')} + ' 枚'">0 枚</dd></div>
+                <div><dt>入札に使える分</dt><dd th:text="${#numbers.formatInteger(wallet.available(), 1, 'COMMA')} + ' 枚'">1,000 枚</dd></div>
+                <div><dt>今日あと描ける枚数</dt><dd th:text="${remaining} + ' 枚'">5 枚</dd></div>
+            </dl>
+            <div class="wallet-actions">
+                <a class="button button-gold" th:href="@{/auction/draw}">絵を描く</a>
+                <a class="button button-outline" th:href="@{/auction/users/{id}(id=${meId})}">公開されているページ</a>
+            </div>
+        </div>
+
+        <section class="auction-section" th:unless="${leading.isEmpty()}">
+            <div class="auction-section-head"><h2>いちばん高い値を付けている競り</h2></div>
+            <ul class="lot-grid lot-grid-small">
+                <th:block th:each="c : ${leading}"><li th:replace="~{auction/parts :: lotCard(${c})}"></li></th:block>
+            </ul>
+        </section>
+
+        <section class="auction-section" th:unless="${selling.isEmpty()}">
+            <div class="auction-section-head"><h2>出品中</h2></div>
+            <ul class="lot-grid lot-grid-small">
+                <th:block th:each="c : ${selling}"><li th:replace="~{auction/parts :: lotCard(${c})}"></li></th:block>
+            </ul>
+        </section>
+
+        <section class="auction-section">
+            <div class="auction-section-head">
+                <h2>持っている絵</h2>
+                <p>絵のページから、いつでも競りに出せます。</p>
+            </div>
+            <ul class="lot-grid lot-grid-small" th:unless="${owned.isEmpty()}">
+                <th:block th:each="c : ${owned}"><li th:replace="~{auction/parts :: workCard(${c})}"></li></th:block>
+            </ul>
+            <p class="auction-empty-line" th:if="${owned.isEmpty()}">まだ持っている絵はありません。描くか、競りで落としましょう。</p>
+        </section>
+
+        <section class="auction-section" th:unless="${drawn.isEmpty()}">
+            <div class="auction-section-head">
+                <h2>描いた絵</h2>
+                <p>ほかの人に渡った絵も、転売されるたびに値段の5%があなたに入ります。</p>
+            </div>
+            <ul class="lot-grid lot-grid-small">
+                <th:block th:each="c : ${drawn}"><li th:replace="~{auction/parts :: workCard(${c})}"></li></th:block>
+            </ul>
+        </section>
+
+        <section class="auction-section">
+            <div class="auction-section-head"><h2>コインの記録</h2><p>新しい順に30件まで。</p></div>
+            <table class="coin-ledger">
+                <tbody>
+                <tr th:each="e : ${ledger}">
+                    <td class="ledger-date" th:text="${#temporals.format(e.createdAt, 'M月d日 H:mm')}">11月10日</td>
+                    <td>
+                        <span th:text="${e.reasonLabel}">落札</span>
+                        <a th:if="${e.artworkId != null}" th:href="@{/auction/artworks/{id}(id=${e.artworkId})}">絵を見る</a>
+                    </td>
+                    <td class="ledger-delta" th:classappend="${e.delta < 0} ? 'is-minus' : 'is-plus'"
+                        th:text="(${e.delta > 0} ? '+' : '') + ${#numbers.formatInteger(e.delta, 1, 'COMMA')}">+1,000</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <form class="logout-form" th:action="@{/auction/logout}" method="post">
+            <button type="submit" class="link-button">ログアウト</button>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

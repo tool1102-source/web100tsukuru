@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('新規登録 | らくがきオークション', 'らくがきオークションに登録するページです。', true)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('auction')}"></header>
+
+<main>
+    <div class="wrap">
+        <p class="breadcrumb"><a th:href="@{/auction}">← 競り場</a></p>
+        <section class="page-head">
+            <h1>はじめる</h1>
+            <p class="lead">
+                登録すると、コインを<b th:text="${#numbers.formatInteger(@coinService.startCoins, 1, 'COMMA')}">1,000</b>枚受け取れます。
+                アカウントは「ちいさな投票所」と共通です。お金は一切かかりません。
+            </p>
+        </section>
+
+        <div class="form-card">
+            <div th:replace="~{auction/parts :: messages}"></div>
+            <p class="hint terms-note">
+                登録すると、<a href="/auction/rules#terms" target="_blank" rel="noopener">利用規約</a>と
+                <a th:href="@{/privacy}" target="_blank" rel="noopener">プライバシーポリシー</a>に同意したことになります。
+            </p>
+            <div th:replace="~{auction/parts :: google(${next})}"></div>
+            <p class="or-divider" th:if="${@googleIdTokens.enabled}"><span>または ID とパスワードで登録</span></p>
+            <form th:action="@{/auction/signup}" method="post" class="form" novalidate>
+                <input type="hidden" name="next" th:value="${next}">
+                <div class="form-group">
+                    <label for="loginId">ログイン ID <span class="required">必須</span></label>
+                    <input type="text" id="loginId" name="loginId" th:value="${loginId}" autocomplete="username"
+                           maxlength="20" pattern="[a-z0-9_]{3,20}" placeholder="例：taro_123" required autocapitalize="none" spellcheck="false">
+                    <p class="hint">英小文字・数字・_ の3〜20文字。ほかの人には見えません。</p>
+                </div>
+                <div class="form-group">
+                    <label for="displayName">表示名 <span class="required">必須</span></label>
+                    <input type="text" id="displayName" name="displayName" th:value="${displayName}" maxlength="20"
+                           placeholder="ニックネームでOK" required>
+                    <p class="hint">描いた絵の作者名として、ほかの人に表示されます。本名は入れないでください。</p>
+                </div>
+                <div class="form-group">
+                    <label for="password">パスワード <span class="required">必須</span></label>
+                    <input type="password" id="password" name="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+                    <p class="hint">8文字以上。メールアドレスを登録しないので、忘れると元に戻せません。ブラウザに保存しておいてください。</p>
+                </div>
+
+                <!-- スパム対策のおとり欄（人には見えない） -->
+                <div class="hp" aria-hidden="true">
+                    <label for="website">ウェブサイト（入力しないでください）</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="button button-gold">登録してコインをもらう</button>
+                </div>
+            </form>
+            <p class="form-foot">登録済みの方は <a th:href="@{/auction/login(next=${next})}">ログイン</a></p>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

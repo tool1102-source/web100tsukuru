@@ -40,6 +40,10 @@ public class SitemapController {
         }
         url(xml, "/vote", null);
         url(xml, "/vote/terms", null);
+        url(xml, "/auction", null);
+        url(xml, "/auction/collectors", null);
+        url(xml, "/auction/ranking", null);
+        url(xml, "/auction/rules", null);
         url(xml, "/privacy", null);
         for (Poll p : pollService.page(1, MAX_POSTS)) {
             LocalDateTime updated = p.getReportedAt() != null ? p.getReportedAt() : p.getCreatedAt();

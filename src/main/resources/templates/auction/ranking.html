@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('ランキング | らくがきオークション', 'らくがきオークションの資産・画家・名画のランキングです。', false)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('auction')}"></header>
+
+<main>
+    <div class="wrap">
+        <section class="page-head">
+            <h1>ランキング</h1>
+        </section>
+
+        <div class="ranking-columns">
+            <section class="auction-section">
+                <div class="auction-section-head">
+                    <h2>資産</h2>
+                    <p>コインと、持っている絵の値打ち（最後に売れた値段）の合計。</p>
+                </div>
+                <ol class="rank-list" th:unless="${assets.isEmpty()}">
+                    <li th:each="a, st : ${assets}">
+                        <span class="rank-no" th:text="${st.count}">1</span>
+                        <a th:replace="~{auction/parts :: who(${a.who()})}"></a>
+                        <span class="rank-sub" th:text="'絵 ' + ${a.works()} + '枚'">絵 3枚</span>
+                        <b class="rank-value" th:text="${#numbers.formatInteger(a.total(), 1, 'COMMA')}">3,000</b>
+                    </li>
+                </ol>
+                <p class="auction-empty-line" th:if="${assets.isEmpty()}">まだだれも参加していません。</p>
+            </section>
+
+            <section class="auction-section">
+                <div class="auction-section-head">
+                    <h2>画家</h2>
+                    <p>描いた絵が売れた額の合計（転売も含む）。</p>
+                </div>
+                <ol class="rank-list" th:unless="${artists.isEmpty()}">
+                    <li th:each="a, st : ${artists}">
+                        <span class="rank-no" th:text="${st.count}">1</span>
+                        <a th:replace="~{auction/parts :: who(${a.who()})}"></a>
+                        <span class="rank-sub" th:text="${a.sales()} + '回売れた'">5回売れた</span>
+                        <b class="rank-value" th:text="${#numbers.formatInteger(a.total(), 1, 'COMMA')}">3,000</b>
+                    </li>
+                </ol>
+                <p class="auction-empty-line" th:if="${artists.isEmpty()}">まだ売れた絵はありません。</p>
+            </section>
+        </div>
+
+        <section class="auction-section">
+            <div class="auction-section-head">
+                <h2>名画</h2>
+                <p>最後に売れた値段の高い順。</p>
+            </div>
+            <ul class="lot-grid lot-grid-small" th:unless="${masterpieces.isEmpty()}">
+                <th:block th:each="c : ${masterpieces}"><li th:replace="~{auction/parts :: workCard(${c})}"></li></th:block>
+            </ul>
+            <p class="auction-empty-line" th:if="${masterpieces.isEmpty()}">まだ売れた絵はありません。</p>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

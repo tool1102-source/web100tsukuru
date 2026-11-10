@@ -28,6 +28,10 @@ public class VoteModelAdvice {
 
     @ModelAttribute
     public void currentUser(HttpServletRequest request, Model model) {
+        // ログイン画面はオークションと共通。オークション側の画面では投票所のことはしない
+        if (request.getRequestURI().startsWith("/auction")) {
+            return;
+        }
         settlement.settleAllDue();
         Long userId = login.currentUserId(request);
         if (userId == null) {

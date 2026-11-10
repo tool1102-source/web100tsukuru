@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${card.work().title} + ' | らくがきオークション', ${card.artist().name()} + ' が描いた「' + ${card.work().title} + '」。' + (${card.work().lastPrice > 0} ? ${#numbers.formatInteger(card.work().lastPrice, 1, 'COMMA')} + 'コインで落札されました。' : 'まだ売れていない絵です。'), false)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('auction')}"></header>
+
+<main th:with="w=${card.work()}">
+    <div class="wrap">
+        <p class="breadcrumb"><a th:href="@{/auction}">← 競り場</a></p>
+        <div th:replace="~{auction/parts :: messages}"></div>
+
+        <div class="work">
+            <div class="work-art">
+                <span class="frame frame-large"><span class="frame-mat"><img th:src="@{/auction/artworks/{id}.png(id=${w.id})}"
+                        th:alt="${w.title}" width="512" height="512"></span></span>
+                <p class="work-plate">
+                    <b th:text="'「' + ${w.title} + '」'">「題名」</b>
+                    <span th:text="${card.artist().name()} + ' 作　' + ${#temporals.format(w.createdAt, 'yyyy年M月d日')}">作者</span>
+                </p>
+            </div>
+
+            <div class="work-info">
+                <h1 th:text="${w.title}">題名</h1>
+                <dl class="work-facts">
+                    <div><dt>描いた人</dt><dd><a th:replace="~{auction/parts :: who(${card.artist()})}"></a></dd></div>
+                    <div th:if="${card.owner() != null}"><dt>持ち主</dt><dd><a th:replace="~{auction/parts :: who(${card.owner()})}"></a></dd></div>
+                    <div><dt>最後の落札</dt>
+                        <dd th:if="${w.lastPrice > 0}"><b class="price" th:text="${#numbers.formatInteger(w.lastPrice, 1, 'COMMA')}">1,200</b> コイン（<span th:text="${w.saleCount}">1</span>回売れました）</dd>
+                        <dd th:if="${w.lastPrice == 0}">まだ売れていません</dd>
+                    </div>
+                </dl>
+
+                <a class="work-onsale" th:if="${card.lot() != null}" th:href="@{/auction/lots/{id}(id=${card.lot().id})}">
+                    <span class="lot-card-badge is-live">出品中</span>
+                    <span>いまの値段 <b th:text="${#numbers.formatInteger(card.lot().price, 1, 'COMMA')}">300</b> コイン・<span th:text="${card.lot().timeLeft}">あと2分</span></span>
+                    <span class="work-onsale-go">競りを見る →</span>
+                </a>
+
+                <!-- 持ち主だけ：競りに出す -->
+                <form class="sell-form" th:if="${mine and card.lot() == null}" th:action="@{/auction/artworks/{id}/sell(id=${w.id})}" method="post">
+                    <h2>競りに出す</h2>
+                    <div class="sell-row">
+                        <label for="startPrice">開始価格</label>
+                        <span class="coin-input"><input type="number" id="startPrice" name="startPrice" inputmode="numeric"
+                               th:attr="min=${minStart}" th:value="${minStart}" step="10" required><span>コイン</span></span>
+                    </div>
+                    <p class="hint">これより安い値しか付けない収集家は入札しません。高くしすぎると、だれも来ないことがあります。</p>
+                    <fieldset class="sell-lengths">
+                        <legend>長さ</legend>
+                        <label th:each="l, st : ${lengths}" class="length-option">
+                            <input type="radio" name="length" th:value="${l.name()}" th:checked="${st.first}">
+                            <span>
+                                <b th:text="${l.label}">3分</b>
+                                <small th:switch="${l.name()}">
+                                    <th:block th:case="'MINUTES_3'">すぐに決まる。見ている間に競りが進みます</th:block>
+                                    <th:block th:case="'HOUR_1'">ほかの人が入札しに来やすい</th:block>
+                                    <th:block th:case="*">寝ている間も競りが続きます</th:block>
+                                </small>
+                            </span>
+                        </label>
+                    </fieldset>
+                    <button type="submit" class="button button-gold">この絵を競りに出す</button>
+                    <p class="hint">
+                        売れたら、手数料5%を引いたコインが入ります（ほかの人が描いた絵なら、さらに5%が描いた人へ）。
+                        だれも入札しなければ、絵は手元に戻ります。
+                    </p>
+                </form>
+
+                <section class="work-fans">
+                    <h2>この絵を好みそうな収集家</h2>
+                    <ul class="fan-list" th:unless="${fans.isEmpty()}">
+                        <li th:each="f : ${fans}">
+                            <a th:href="@{/auction/collectors/{key}(key=${f.collector().key()})}">
+                                <span class="who-icon" aria-hidden="true" th:style="'background-color:' + ${f.collector().color()}" th:text="${f.collector().initial()}">赤</span>
+                                <span class="fan-name" th:text="${f.collector().name()}">赤坂伯爵</span>
+                            </a>
+                            <span class="fan-day" th:classappend="${f.attendsToday()} ? 'is-on'" th:text="${f.attendsToday()} ? '今日来場' : '今日は来ない'">今日来場</span>
+                            <span class="fan-day" th:classappend="${f.attendsTomorrow()} ? 'is-on'" th:text="${f.attendsTomorrow()} ? '明日来場' : '明日は来ない'">明日来場</span>
+                        </li>
+                    </ul>
+                    <p class="hint" th:if="${fans.isEmpty()}">特に好みそうな収集家はいません。ほかの人が買ってくれるかもしれません。</p>
+                    <p class="work-trend">
+                        <span>今日の流行「<span th:text="${today.trend().label()}">青と水色</span>」に <b th:text="${#numbers.formatInteger(trendToday * 100, 1)} + '%'">50%</b> 合う</span>
+                        <span>明日の流行「<span th:text="${tomorrow.trend().label()}">赤</span>」に <b th:text="${#numbers.formatInteger(trendTomorrow * 100, 1)} + '%'">0%</b> 合う</span>
+                    </p>
+                </section>
+
+                <p class="work-share">
+                    <a class="button button-outline button-small" target="_blank" rel="noopener"
+                       th:href="'https://x.com/intent/post?text=' + ${#uris.escapeQueryParam('「' + w.title + '」' + (w.lastPrice > 0 ? (' は ' + #numbers.formatInteger(w.lastPrice, 1, 'COMMA') + 'コインで落札されました') : ' を描きました') + ' #らくがきオークション')} + '&url=' + ${#uris.escapeQueryParam(baseUrl + currentPath)}">X で見せる</a>
+                </p>
+            </div>
+        </div>
+
+        <section class="auction-section">
+            <div class="auction-section-head">
+                <h2>来歴</h2>
+                <p>この絵が、だれからだれへ、いくらで渡ってきたか。</p>
+            </div>
+            <ol class="history">
+                <li th:each="s : ${history}">
+                    <span class="history-date" th:text="${#temporals.format(s.lot().endAt, 'M月d日 H:mm')}">11月10日</span>
+                    <span class="history-move">
+                        <a th:replace="~{auction/parts :: who(${s.from()})}"></a>
+                        <span class="history-arrow" aria-label="から">→</span>
+                        <a th:replace="~{auction/parts :: who(${s.to()})}"></a>
+                    </span>
+                    <b class="history-price"><span th:text="${#numbers.formatInteger(s.lot().price, 1, 'COMMA')}">300</span> コイン</b>
+                </li>
+                <li class="history-born">
+                    <span class="history-date" th:text="${#temporals.format(w.createdAt, 'M月d日 H:mm')}">11月10日</span>
+                    <span class="history-move"><a th:replace="~{auction/parts :: who(${card.artist()})}"></a> が描いた</span>
+                </li>
+            </ol>
+        </section>
+
+        <form class="report-form" th:if="${me != null and !mine}" th:action="@{/auction/artworks/{id}/report(id=${w.id})}" method="post">
+            <button type="submit" class="link-button" onclick="return confirm('この絵を不適切な絵として報告しますか？')">不適切な絵として報告する</button>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

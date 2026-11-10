@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${who.name()} + ' さんの絵 | らくがきオークション', ${who.name()} + ' さんが描いた絵と、持っている絵です。', false)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('auction')}"></header>
+
+<main>
+    <div class="wrap">
+        <p class="breadcrumb"><a th:href="@{/auction/ranking}">← ランキング</a></p>
+        <section class="page-head">
+            <p class="profile-line"><span class="who-icon who-icon-large" aria-hidden="true" th:style="'background-color:' + ${who.color()}" th:text="${who.initial()}">み</span></p>
+            <h1 th:text="${who.name()} + ' さん'">名前 さん</h1>
+        </section>
+
+        <section class="auction-section">
+            <div class="auction-section-head"><h2>描いた絵</h2></div>
+            <ul class="lot-grid lot-grid-small" th:unless="${drawn.isEmpty()}">
+                <th:block th:each="c : ${drawn}"><li th:replace="~{auction/parts :: workCard(${c})}"></li></th:block>
+            </ul>
+            <p class="auction-empty-line" th:if="${drawn.isEmpty()}">まだ描いた絵はありません。</p>
+        </section>
+
+        <section class="auction-section">
+            <div class="auction-section-head"><h2>持っている絵</h2></div>
+            <ul class="lot-grid lot-grid-small" th:unless="${owned.isEmpty()}">
+                <th:block th:each="c : ${owned}"><li th:replace="~{auction/parts :: workCard(${c})}"></li></th:block>
+            </ul>
+            <p class="auction-empty-line" th:if="${owned.isEmpty()}">いま持っている絵はありません。</p>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

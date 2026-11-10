@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('表示名を決める | らくがきオークション', 'Google で登録するときに、表示名を決めるページです。', true)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('auction')}"></header>
+
+<main>
+    <div class="wrap">
+        <section class="page-head">
+            <h1>表示名を決める</h1>
+            <p class="lead">
+                Google アカウントを確認しました。最後に、描いた絵の作者名として表示される名前を決めてください。
+                決めると、コインを<b th:text="${#numbers.formatInteger(@coinService.startCoins, 1, 'COMMA')}">1,000</b>枚受け取れます。
+            </p>
+        </section>
+
+        <div class="form-card">
+            <div th:replace="~{auction/parts :: messages}"></div>
+            <form th:action="@{/auction/signup/google}" method="post" class="form" novalidate>
+                <div class="form-group">
+                    <label for="displayName">表示名 <span class="required">必須</span></label>
+                    <input type="text" id="displayName" name="displayName" th:value="${displayName}" maxlength="20"
+                           placeholder="ニックネームでOK" required autofocus>
+                    <p class="hint">ほかの人に表示される名前です。Google の名前は使いません。本名は入れないでください。</p>
+                </div>
+
+                <!-- スパム対策のおとり欄（人には見えない） -->
+                <div class="hp" aria-hidden="true">
+                    <label for="website">ウェブサイト（入力しないでください）</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                </div>
+
+                <p class="hint terms-note">
+                    登録すると、<a href="/auction/rules#terms" target="_blank" rel="noopener">利用規約</a>と
+                    <a th:href="@{/privacy}" target="_blank" rel="noopener">プライバシーポリシー</a>に同意したことになります。
+                </p>
+                <div class="form-actions">
+                    <button type="submit" class="button button-gold">登録してコインをもらう</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

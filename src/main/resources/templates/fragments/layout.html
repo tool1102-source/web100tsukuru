@@ -5,11 +5,11 @@
   使い方: <head th:replace="~{fragments/layout :: head('タイトル', '説明文', false)}"></head>
   3つ目を true にすると検索結果に出さない（投稿フォームやエラー画面用）。
   共有したときの画像は、モデルに ogImage（/ から始まるパス）があればそれ、なければサイトごとの画像。
-  見出し・色・書体はサイトごとに変える（site は GlobalModelAttributes が決める：hub / fiction / vote）。
+  見出し・色・書体はサイトごとに変える（site は GlobalModelAttributes が決める：hub / fiction / vote / auction）。
   body には th:class="'site-' + ${site ?: 'hub'}" を付け、色は style.css の .site-〇〇 で切り替える。
 -->
 <head th:fragment="head(title, description, noindex)"
-      th:with="s=${site ?: 'hub'}, ogImg=${ogImage ?: (s == 'fiction' ? '/img/og/fiction.jpg' : (s == 'vote' ? '/img/og/vote.jpg' : '/img/og/hub.jpg'))}">
+      th:with="s=${site ?: 'hub'}, ogImg=${ogImage ?: '/img/og/' + s + '.jpg'}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${title}">webサイト100個作る人のwebサイト</title>
@@ -38,19 +38,21 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@web100tsukuru">
 
-    <meta name="theme-color" th:content="${s == 'fiction'} ? '#111111' : (${s == 'vote'} ? '#ffffff' : '#f3efe6')" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" th:content="${s == 'fiction'} ? '#000000' : (${s == 'vote'} ? '#121212' : '#131312')" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" th:content="${s == 'fiction'} ? '#111111' : (${s == 'vote'} ? '#ffffff' : (${s == 'auction'} ? '#5a1a22' : '#f3efe6'))" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" th:content="${s == 'fiction'} ? '#000000' : (${s == 'vote'} ? '#121212' : (${s == 'auction'} ? '#240b0f' : '#131312'))" media="(prefers-color-scheme: dark)">
     <meta name="color-scheme" content="light dark">
     <link rel="icon" th:href="@{/favicon.ico}">
 
-    <!-- サイトごとの書体。トップは数字と英字の見出しだけ、ブログは極太の見出し用ゴシック。投票所は端末の書体のまま（読みもの系のサービスのように） -->
+    <!-- サイトごとの書体。トップは数字と英字の見出しだけ、ブログは極太の見出し用ゴシック。投票所は端末の書体のまま（読みもの系のサービスのように）。オークションは格式ばった明朝の見出し -->
     <th:block th:unless="${s == 'vote'}">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     </th:block>
     <link rel="stylesheet" th:if="${s == 'hub'}" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
     <link rel="stylesheet" th:if="${s == 'fiction'}" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap">
+    <link rel="stylesheet" th:if="${s == 'auction'}" href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@700;900&display=swap">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:if="${s == 'auction'}" th:href="@{/css/auction.css}">
 
     <meta name="google-site-verification" content="yj4LGgoltxROKbI2DaOK9eTDbavhFgUfPISmX5yaD44">
     <!-- 広告は読み物のページだけ。フォーム・エラー・管理画面には載せない（AdSense の規約） -->
@@ -60,11 +62,11 @@
 <body>
 
 <th:block th:fragment="header(active)" th:with="s=${site ?: 'hub'}">
-    <!-- 中のサイト（ブログ・投票所）では、いちばん上に細い帯を出して、トップへ戻れるようにする -->
+    <!-- 中のサイト（ブログ・投票所・オークション）では、いちばん上に細い帯を出して、トップへ戻れるようにする -->
     <div class="hub-strip" th:unless="${s == 'hub'}">
         <div class="wrap hub-strip-inner">
             <a th:href="@{/}"><span aria-hidden="true">←</span> webサイト100個作る人</a>
-            <span th:text="${s == 'fiction'} ? 'No.002 / 100' : 'No.003 / 100'">No.002 / 100</span>
+            <span th:text="${s == 'fiction'} ? 'No.002 / 100' : (${s == 'vote'} ? 'No.003 / 100' : 'No.004 / 100')">No.002 / 100</span>
         </div>
     </div>
 
@@ -79,6 +81,7 @@
                 <a th:href="@{/}" th:attr="aria-current=${active == 'home'} ? 'page' : null">作ったサイト</a>
                 <a th:href="@{/fiction}"><span class="nav-long">フィクション</span>ブログ</a>
                 <a th:href="@{/vote}"><span class="nav-long">ちいさな</span>投票所</a>
+                <a th:href="@{/auction}"><span class="nav-long">らくがき</span>オークション</a>
                 <a class="nav-ext" href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note</a>
                 <a class="nav-ext" href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X</a>
             </nav>
@@ -106,6 +109,11 @@
     <th:block th:if="${s == 'vote'}">
         <div th:replace="~{vote/parts :: bar}"></div>
     </th:block>
+
+    <!-- No.004 らくがきオークション：えんじ色の帯に金の題字、コインの残りと「描く」（auction/parts :: bar） -->
+    <th:block th:if="${s == 'auction'}">
+        <div th:replace="~{auction/parts :: bar}"></div>
+    </th:block>
 </th:block>
 
 <footer class="site-footer" th:fragment="footer" th:with="s=${site ?: 'hub'}">
@@ -119,6 +127,10 @@
                 <p class="footer-title">ちいさな投票所</p>
                 <p class="footer-text">だれかの小さな選択を、投票券で決める投票所です。webサイト100個作る人の No.003 です。</p>
             </th:block>
+            <th:block th:case="'auction'">
+                <p class="footer-title">らくがきオークション</p>
+                <p class="footer-text">描いた絵を競りに出し、ゲームの中のコインで競り落とすゲームです。webサイト100個作る人の No.004 です。コインはお金に換えられません。</p>
+            </th:block>
             <th:block th:case="*">
                 <p class="footer-title">webサイト100個作る人のwebサイト</p>
                 <p class="footer-text">webサイトを100個つくる挑戦の記録です。作る過程は note と X で発信しています。</p>
@@ -129,6 +141,8 @@
             <li><a th:href="@{/fiction}">フィクションブログ</a></li>
             <li><a th:href="@{/vote}">ちいさな投票所</a></li>
             <li><a th:href="@{/vote/terms}">投票所の利用規約</a></li>
+            <li><a th:href="@{/auction}">らくがきオークション</a></li>
+            <li><a th:href="@{/auction/rules}">オークションの遊び方と規約</a></li>
             <li><a th:href="@{/privacy}">プライバシーポリシー</a></li>
             <li><a href="https://note.com/web100tsukuru" target="_blank" rel="noopener">note</a></li>
             <li><a href="https://x.com/web100tsukuru" target="_blank" rel="noopener">X（@web100tsukuru）</a></li>

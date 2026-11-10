@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('絵を描く | らくがきオークション', '競りに出す絵を描くページです。', true)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('auction')}"></header>
+
+<main>
+    <div class="wrap">
+        <section class="page-head draw-head">
+            <h1>絵を描く</h1>
+            <p class="lead">
+                今日あと<b th:text="${remaining}">5</b>枚描けます（1日<span th:text="${dailyLimit}">5</span>枚まで）。
+                描き終えたら保存して、絵のページから競りに出します。
+            </p>
+        </section>
+        <div th:replace="~{auction/parts :: messages}"></div>
+
+        <p class="alert" th:if="${remaining <= 0}">今日はもう描けません。明日また描いてください。持っている絵は、マイページから出品できます。</p>
+
+        <div class="draw" id="draw" th:if="${remaining > 0}"
+             th:attr="data-guests=${#strings.listJoin(today.attendees().![key()], ',')},data-trend=${today.trend().key()}">
+            <div class="draw-stage">
+                <div class="draw-canvas-wrap">
+                    <canvas id="draw-canvas" width="512" height="512" aria-label="絵を描くところ"></canvas>
+                </div>
+                <div class="draw-row draw-history">
+                    <button type="button" class="tool" data-action="undo" disabled>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 4 12l5 5M4 12h11a5 5 0 0 1 0 10h-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        戻す
+                    </button>
+                    <button type="button" class="tool" data-action="redo" disabled>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 7 5 5-5 5M20 12H9a5 5 0 0 0 0 10h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        やり直す
+                    </button>
+                    <button type="button" class="tool tool-quiet" data-action="clear">全部消す</button>
+                </div>
+            </div>
+
+            <div class="draw-side">
+                <div class="draw-panel">
+                    <p class="draw-label">色</p>
+                    <div class="palette" role="radiogroup" aria-label="色">
+                        <button type="button" th:each="c : ${palette}" class="swatch-button" role="radio"
+                                th:classappend="${c.index() == 1} ? 'is-active'"
+                                th:attr="data-color=${c.index()},aria-checked=${c.index() == 1},aria-label=${c.name()},title=${c.name()}"
+                                th:style="'background-color:' + ${c.hex()}"></button>
+                    </div>
+                    <p class="draw-label">太さ</p>
+                    <div class="draw-row" role="radiogroup" aria-label="太さ">
+                        <button type="button" class="tool size" role="radio" data-size="3" aria-checked="false"><span class="dot" style="width:4px;height:4px"></span>細</button>
+                        <button type="button" class="tool size is-active" role="radio" data-size="8" aria-checked="true"><span class="dot" style="width:8px;height:8px"></span>中</button>
+                        <button type="button" class="tool size" role="radio" data-size="20" aria-checked="false"><span class="dot" style="width:14px;height:14px"></span>太</button>
+                        <button type="button" class="tool size" role="radio" data-size="44" aria-checked="false"><span class="dot" style="width:20px;height:20px"></span>特太</button>
+                    </div>
+                    <p class="draw-label">道具</p>
+                    <div class="draw-row" role="radiogroup" aria-label="道具">
+                        <button type="button" class="tool mode is-active" role="radio" data-mode="pen" aria-checked="true">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                            ペン
+                        </button>
+                        <button type="button" class="tool mode" role="radio" data-mode="fill" aria-checked="false">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 11 7-7 7 7-7 7z M19 15s2 2.4 2 3.6a2 2 0 0 1-4 0c0-1.2 2-3.6 2-3.6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                            塗りつぶし
+                        </button>
+                        <button type="button" class="tool mode" role="radio" data-mode="eraser" aria-checked="false">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 20-5-5 10-10 7 7-8 8zM8 20h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                            消しゴム
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 描いている絵を、今日来ている収集家が気に入りそうか（描くたびに計り直す） -->
+                <div class="draw-panel draw-meter">
+                    <p class="draw-label">今日の収集家の反応</p>
+                    <ul class="meter-list">
+                        <li th:each="c : ${today.attendees()}" th:attr="data-guest=${c.key()}">
+                            <span class="who-icon" aria-hidden="true" th:style="'background-color:' + ${c.color()}" th:text="${c.initial()}">赤</span>
+                            <span class="meter-name">
+                                <b th:text="${c.name()}">赤坂伯爵</b>
+                                <small th:text="${c.taste()}">赤が好き</small>
+                            </span>
+                            <span class="meter-value" aria-live="polite">—</span>
+                        </li>
+                    </ul>
+                    <p class="meter-quality">描きこみ <b id="quality-value">○○○○○</b> <small>塗った広さ・線の細かさ・色の数</small></p>
+                    <p class="meter-trend">
+                        <span class="swatch" aria-hidden="true" th:style="'background-color:' + ${today.trend().hex()}"></span>
+                        今日の流行「<span th:text="${today.trend().label()}">青と水色</span>」 <b id="trend-value">0%</b>
+                    </p>
+                    <p class="hint">流行の色が塗った部分の4割あると、だれの付け値も最大1.5倍になります。</p>
+                </div>
+
+                <form class="draw-panel draw-save" id="draw-form" novalidate>
+                    <label class="draw-label" for="draw-title">題名</label>
+                    <div class="title-row">
+                        <input type="text" id="draw-title" name="title" th:attr="maxlength=${titleMax}" placeholder="例：夕焼けのねこ" required autocomplete="off">
+                        <button type="button" class="tool" id="prompt-button" th:attr="data-prompts=${#strings.listJoin(prompts, ',')}">お題</button>
+                    </div>
+                    <p class="hint" id="prompt-hint">何を描くか迷ったら「お題」を押してください。</p>
+                    <p class="alert" id="draw-error" role="alert" hidden></p>
+                    <button type="submit" class="button button-gold draw-submit">保存して出品へ進む</button>
+                    <p class="hint">保存した絵は消せません。人を傷つける絵や、ほかの人の作品をまねた絵は描かないでください。</p>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/auction-draw.js}" defer></script>
+</body>
+</html>

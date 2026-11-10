@@ -47,20 +47,20 @@ class SitePagesTests {
                 .andExpect(content().string(containsString("href=\"/tools/\"")))
                 .andExpect(content().string(not(containsString("convertertools.jp"))))
                 .andExpect(content().string(containsString("href=\"/fiction\"")))
-                .andExpect(content().string(containsString("<strong>003</strong><span>/ 100</span>")))
-                .andExpect(content().string(containsString("のこり <b>97</b> 個")))
+                .andExpect(content().string(containsString("<strong>004</strong><span>/ 100</span>")))
+                .andExpect(content().string(containsString("のこり <b>96</b> 個")))
                 .andExpect(content().string(containsString("<meta name=\"viewport\"")))
                 .andExpect(content().string(containsString("<link rel=\"canonical\" href=\"https://web100tsukuru.com/\">")))
                 .andExpect(content().string(containsString("og:title")))
                 .andExpect(content().string(containsString("adsbygoogle")))
                 .andReturn().getResponse().getContentAsString();
 
-        // 100マス：作った3つはリンク、次の 004 に印、残りは空
-        assertThat(html.split("class=\"tile\\s*tile-done\"", -1).length - 1).isEqualTo(3);
+        // 100マス：作った4つはリンク、次の 005 に印、残りは空
+        assertThat(html.split("class=\"tile\\s*tile-done\"", -1).length - 1).isEqualTo(4);
         assertThat(html.split("class=\"tile\\s*tile-next\"", -1).length - 1).isEqualTo(1);
-        assertThat(html.split("class=\"tile\\s*tile-empty\"", -1).length - 1).isEqualTo(96);
-        assertThat(html).containsPattern("tile-next\">\\s*<span title=\"次に作るサイト\">004</span>");
-        assertThat(html).contains("href=\"/vote\"");
+        assertThat(html.split("class=\"tile\\s*tile-empty\"", -1).length - 1).isEqualTo(95);
+        assertThat(html).containsPattern("tile-next\">\\s*<span title=\"次に作るサイト\">005</span>");
+        assertThat(html).contains("href=\"/vote\"", "href=\"/auction\"");
     }
 
     @Test
@@ -146,7 +146,8 @@ class SitePagesTests {
         mvc.perform(get("/sitemap.xml"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("<loc>https://web100tsukuru.com/</loc>")))
-                .andExpect(content().string(containsString("<loc>https://web100tsukuru.com/fiction/" + id + "</loc>")));
+                .andExpect(content().string(containsString("<loc>https://web100tsukuru.com/fiction/" + id + "</loc>")))
+                .andExpect(content().string(containsString("<loc>https://web100tsukuru.com/auction</loc>")));
     }
 
     @Test
@@ -211,18 +212,20 @@ class SitePagesTests {
                 .andExpect(content().string(not(containsString("fonts.googleapis.com"))))
                 .andExpect(content().string(containsString("No.003 / 100")));
         // X などで共有したときの画像は、サイトごとに分かれ、大きいカードで出す
-        for (String[] page : new String[][]{{"/", "hub"}, {"/fiction", "fiction"}, {"/vote", "vote"}, {"/vote/terms", "vote"}}) {
+        for (String[] page : new String[][]{{"/", "hub"}, {"/fiction", "fiction"}, {"/vote", "vote"}, {"/vote/terms", "vote"}, {"/auction", "auction"}}) {
             mvc.perform(get(page[0]))
                     .andExpect(content().string(containsString(
                             "<meta property=\"og:image\" content=\"https://web100tsukuru.com/img/og/" + page[1] + ".jpg\">")))
                     .andExpect(content().string(containsString("<meta name=\"twitter:card\" content=\"summary_large_image\">")));
         }
         mvc.perform(get("/img/og/vote.jpg")).andExpect(status().isOk());
+        mvc.perform(get("/img/og/auction.jpg")).andExpect(status().isOk());
         // エラー画面は、もともと開こうとしたページのサイトに合わせる（MockMvc はエラー画面を描かないので、判定だけ確かめる）
         assertThat(GlobalModelAttributes.siteOf("/fiction/99999")).isEqualTo("fiction");
         assertThat(GlobalModelAttributes.siteOf("/vote/1/report")).isEqualTo("vote");
         assertThat(GlobalModelAttributes.siteOf("/fictionx")).isEqualTo("hub");
         assertThat(GlobalModelAttributes.siteOf("/admin/vote")).isEqualTo("hub");
+        assertThat(GlobalModelAttributes.siteOf("/auction/lots/1")).isEqualTo("auction");
     }
 
     @Test

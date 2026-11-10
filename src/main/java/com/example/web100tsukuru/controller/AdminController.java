@@ -15,6 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import com.example.web100tsukuru.entity.Artwork;
+import com.example.web100tsukuru.service.auction.ArtworkService;
+import com.example.web100tsukuru.service.auction.AuctionViews;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,14 +50,19 @@ public class AdminController {
 
     private final FictionService fictionService;
     private final PollService pollService;
+    private final ArtworkService artworkService;
+    private final AuctionViews auctionViews;
     private final byte[] passwordHash;
     // 合言葉の総当たり対策（同じ接続元から 10分に5回まで）
     private final PostRateLimiter loginLimiter = new PostRateLimiter(5, Duration.ofMinutes(10));
 
     public AdminController(FictionService fictionService, PollService pollService,
+                           ArtworkService artworkService, AuctionViews auctionViews,
                            @Value("${app.admin-password-hash:}") String passwordHash) {
         this.fictionService = fictionService;
         this.pollService = pollService;
+        this.artworkService = artworkService;
+        this.auctionViews = auctionViews;
         this.passwordHash = HexFormat.of().parseHex(passwordHash.strip());
     }
 
@@ -162,6 +170,35 @@ public class AdminController {
         }
         redirect.addFlashAttribute("deletedCount", deleted.size());
         return "redirect:/admin/vote";
+    }
+
+    /** 「らくがきオークション」の絵の一覧（報告のあった絵を先に） (GET /admin/auction) */
+    @GetMapping("/auction")
+    public String artworks(HttpServletRequest request, Model model) {
+        requireEnabled();
+        if (!isLoggedIn(request)) {
+            return "redirect:/admin";
+        }
+        model.addAttribute("reported", auctionViews.reported());
+        model.addAttribute("newest", auctionViews.newest(60));
+        return "admin/auction";
+    }
+
+    /** チェックを入れた絵を消す。出品中の競りは取り消し、買って持っていた人には買った値段を返す (POST /admin/auction/delete) */
+    @PostMapping("/auction/delete")
+    public String deleteArtworks(@RequestParam(name = "ids", required = false) List<Long> ids,
+                                 HttpServletRequest request,
+                                 RedirectAttributes redirect) {
+        requireEnabled();
+        if (!isLoggedIn(request)) {
+            return "redirect:/admin";
+        }
+        List<Artwork> deleted = artworkService.deleteAll(ids == null ? List.of() : ids);
+        for (Artwork a : deleted) {
+            log.info("管理画面で絵を消しました: id={} 題名={}", a.getId(), a.getTitle().replaceAll("[\r\n]+", " "));
+        }
+        redirect.addFlashAttribute("deletedCount", deleted.size());
+        return "redirect:/admin/auction";
     }
 
     private void requireEnabled() {

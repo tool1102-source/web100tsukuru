@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('らくがきオークション | 描いた絵が、競りで売れる。', 'らくがきを描いて競りに出すと、8人の収集家とほかの人たちがゲームの中のコインで値を付けるゲームです。落とした絵はまた出品できます。', false)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('auction')}"></header>
+
+<main>
+    <section class="auction-hero">
+        <div class="wrap auction-hero-inner">
+            <div class="auction-hero-text">
+                <p class="eyebrow">webサイト100個作る人 No.004</p>
+                <h1>描いた絵が、<br>競りで売れる。</h1>
+                <p class="lead">
+                    らくがきを描いて競りに出すと、8人の収集家と、ほかの人たちがゲームの中のコインで値を付けます。
+                    落とした絵は、また出品して値上がりを狙えます。
+                </p>
+                <div class="actions">
+                    <a class="button button-gold" th:href="@{/auction/draw}">絵を描いて出品する</a>
+                    <a class="button button-outline" th:href="@{/auction/rules}">遊び方</a>
+                </div>
+                <p class="hint" th:if="${me == null}">はじめるとコインを<b th:text="${#numbers.formatInteger(@coinService.startCoins, 1, 'COMMA')}">1,000</b>枚もらえます。お金は一切かかりません。</p>
+            </div>
+            <aside th:replace="~{auction/parts :: today(${today}, ${tomorrow}, false)}"></aside>
+        </div>
+    </section>
+
+    <div class="wrap">
+        <div th:replace="~{auction/parts :: messages}"></div>
+
+        <section class="auction-section">
+            <div class="auction-section-head">
+                <h2>開催中の競り</h2>
+                <p>開いている間も、値段は勝手に動きます。</p>
+            </div>
+            <ul class="lot-grid" th:unless="${live.isEmpty()}">
+                <th:block th:each="c : ${live}">
+                    <li th:replace="~{auction/parts :: lotCard(${c})}"></li>
+                </th:block>
+            </ul>
+            <div class="auction-empty" th:if="${live.isEmpty()}">
+                <p>いま開催中の競りはありません。</p>
+                <p>1枚描いて出せば、すぐに収集家がやって来ます。</p>
+                <a class="button button-gold" th:href="@{/auction/draw}">絵を描く</a>
+            </div>
+        </section>
+
+        <section class="auction-section" th:unless="${sold.isEmpty()}">
+            <div class="auction-section-head">
+                <h2>最近の落札</h2>
+                <p>だれが、いくらで落としたか。</p>
+            </div>
+            <ul class="lot-grid lot-grid-small">
+                <th:block th:each="c : ${sold}">
+                    <li th:replace="~{auction/parts :: lotCard(${c})}"></li>
+                </th:block>
+            </ul>
+        </section>
+
+        <section class="auction-section" th:unless="${masterpieces.isEmpty()}">
+            <div class="auction-section-head">
+                <h2>名画</h2>
+                <p>これまでに高く売れた絵。<a th:href="@{/auction/ranking}">ランキングを見る</a></p>
+            </div>
+            <ul class="lot-grid lot-grid-small">
+                <th:block th:each="c : ${masterpieces}">
+                    <li th:replace="~{auction/parts :: workCard(${c})}"></li>
+                </th:block>
+            </ul>
+        </section>
+
+        <section class="auction-section" th:unless="${newest.isEmpty()}">
+            <div class="auction-section-head">
+                <h2>描かれたばかりの絵</h2>
+            </div>
+            <ul class="lot-grid lot-grid-small">
+                <th:block th:each="c : ${newest}">
+                    <li th:replace="~{auction/parts :: workCard(${c})}"></li>
+                </th:block>
+            </ul>
+        </section>
+
+        <section class="auction-section auction-steps">
+            <div class="auction-section-head">
+                <h2>遊び方</h2>
+            </div>
+            <ol class="steps">
+                <li>
+                    <b>描く</b>
+                    <span>13色のペンで1枚描きます。1日<span th:text="${@artworkService.dailyLimit}">5</span>枚まで。その日に来ている収集家の好みに合わせると、高く売れます。</span>
+                </li>
+                <li>
+                    <b>競りに出す</b>
+                    <span>開始価格と、3分・1時間・1日の長さを決めて出品。終わる直前に入札があると、少し延びます。</span>
+                </li>
+                <li>
+                    <b>競り落として、また出す</b>
+                    <span>ほかの人の絵も競り落とせます。流行の色や来る収集家は日ごとに変わるので、安く買って高い日に売れば儲かります。</span>
+                </li>
+            </ol>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

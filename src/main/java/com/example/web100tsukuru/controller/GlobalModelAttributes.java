@@ -28,7 +28,7 @@ public class GlobalModelAttributes {
 
     /**
      * いまどのサイトにいるか（見出し・色・書体をサイトごとに変えるため）。
-     * hub = webサイト100個作る人のトップなど、fiction = No.002、vote = No.003。
+     * hub = webサイト100個作る人のトップなど、fiction = No.002、vote = No.003、auction = No.004。
      * エラー画面では、もともと開こうとしたページのサイトに合わせる。
      */
     @ModelAttribute("site")
@@ -47,6 +47,9 @@ public class GlobalModelAttributes {
         }
         if (path.equals("/vote") || path.startsWith("/vote/")) {
             return "vote";
+        }
+        if (path.equals("/auction") || path.startsWith("/auction/")) {
+            return "auction";
         }
         return "hub";
     }

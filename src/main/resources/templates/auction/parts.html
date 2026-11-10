@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<!--/*
+  「らくがきオークション」の部品。
+  bar … いちばん上の帯（題字・コインの残り・描く・アイコン）と、下のメニュー
+  messages … はじめてのコイン・ログインボーナス・お知らせ・エラー
+  coin … コインの印
+  frame(id, alt) … 金の額縁に入れた絵
+  who(w) … 人や収集家の丸いアイコンと名前（AuctionViews.Who）
+  lotCard(c) / workCard(c) … 一覧の1件
+  google(next) … 「Google でログイン」のボタン
+*/-->
+<body>
+
+<svg th:fragment="coin" class="icon-coin" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="#e3c26b" stroke="#9c7322" stroke-width="1.6"/><circle cx="12" cy="12" r="5.6" fill="none" stroke="#9c7322" stroke-width="1.3"/><path d="M12 8.6v6.8" stroke="#9c7322" stroke-width="1.5" stroke-linecap="round"/></svg>
+
+<div class="auction-bar" th:fragment="bar">
+    <div class="wrap auction-bar-inner">
+        <a class="auction-brand" th:href="@{/auction}">
+            <svg class="auction-brand-mark" viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(-45 12 12)" fill="currentColor"><rect x="4" y="6" width="16" height="9" rx="2.2"/><rect x="6.5" y="5" width="2" height="11" rx="1" fill-opacity=".55"/><rect x="15.5" y="5" width="2" height="11" rx="1" fill-opacity=".55"/><rect x="10.6" y="14" width="2.8" height="15" rx="1.4"/></g><rect x="17" y="26" width="13" height="3.6" rx="1.6" fill="currentColor"/></svg>
+            <span class="auction-brand-name"><span class="auction-brand-small">らくがき</span>オークション</span>
+        </a>
+        <nav class="auction-bar-nav" aria-label="アカウント">
+            <th:block th:if="${me != null}">
+                <a class="coin-balance" th:href="@{/auction/me}" title="コインの残り（マイページへ）">
+                    <svg th:replace="~{auction/parts :: coin}"></svg><span class="visually-hidden">コインの残り</span>
+                    <b id="coin-balance" th:text="${#numbers.formatInteger(wallet.coins(), 1, 'COMMA')}">1,000</b>
+                </a>
+                <a class="button button-small auction-draw" th:href="@{/auction/draw}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                    描く
+                </a>
+                <a class="who-icon who-icon-bar" th:href="@{/auction/me}" th:style="'background-color:' + ${me.color()}"
+                   th:title="${me.name()} + ' さんのマイページ'" th:text="${me.initial()}">み</a>
+            </th:block>
+            <th:block th:if="${me == null}"
+                      th:with="back=${currentPath == '/auction/signup' or currentPath == '/auction/login'} ? '/auction' : ${currentPath}">
+                <a class="auction-login" th:href="@{/auction/login(next=${back})}">ログイン</a>
+                <a class="button button-small" th:href="@{/auction/signup(next=${back})}">はじめる</a>
+            </th:block>
+        </nav>
+    </div>
+    <nav class="auction-tabs" aria-label="らくがきオークションのメニュー">
+        <div class="wrap auction-tabs-inner">
+            <a th:href="@{/auction}" th:attr="aria-current=${currentPath == '/auction'} ? 'page' : null">競り場</a>
+            <a th:href="@{/auction/collectors}" th:attr="aria-current=${#strings.startsWith(currentPath, '/auction/collectors')} ? 'page' : null">収集家</a>
+            <a th:href="@{/auction/ranking}" th:attr="aria-current=${currentPath == '/auction/ranking'} ? 'page' : null">ランキング</a>
+            <a th:href="@{/auction/rules}" th:attr="aria-current=${currentPath == '/auction/rules'} ? 'page' : null">遊び方</a>
+            <a th:if="${me != null}" th:href="@{/auction/me}" th:attr="aria-current=${currentPath == '/auction/me'} ? 'page' : null">マイページ</a>
+        </div>
+    </nav>
+</div>
+
+<div th:fragment="messages" class="auction-messages">
+    <p class="status" role="status" th:if="${notice != null}" th:text="${notice}">お知らせ</p>
+    <p class="status" role="status" th:if="${greeting != null}" th:text="${greeting}">はじめてのコイン</p>
+    <p class="alert" role="alert" th:if="${error != null}" th:text="${error}">エラー</p>
+</div>
+
+<span class="frame" th:fragment="frame(id, alt)"><span class="frame-mat"><img
+        th:src="@{/auction/artworks/{id}.png(id=${id})}" th:alt="${alt}" width="512" height="512"
+        loading="lazy" decoding="async"></span></span>
+
+<a class="who" th:fragment="who(w)" th:href="${w.href()}"><span class="who-icon" aria-hidden="true"
+        th:style="'background-color:' + ${w.color()}" th:text="${w.initial()}">赤</span><span class="who-name" th:text="${w.name()}">名前</span></a>
+
+<!-- 競り1件（開催中なら今の値段と残り時間、終わっていれば落札の値段） -->
+<li class="lot-card" th:fragment="lotCard(c)" th:with="l=${c.lot()}, live=${c.lot().live}">
+    <a th:href="@{/auction/lots/{id}(id=${l.id})}">
+        <span class="lot-card-art">
+            <span th:replace="~{auction/parts :: frame(${c.work().id}, ${c.work().title})}"></span>
+            <span class="lot-card-badge" th:classappend="${live} ? 'is-live'"
+                  th:text="${live} ? ${l.timeLeft} : (${l.status.name() == 'SOLD'} ? '落札' : (${l.status.name() == 'UNSOLD'} ? '売れず' : 'まもなく終了'))">あと2分</span>
+        </span>
+        <span class="lot-card-title" th:text="${c.work().title}">題名</span>
+        <span class="lot-card-price">
+            <small th:text="${live} ? '現在' : (${l.status.name() == 'SOLD'} ? '落札' : '開始')">現在</small>
+            <b th:text="${#numbers.formatInteger(l.price, 1, 'COMMA')}">1,200</b><span class="unit">コイン</span>
+        </span>
+        <span class="lot-card-meta">
+            <span th:text="'作 ' + ${c.artist().name()}">作 名前</span>
+            <span th:if="${c.top() != null}" th:text="(${live} ? '最高 ' : '→ ') + ${c.top().name()}">最高 赤坂伯爵</span>
+            <span th:if="${c.top() == null and live}">入札まだなし</span>
+        </span>
+    </a>
+</li>
+
+<!-- 絵1枚（持ち主と、最後に売れた値段） -->
+<li class="work-card" th:fragment="workCard(c)">
+    <a th:href="@{/auction/artworks/{id}(id=${c.work().id})}">
+        <span class="lot-card-art">
+            <span th:replace="~{auction/parts :: frame(${c.work().id}, ${c.work().title})}"></span>
+            <span class="lot-card-badge is-live" th:if="${c.lot() != null}">出品中</span>
+        </span>
+        <span class="lot-card-title" th:text="${c.work().title}">題名</span>
+        <span class="lot-card-price" th:if="${c.work().lastPrice > 0}">
+            <small>最後の落札</small>
+            <b th:text="${#numbers.formatInteger(c.work().lastPrice, 1, 'COMMA')}">1,200</b><span class="unit">コイン</span>
+        </span>
+        <span class="lot-card-price is-new" th:if="${c.work().lastPrice == 0}"><small>まだ売れていない</small></span>
+        <span class="lot-card-meta">
+            <span th:text="'作 ' + ${c.artist().name()}">作 名前</span>
+            <span th:if="${c.owner() != null and c.owner().name() != c.artist().name()}" th:text="'持ち主 ' + ${c.owner().name()}">持ち主 名前</span>
+        </span>
+    </a>
+</li>
+
+<div class="google-login" th:fragment="google(next)" th:if="${@googleIdTokens.enabled}">
+    <div id="g_id_onload" th:attr="data-client_id=${@googleIdTokens.clientId}"
+         data-callback="onGoogleCredential" data-auto_prompt="false" data-ux_mode="popup" data-context="signin"></div>
+    <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="continue_with"
+         data-shape="pill" data-logo_alignment="left" data-locale="ja" data-width="300"></div>
+    <form id="google-login-form" th:action="@{/auction/login/google}" method="post">
+        <input type="hidden" name="credential">
+        <input type="hidden" name="next" th:value="${next}">
+    </form>
+    <script>
+        function onGoogleCredential(response) {
+            const form = document.getElementById('google-login-form');
+            form.credential.value = response.credential;
+            form.submit();
+        }
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <p class="hint">保存するのは、Google アカウントを識別する番号だけです。名前やメールアドレスは保存しません。</p>
+</div>
+
+<!-- 今日の競り場（流行の色・来場している収集家）と、明日の予告 -->
+<aside class="today-card" th:fragment="today(today, tomorrow, compact)">
+    <p class="today-date"><span th:text="${#temporals.format(today.date(), 'M月d日')}">11月10日</span>の競り場</p>
+    <p class="today-trend">
+        <span class="swatch" aria-hidden="true" th:style="'background-color:' + ${today.trend().hex()}"></span>
+        流行の色 <b th:text="${today.trend().label()}">青と水色</b>
+    </p>
+    <p class="today-label">来場している収集家</p>
+    <ul class="today-guests" th:classappend="${compact} ? 'is-compact'">
+        <li th:each="c : ${today.attendees()}">
+            <a th:href="@{/auction/collectors/{key}(key=${c.key()})}">
+                <span class="who-icon" aria-hidden="true" th:style="'background-color:' + ${c.color()}" th:text="${c.initial()}">赤</span>
+                <span class="today-guest-text">
+                    <b th:text="${c.name()}">赤坂伯爵</b>
+                    <small th:text="${c.taste()}">赤い絵が好き</small>
+                </span>
+            </a>
+        </li>
+    </ul>
+    <details class="tomorrow">
+        <summary>明日の予告</summary>
+        <p>
+            <span class="swatch" aria-hidden="true" th:style="'background-color:' + ${tomorrow.trend().hex()}"></span>
+            流行の色 <b th:text="${tomorrow.trend().label()}">赤</b>
+        </p>
+        <p class="tomorrow-guests">来場：<span th:text="${#strings.listJoin(tomorrow.attendees().![name()], '・')}">赤坂伯爵・青柳夫人</span></p>
+    </details>
+</aside>
+
+</body>
+</html>

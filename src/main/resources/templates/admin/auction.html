@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('管理画面（オークション） | webサイト100個作る人のwebサイト', '管理画面です。', true)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('admin')}"></header>
+
+<main>
+    <div class="wrap">
+        <section class="page-head">
+            <p class="eyebrow">admin</p>
+            <h1>らくがきオークションの管理</h1>
+            <nav class="admin-tabs" aria-label="管理画面の切り替え">
+                <a th:href="@{/admin}">フィクションブログ</a>
+                <a th:href="@{/admin/vote}">ちいさな投票所</a>
+                <a th:href="@{/admin/auction}" aria-current="page">らくがきオークション</a>
+            </nav>
+            <p class="lead">
+                消したい絵にチェックを入れて、下の「選んだ絵を消す」を押してください。出品中の競りは取り消し（入札で押さえていたコインは使えるように戻ります）、
+                ほかの人から買って持っていた人には、買った値段のコインを返します。消した絵は元に戻せません。
+            </p>
+        </section>
+
+        <p class="status" role="status" th:if="${deletedCount != null}" th:text="${deletedCount} + '枚の絵を消しました。'">1枚の絵を消しました。</p>
+
+        <form id="delete-form" th:action="@{/admin/auction/delete}" method="post">
+            <h2 class="admin-subhead">報告のあった絵</h2>
+            <p th:if="${reported.isEmpty()}" class="empty">報告のあった絵はありません。</p>
+            <ol class="admin-list" th:unless="${reported.isEmpty()}">
+                <li class="admin-item" th:each="c : ${reported}">
+                    <label>
+                        <input type="checkbox" name="ids" th:value="${c.work().id}">
+                        <span>
+                            <span class="admin-title" th:text="${c.work().title}">題名</span>
+                            <span class="meta">
+                                <span th:text="'作 ' + ${c.artist().name()}">作者</span>
+                                <span aria-hidden="true"> ・ </span>
+                                <span th:text="'報告 ' + ${c.work().reportCount} + '件'">報告 1件</span>
+                                <span aria-hidden="true"> ・ </span>
+                                <a th:href="@{/auction/artworks/{id}(id=${c.work().id})}" target="_blank" rel="noopener">開く ↗</a>
+                            </span>
+                            <span class="admin-thumbs"><img th:src="@{/auction/artworks/{id}.png(id=${c.work().id})}" alt="絵" width="96" height="96" loading="lazy"></span>
+                        </span>
+                    </label>
+                </li>
+            </ol>
+
+            <h2 class="admin-subhead">新しく描かれた絵（60枚まで）</h2>
+            <p th:if="${newest.isEmpty()}" class="empty">絵はありません。</p>
+            <ol class="admin-list" th:unless="${newest.isEmpty()}">
+                <li class="admin-item" th:each="c : ${newest}">
+                    <label>
+                        <input type="checkbox" name="ids" th:value="${c.work().id}">
+                        <span>
+                            <span class="admin-title" th:text="${c.work().title}">題名</span>
+                            <span class="meta">
+                                <span th:text="'作 ' + ${c.artist().name()}">作者</span>
+                                <span aria-hidden="true"> ・ </span>
+                                <span th:text="${#temporals.format(c.work().createdAt, 'M月d日 H:mm')}">日時</span>
+                                <span aria-hidden="true"> ・ </span>
+                                <a th:href="@{/auction/artworks/{id}(id=${c.work().id})}" target="_blank" rel="noopener">開く ↗</a>
+                            </span>
+                            <span class="admin-thumbs"><img th:src="@{/auction/artworks/{id}.png(id=${c.work().id})}" alt="絵" width="96" height="96" loading="lazy"></span>
+                        </span>
+                    </label>
+                </li>
+            </ol>
+            <div class="admin-bar" th:unless="${newest.isEmpty() and reported.isEmpty()}">
+                <button type="submit" class="button button-danger">選んだ絵を消す</button>
+            </div>
+        </form>
+        <div class="pager"></div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script>
+    // 押し間違いで消さないように、枚数を出して確かめる（同じ絵が両方の一覧にあっても1枚と数える）
+    const deleteForm = document.getElementById('delete-form');
+    deleteForm.addEventListener('submit', function (event) {
+        const ids = new Set([...deleteForm.querySelectorAll('input[name="ids"]:checked')].map(i => i.value));
+        if (ids.size === 0) {
+            event.preventDefault();
+            alert('消したい絵にチェックを入れてください。');
+        } else if (!confirm(ids.size + '枚の絵を消します。元に戻せません。よろしいですか？')) {
+            event.preventDefault();
+        }
+    });
+</script>
+</body>
+</html>

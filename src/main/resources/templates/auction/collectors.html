@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('収集家 | らくがきオークション', '競りに来る8人の収集家と、それぞれの好みです。毎日5人が来場します。', false)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('auction')}"></header>
+
+<main>
+    <div class="wrap">
+        <section class="page-head">
+            <h1>収集家</h1>
+            <p class="lead">
+                競り場には、毎日8人のうち5人が来場します。それぞれ好きな絵が違い、好みに合う絵にだけ入札します。
+                だれが来るかは前の日に分かるので、来る人の好みに合わせて描いたり、出す日を選んだりできます。
+            </p>
+        </section>
+
+        <ul class="collector-grid">
+            <li th:each="c : ${collectors}" class="collector-card">
+                <a th:href="@{/auction/collectors/{key}(key=${c.key()})}">
+                    <span class="who-icon who-icon-large" aria-hidden="true" th:style="'background-color:' + ${c.color()}" th:text="${c.initial()}">赤</span>
+                    <span class="collector-text">
+                        <b th:text="${c.name()}">赤坂伯爵</b>
+                        <span th:text="${c.taste()}">好み</span>
+                        <span class="collector-stars" th:attr="aria-label='財力 5段階の' + ${c.stars()}">
+                            財力 <span th:text="${#strings.repeat('★', c.stars())} + ${#strings.repeat('☆', 5 - c.stars())}">★★★☆☆</span>
+                        </span>
+                    </span>
+                    <span class="collector-days">
+                        <span class="fan-day" th:classappend="${today.attends(c.key())} ? 'is-on'" th:text="${today.attends(c.key())} ? '今日来場' : '今日は来ない'">今日来場</span>
+                        <span class="fan-day" th:classappend="${tomorrow.attends(c.key())} ? 'is-on'" th:text="${tomorrow.attends(c.key())} ? '明日来場' : '明日は来ない'">明日来場</span>
+                    </span>
+                </a>
+            </li>
+        </ul>
+        <p class="hint collectors-note">収集家はゲームの登場人物で、実在の人物ではありません。</p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

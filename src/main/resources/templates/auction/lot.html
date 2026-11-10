@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('競り：' + ${card.work().title} + ' | らくがきオークション', ${card.artist().name()} + ' が描いた「' + ${card.work().title} + '」の競り。いまの値段は' + ${#numbers.formatInteger(card.lot().price, 1, 'COMMA')} + 'コイン。', false)}"></head>
+<body th:class="'site-' + ${site ?: 'hub'}">
+<header th:replace="~{fragments/layout :: header('auction')}"></header>
+
+<main th:with="l=${card.lot()}, w=${card.work()}, ended=${!card.lot().live}">
+    <div class="wrap">
+        <p class="breadcrumb"><a th:href="@{/auction}">← 競り場</a></p>
+        <div th:replace="~{auction/parts :: messages}"></div>
+
+        <div class="lot" id="lot"
+             th:attr="data-state=@{/auction/lots/{id}/state(id=${l.id})},data-bid=@{/auction/lots/{id}/bid(id=${l.id})},data-status=${l.status.name()},data-end=${endMs},data-planned=${plannedMs},data-now=${nowMs}">
+            <div class="lot-art">
+                <span class="frame frame-large"><span class="frame-mat"><img th:src="@{/auction/artworks/{id}.png(id=${w.id})}"
+                        th:alt="${w.title}" width="512" height="512"></span></span>
+                <span class="lot-stamp" id="stamp" th:classappend="${l.status.name() == 'UNSOLD'} ? 'is-unsold'"
+                      th:hidden="${!ended}" th:text="${l.status.name() == 'UNSOLD'} ? '売れず' : '落札'">落札</span>
+            </div>
+
+            <div class="lot-panel">
+                <p class="lot-kicker">
+                    <span th:text="'競り No.' + ${l.id}">競り No.1</span>
+                    <span th:text="${l.durationMinutes == 3} ? '3分の競り' : (${l.durationMinutes == 60} ? '1時間の競り' : '1日の競り')">3分の競り</span>
+                </p>
+                <h1><a th:href="@{/auction/artworks/{id}(id=${w.id})}" th:text="${w.title}">題名</a></h1>
+                <p class="lot-people">
+                    <span>作 <a th:replace="~{auction/parts :: who(${card.artist()})}"></a></span>
+                    <span th:if="${card.seller() != null}">出品 <a th:replace="~{auction/parts :: who(${card.seller()})}"></a></span>
+                </p>
+
+                <div class="lot-price-box">
+                    <p class="lot-price-label" id="price-label"
+                       th:text="${ended} ? (${l.status.name() == 'SOLD'} ? '落札価格' : '開始価格') : (${l.hasTop()} ? 'いまの値段' : '開始価格')">いまの値段</p>
+                    <p class="lot-price"><b id="price" th:text="${#numbers.formatInteger(l.price, 1, 'COMMA')}">1,200</b><span>コイン</span></p>
+                    <p class="lot-top" id="top">
+                        <th:block th:if="${card.top() != null}">
+                            <span id="top-label" th:text="${ended} ? '落札' : 'いちばん高い'">いちばん高い</span>
+                            <a th:replace="~{auction/parts :: who(${card.top()})}"></a>
+                        </th:block>
+                        <span th:if="${card.top() == null}" th:text="${ended} ? 'だれも入札しませんでした' : 'まだ入札はありません'">まだ入札はありません</span>
+                    </p>
+                    <p class="lot-clock" th:unless="${ended}">
+                        残り <b id="clock" th:text="${l.timeLeft}">2:31</b>
+                        <span class="lot-extended" id="extended" hidden>延長中</span>
+                    </p>
+                    <p class="lot-clock" th:if="${ended}"><span th:text="${#temporals.format(l.endAt, 'M月d日 H:mm')} + 'に終了'">終了</span></p>
+                </div>
+
+                <div class="lot-mine" id="mine" hidden></div>
+
+                <th:block th:unless="${ended}">
+                    <form class="bid-form" id="bid-form" th:if="${me != null and !l.isSellerUser(meId)}" th:action="@{/auction/lots/{id}/bid(id=${l.id})}" method="post">
+                        <label for="amount">上限額を決めて入札</label>
+                        <div class="bid-row">
+                            <span class="coin-input"><input type="number" id="amount" name="amount" inputmode="numeric"
+                                   th:attr="min=${minBid}" th:value="${minBid}" step="10" required><span>コイン</span></span>
+                            <button type="submit" class="button button-gold">入札する</button>
+                        </div>
+                        <div class="bid-quick" id="bid-quick">
+                            <button type="button" class="tool" data-quick="min">最低額</button>
+                            <button type="button" class="tool" data-quick="1.2">+2割</button>
+                            <button type="button" class="tool" data-quick="1.5">+5割</button>
+                            <button type="button" class="tool" data-quick="2">2倍</button>
+                        </div>
+                        <p class="bid-message" id="bid-message" role="status" aria-live="polite"></p>
+                        <p class="hint">
+                            上限までは、ほかの入札に合わせて自動で競り上がります。払うのは競り勝った値段だけです。
+                            使えるコイン <b id="available" th:text="${#numbers.formatInteger(wallet.available(), 1, 'COMMA')}">1,000</b> 枚
+                        </p>
+                    </form>
+                    <p class="lot-note" id="seller-note" th:if="${me != null and l.isSellerUser(meId)}">あなたが出品した絵です。収集家たちの競りを見守りましょう。</p>
+                    <p class="lot-note" th:if="${me == null}">
+                        <a th:href="@{/auction/login(next=${currentPath})}">ログイン</a>すると入札できます。はじめての方は
+                        <a th:href="@{/auction/signup(next=${currentPath})}">こちら</a>（コインを1,000枚もらえます）。
+                    </p>
+                </th:block>
+                <p class="lot-note" th:if="${ended and me != null and l.isSellerUser(meId)}"
+                   th:text="${l.status.name() == 'SOLD'} ? '売れました。手数料を引いたコインが入っています。' : 'だれも入札しませんでした。絵は手元に戻りました。もう一度出品できます。'">売れました</p>
+                <p class="lot-note" th:if="${ended and card.top() != null and l.topUserId != null and l.topUserId == meId}">
+                    おめでとうございます。この絵はあなたのものです。<a th:href="@{/auction/artworks/{id}(id=${w.id})}">絵のページ</a>から、また競りに出せます。
+                </p>
+            </div>
+        </div>
+
+        <div class="lot-lower">
+            <section class="lot-log">
+                <h2>入札の記録</h2>
+                <ol class="bid-list" id="bids">
+                    <li th:each="b : ${bids}" class="bid-line"
+                        th:classappend="${(b.who() != null and b.who().npc()) ? 'is-npc ' : ''} + ${b.auto() ? 'is-auto ' : ''} + ${b.win() ? 'is-win' : ''}">
+                        <span class="who-icon" aria-hidden="true" th:style="'background-color:' + ${b.who().color()}" th:text="${b.who().initial()}">赤</span>
+                        <span class="bid-body">
+                            <span class="bid-who"><a th:href="${b.who().href()}" th:text="${b.who().name()}">名前</a>
+                                <small th:text="${b.win()} ? '落札' : (${b.auto()} ? '自動で入札' : '入札')">入札</small>
+                                <time th:text="${#temporals.format(b.at(), 'H:mm:ss')}">12:00:00</time></span>
+                            <span class="bid-say" th:if="${b.line() != null}" th:text="'「' + ${b.line()} + '」'">「ひとこと」</span>
+                        </span>
+                        <b class="bid-amount" th:text="${#numbers.formatInteger(b.amount(), 1, 'COMMA')}">300</b>
+                    </li>
+                </ol>
+                <p class="hint" id="bids-empty" th:hidden="${!bids.isEmpty()}">まだ入札はありません。</p>
+            </section>
+
+            <aside class="lot-guests">
+                <h2>この日の来場者</h2>
+                <p class="hint">このうち、絵を気に入った人だけが入札します。だれが、いくらまで出すかは分かりません。</p>
+                <ul class="guest-list">
+                    <li th:each="c : ${lotDay.attendees()}">
+                        <a th:href="@{/auction/collectors/{key}(key=${c.key()})}">
+                            <span class="who-icon" aria-hidden="true" th:style="'background-color:' + ${c.color()}" th:text="${c.initial()}">赤</span>
+                            <span><b th:text="${c.name()}">赤坂伯爵</b><small th:text="${c.taste()}">好み</small></span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="today-trend">
+                    <span class="swatch" aria-hidden="true" th:style="'background-color:' + ${lotDay.trend().hex()}"></span>
+                    流行の色 <b th:text="${lotDay.trend().label()}">青と水色</b>
+                </p>
+            </aside>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/auction-lot.js}" defer></script>
+</body>
+</html>
