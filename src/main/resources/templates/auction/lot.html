@@ -24,6 +24,7 @@
                     <span th:text="${l.durationMinutes == 3} ? '3分の競り' : (${l.durationMinutes == 60} ? '1時間の競り' : '1日の競り')">3分の競り</span>
                 </p>
                 <h1><a th:href="@{/auction/artworks/{id}(id=${w.id})}" th:text="${w.title}">題名</a></h1>
+                <p class="work-credit" th:if="${w.credit != null}">原画：<span th:text="${w.credit}">原画</span></p>
                 <p class="lot-people">
                     <span>作 <a th:replace="~{auction/parts :: who(${card.artist()})}"></a></span>
                     <span th:if="${card.seller() != null}">出品 <a th:replace="~{auction/parts :: who(${card.seller()})}"></a></span>

@@ -77,14 +77,16 @@ public class AuctionViews {
     private final AuctionLotRepository lots;
     private final AuctionBidRepository bids;
     private final CoinWalletRepository wallets;
+    private final OfficialAccount official;
 
     public AuctionViews(AppUserRepository users, ArtworkRepository artworks, AuctionLotRepository lots,
-                        AuctionBidRepository bids, CoinWalletRepository wallets) {
+                        AuctionBidRepository bids, CoinWalletRepository wallets, OfficialAccount official) {
         this.users = users;
         this.artworks = artworks;
         this.lots = lots;
         this.bids = bids;
         this.wallets = wallets;
+        this.official = official;
     }
 
     public static Who npc(String key) {
@@ -186,6 +188,13 @@ public class AuctionViews {
         return cards(artworks.findByLastPriceGreaterThanOrderByLastPriceDescIdDesc(0, PageRequest.of(0, limit)));
     }
 
+    /** 公式の絵のうち、いま公式が持っているもの */
+    @Transactional(readOnly = true)
+    public List<WorkCard> officialStock() {
+        Long id = official.find();
+        return id == null ? List.of() : ownedBy(id);
+    }
+
     /** 報告のあった絵（報告の多い順） */
     @Transactional(readOnly = true)
     public List<WorkCard> reported() {
@@ -254,7 +263,8 @@ public class AuctionViews {
     public List<Asset> assets(int limit) {
         Map<Long, OwnerTotal> works = artworks.totalsByOwner().stream()
                 .collect(Collectors.toMap(OwnerTotal::getUserId, Function.identity()));
-        List<CoinWallet> all = wallets.findAll();
+        // 公式のアカウントはランキングに出さない
+        List<CoinWallet> all = wallets.findAll().stream().filter(w -> !official.is(w.getUserId())).toList();
         Map<Long, Who> people = people(all.stream().map(CoinWallet::getUserId).toList());
         return all.stream().map(w -> {
                     OwnerTotal t = works.get(w.getUserId());
@@ -268,7 +278,8 @@ public class AuctionViews {
     /** 描いた絵が売れた額の合計の多い順（転売も含む） */
     @Transactional(readOnly = true)
     public List<ArtistRank> artists(int limit) {
-        List<ArtistTotal> totals = lots.totalsByArtist(PageRequest.of(0, limit));
+        List<ArtistTotal> totals = lots.totalsByArtist(PageRequest.of(0, limit + 1)).stream()
+                .filter(t -> !official.is(t.getArtistId())).limit(limit).toList();
         Map<Long, Who> people = people(totals.stream().map(ArtistTotal::getArtistId).toList());
         return totals.stream().map(t -> new ArtistRank(people.get(t.getArtistId()), t.getTotal(), t.getSales())).toList();
     }

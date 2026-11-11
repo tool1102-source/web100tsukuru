@@ -29,6 +29,8 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 
     List<Artwork> findByOwnerUserIdOrderByIdDesc(Long ownerUserId);
 
+    boolean existsByArtistIdAndTitle(Long artistId, String title);
+
     List<Artwork> findByArtistIdOrderByIdDesc(Long artistId);
 
     long countByArtistIdAndCreatedAtGreaterThanEqual(Long artistId, LocalDateTime since);

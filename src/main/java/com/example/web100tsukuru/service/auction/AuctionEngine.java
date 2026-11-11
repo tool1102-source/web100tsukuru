@@ -140,15 +140,18 @@ public class AuctionEngine {
     private final ArtworkRepository artworks;
     private final CoinWalletRepository wallets;
     private final CoinService coins;
+    private final OfficialAccount official;
     private final TransactionTemplate tx;
 
     public AuctionEngine(AuctionLotRepository lots, AuctionBidRepository bids, ArtworkRepository artworks,
-                         CoinWalletRepository wallets, CoinService coins, PlatformTransactionManager transactionManager) {
+                         CoinWalletRepository wallets, CoinService coins, OfficialAccount official,
+                         PlatformTransactionManager transactionManager) {
         this.lots = lots;
         this.bids = bids;
         this.artworks = artworks;
         this.wallets = wallets;
         this.coins = coins;
+        this.official = official;
         this.tx = new TransactionTemplate(transactionManager);
     }
 
@@ -361,7 +364,8 @@ public class AuctionEngine {
         if (lot.getTopUserId() != null) {
             coins.add(lot.getTopUserId(), -price, Reason.BUY, artworkId);
         }
-        boolean resale = artistId != null && !artistId.equals(lot.getSellerUserId());
+        // 公式の絵（名画のらくがき版）は、描いた人への5%はない
+        boolean resale = artistId != null && !artistId.equals(lot.getSellerUserId()) && !official.is(artistId);
         long royalty = resale ? Math.round(price * ROYALTY) : 0;
         if (lot.getSellerUserId() != null) {
             long fee = Math.round(price * FEE);

@@ -18,6 +18,10 @@ import org.springframework.ui.Model;
 import com.example.web100tsukuru.entity.Artwork;
 import com.example.web100tsukuru.service.auction.ArtworkService;
 import com.example.web100tsukuru.service.auction.AuctionViews;
+import com.example.web100tsukuru.service.auction.AuctionEngine;
+import com.example.web100tsukuru.service.auction.OfficialAccount;
+import com.example.web100tsukuru.entity.AuctionLot;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,17 +56,19 @@ public class AdminController {
     private final PollService pollService;
     private final ArtworkService artworkService;
     private final AuctionViews auctionViews;
+    private final OfficialAccount officialAccount;
     private final byte[] passwordHash;
     // 合言葉の総当たり対策（同じ接続元から 10分に5回まで）
     private final PostRateLimiter loginLimiter = new PostRateLimiter(5, Duration.ofMinutes(10));
 
     public AdminController(FictionService fictionService, PollService pollService,
-                           ArtworkService artworkService, AuctionViews auctionViews,
+                           ArtworkService artworkService, AuctionViews auctionViews, OfficialAccount officialAccount,
                            @Value("${app.admin-password-hash:}") String passwordHash) {
         this.fictionService = fictionService;
         this.pollService = pollService;
         this.artworkService = artworkService;
         this.auctionViews = auctionViews;
+        this.officialAccount = officialAccount;
         this.passwordHash = HexFormat.of().parseHex(passwordHash.strip());
     }
 
@@ -179,9 +185,29 @@ public class AdminController {
         if (!isLoggedIn(request)) {
             return "redirect:/admin";
         }
+        model.addAttribute("official", auctionViews.officialStock());
+        model.addAttribute("lengths", AuctionEngine.Length.values());
         model.addAttribute("reported", auctionViews.reported());
         model.addAttribute("newest", auctionViews.newest(60));
         return "admin/auction";
+    }
+
+    /** 公式の絵を競りに出す (POST /admin/auction/official/{id}/sell) */
+    @PostMapping("/auction/official/{id}/sell")
+    public String sellOfficial(@PathVariable Long id, @RequestParam(defaultValue = "100") long startPrice,
+                               @RequestParam(defaultValue = "HOUR_1") String length,
+                               HttpServletRequest request, RedirectAttributes redirect) {
+        requireEnabled();
+        if (!isLoggedIn(request)) {
+            return "redirect:/admin";
+        }
+        try {
+            AuctionLot lot = artworkService.sell(officialAccount.ensure(), id, startPrice, AuctionEngine.Length.of(length));
+            redirect.addFlashAttribute("officialListed", lot.getId());
+        } catch (ArtworkService.ArtworkException e) {
+            redirect.addFlashAttribute("officialError", e.getMessage());
+        }
+        return "redirect:/admin/auction";
     }
 
     /** チェックを入れた絵を消す。出品中の競りは取り消し、買って持っていた人には買った値段を返す (POST /admin/auction/delete) */

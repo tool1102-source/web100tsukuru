@@ -2,6 +2,9 @@ package com.example.web100tsukuru.controller;
 
 import com.example.web100tsukuru.entity.Fiction;
 import com.example.web100tsukuru.repository.FictionRepository;
+import com.example.web100tsukuru.repository.ArtworkRepository;
+import com.example.web100tsukuru.service.auction.OfficialAccount;
+import com.example.web100tsukuru.service.auction.OfficialWorks;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,6 +128,37 @@ class AdminTests {
         mvc.perform(get("/admin").session(login()))
                 .andExpect(content().string(containsString("<meta name=\"robots\" content=\"noindex\">")))
                 .andExpect(content().string(not(containsString("adsbygoogle"))));
+    }
+
+    @Autowired
+    OfficialWorks officialWorks;
+
+    @Autowired
+    OfficialAccount officialAccount;
+
+    @Autowired
+    ArtworkRepository artworks;
+
+    @Test
+    void 管理画面から公式の名画を競りに出せる() throws Exception {
+        officialWorks.load();
+        Long officialId = officialAccount.ensure();
+        Long workId = artworks.findByOwnerUserIdOrderByIdDesc(officialId).get(0).getId();
+        mvc.perform(post("/admin/auction/official/" + workId + "/sell").param("startPrice", "100").param("length", "HOUR_1"))
+                .andExpect(redirectedUrl("/admin"));
+        MockHttpSession session = login();
+        mvc.perform(get("/admin/auction").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("公式の絵（名画のらくがき版）")))
+                .andExpect(content().string(containsString("（らくがき版）")));
+        mvc.perform(post("/admin/auction/official/" + workId + "/sell").session(session).param("startPrice", "100").param("length", "HOUR_1"))
+                .andExpect(redirectedUrl("/admin/auction"))
+                .andExpect(flash().attributeExists("officialListed"));
+        assertThat(artworks.findById(workId).orElseThrow().isOnSale()).isTrue();
+        // 絵のページには原画が出る
+        mvc.perform(get("/auction/artworks/" + workId))
+                .andExpect(content().string(containsString("原画：")))
+                .andExpect(content().string(containsString("著作権の切れた名画")));
     }
 
     private MockHttpSession login() throws Exception {

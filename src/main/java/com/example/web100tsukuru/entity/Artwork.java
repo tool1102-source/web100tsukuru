@@ -42,6 +42,10 @@ public class Artwork {
     @Column(nullable = false, length = 40)
     private String title;
 
+    // 公式の絵のときの原画（例：葛飾北斎『神奈川沖浪裏』）。ふつうの絵は null
+    @Column(length = 100)
+    private String credit;
+
     // 白以外で塗った広さ（0〜1）
     @Column(nullable = false)
     private double ink;
@@ -116,6 +120,14 @@ public class Artwork {
             result[i + 1] = Double.parseDouble(parts[i]);
         }
         return result;
+    }
+
+    public void credit(String credit) {
+        this.credit = credit;
+    }
+
+    public String getCredit() {
+        return credit;
     }
 
     public boolean isOwnedBy(Long userId) {

@@ -21,6 +21,10 @@
 
             <div class="work-info">
                 <h1 th:text="${w.title}">題名</h1>
+                <p class="work-credit" th:if="${w.credit != null}">
+                    原画：<span th:text="${w.credit}">葛飾北斎『神奈川沖浪裏』</span>
+                    <small>著作権の切れた名画を、らくがきオークションの13色で描き直した公式の絵です。</small>
+                </p>
                 <dl class="work-facts">
                     <div><dt>描いた人</dt><dd><a th:replace="~{auction/parts :: who(${card.artist()})}"></a></dd></div>
                     <div th:if="${card.owner() != null}"><dt>持ち主</dt><dd><a th:replace="~{auction/parts :: who(${card.owner()})}"></a></dd></div>

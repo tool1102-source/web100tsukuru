@@ -95,6 +95,23 @@ public class ArtworkService {
         return artwork;
     }
 
+    /** 公式の絵を登録する（1日の枚数の制限なし。原画を書き添える） */
+    @Transactional
+    public Artwork createOfficial(Long officialId, String title, String credit, byte[] png) throws ArtworkException {
+        Drawing.Result drawing;
+        try {
+            drawing = Drawing.read(png);
+        } catch (InvalidDrawingException e) {
+            throw new ArtworkException(e.getMessage());
+        }
+        Drawing.Features f = drawing.features();
+        Artwork artwork = new Artwork(officialId, title, f.ink(), f.detail(), f.colors(), f.share());
+        artwork.credit(credit);
+        artwork = artworks.save(artwork);
+        images.save(new ArtworkImage(artwork.getId(), drawing.png()));
+        return artwork;
+    }
+
     /** 持っている絵を競りに出す */
     @Transactional
     public AuctionLot sell(Long userId, Long artworkId, long startPrice, Length length) throws ArtworkException {

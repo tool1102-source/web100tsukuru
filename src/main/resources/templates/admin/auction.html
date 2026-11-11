@@ -22,6 +22,34 @@
 
         <p class="status" role="status" th:if="${deletedCount != null}" th:text="${deletedCount} + '枚の絵を消しました。'">1枚の絵を消しました。</p>
 
+        <h2 class="admin-subhead">公式の絵（名画のらくがき版）</h2>
+        <p class="status" role="status" th:if="${officialListed != null}">
+            公式の絵を競りに出しました。<a th:href="@{/auction/lots/{id}(id=${officialListed})}" target="_blank" rel="noopener">競りを見る ↗</a>
+        </p>
+        <p class="alert" role="alert" th:if="${officialError != null}" th:text="${officialError}">エラー</p>
+        <p th:if="${official.isEmpty()}" class="empty">公式が持っている絵はありません（全部売れたか、出品中です）。</p>
+        <ol class="admin-list" th:unless="${official.isEmpty()}">
+            <li class="admin-item" th:each="c : ${official}">
+                <form class="admin-official" th:action="@{/admin/auction/official/{id}/sell(id=${c.work().id})}" method="post">
+                    <span class="admin-thumbs"><img th:src="@{/auction/artworks/{id}.png(id=${c.work().id})}" alt="絵" width="96" height="96" loading="lazy"></span>
+                    <span>
+                        <span class="admin-title" th:text="${c.work().title}">題名</span>
+                        <span class="meta">
+                            <span th:text="${c.work().credit}">原画</span>
+                            <span th:if="${c.lot() != null}"> ・ 出品中</span>
+                        </span>
+                        <span class="admin-official-form" th:if="${c.lot() == null}">
+                            <label>開始 <input type="number" name="startPrice" value="100" min="10" step="10" style="width:7em"> コイン</label>
+                            <select name="length" aria-label="長さ">
+                                <option th:each="l : ${lengths}" th:value="${l.name()}" th:text="${l.label}" th:selected="${l.name() == 'HOUR_1'}">1時間</option>
+                            </select>
+                            <button type="submit" class="button button-small">競りに出す</button>
+                        </span>
+                    </span>
+                </form>
+            </li>
+        </ol>
+
         <form id="delete-form" th:action="@{/admin/auction/delete}" method="post">
             <h2 class="admin-subhead">報告のあった絵</h2>
             <p th:if="${reported.isEmpty()}" class="empty">報告のあった絵はありません。</p>
